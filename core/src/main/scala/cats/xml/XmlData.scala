@@ -13,7 +13,8 @@ object XmlData {
   implicit val showXmlData: Show[XmlData] = {
     case XmlByte(value)   => value.toString
     case XmlNumber(value) => value.toString
-    case XmlArray(value)  => value.mkString("Array(", ", ", ")")
+    case XmlArray(value)  => value.mkString(",")
+    case XmlBool(value)   => value.toString
     case XmlString(value) => value
   }
 }
@@ -29,3 +30,4 @@ object XmlString {
 case class XmlNumber[T <: Number](value: T) extends XmlData
 case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
 case class XmlByte(value: Byte) extends XmlData
+case class XmlBool(value: Boolean) extends XmlData

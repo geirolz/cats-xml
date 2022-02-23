@@ -14,13 +14,13 @@ sealed trait NodeContent {
 
   lazy val nonEmpty: Boolean = !isEmpty
 
-  def text: Option[XmlData] =
+  lazy val text: Option[XmlData] =
     this match {
       case NodeContent.Text(data) => Some(data)
       case _                      => None
     }
 
-  def children: List[XmlNode] = this match {
+  lazy val children: List[XmlNode] = this match {
     case NodeContent.Children(children) => children.toList
     case _                              => Nil
   }

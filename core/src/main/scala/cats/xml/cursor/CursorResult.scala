@@ -1,7 +1,7 @@
 package cats.xml.cursor
 
 import cats.xml.codec.Decoder
-import cats.xml.cursor.CursorResult.{Failed, Focused}
+import cats.xml.cursor.CursorResult.*
 import cats.Show
 
 sealed trait CursorResult[+T] {
@@ -47,6 +47,9 @@ sealed trait CursorResult[+T] {
       case Focused(value) => Focused(Some(value))
       case _              => Focused(None)
     }
+
+  override def toString: String =
+    Show[CursorResult[T]].show(this)
 }
 
 object CursorResult extends CursorResultInstances {
@@ -56,17 +59,16 @@ object CursorResult extends CursorResultInstances {
     val path: String
     def asException: CursorFailureException = CursorFailureException(this)
   }
-  trait Missing extends Failed {
+  sealed trait Missing extends Failed {
     val path: String
   }
 
   // decode
-  case class DecodingFailure(path: String, error: Decoder.InvalidResult) extends Failed
+  case class CursorDecodingFailure(path: String, error: Decoder.InvalidResult) extends Failed
 
   // node
   trait FailedNode extends Failed
-  case class WrongTarget(path: String, expectedType: String) extends FailedNode
-  case class MissingNode(path: String, nodeName: String) extends FailedNode with Missing
+  case class MissingNode(nodeName: String, path: String) extends FailedNode with Missing
 
   // text
   case class MissingText(path: String) extends FailedNode with Missing
@@ -82,14 +84,28 @@ object CursorResult extends CursorResultInstances {
 
   // ops
   case class CursorFailureException(failed: Failed) extends RuntimeException(failed.toString)
-  def fromOption[T](opt: Option[T])(ifEmpty: => CursorResult[T]): CursorResult[T] = {
+  def fromOption[T](opt: Option[T])(ifEmpty: => CursorResult[T]): CursorResult[T] =
     opt.fold(ifEmpty)(Focused(_))
-  }
 }
 private[xml] sealed trait CursorResultInstances {
 
-  implicit def showInstanceForCursorResult[T: Show]: Show[CursorResult[T]] = {
-    case Focused(value) => Show[T].show(value)
-    case failed: Failed => Show.fromToString[Failed].show(failed)
+  import cats.implicits.*
+
+  implicit def showInstanceForCursorResult[T](implicit
+    showT: Show[T] = Show.fromToString[T]
+  ): Show[CursorResult[T]] = {
+    case Focused(value)                     => Show[T].show(value)
+    case MissingAttrByKey(path, key)        => s"Missing attribute '$key' at '$path'"
+    case MissingAttrAtIndex(path, index)    => s"Missing attribute at index '$index' at '$path'"
+    case MissingAttrHead(path)              => s"Head attribute on empty list at '$path'"
+    case MissingAttrLast(path)              => s"Last attribute on empty list at '$path'"
+    case LeftBoundLimitAttr(path, lastKey)  => s"Reached left bound limit attribute at '$path'"
+    case RightBoundLimitAttr(path, lastKey) => s"Reached right bound limit attribute at '$path'"
+    case MissingNode(nodeName, path)        => s"Missing node '$nodeName' at '$path'"
+    case MissingText(path)                  => s"Missing text at '$path'"
+    case CursorDecodingFailure(path, error) =>
+      s"Unable to decode value at '$path'. ${error.e.map(_.reason).mkString_(", ")}"
+
+    case unmappedError => unmappedError.toString
   }
 }

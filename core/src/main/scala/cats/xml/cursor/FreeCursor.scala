@@ -34,7 +34,7 @@ object FreeCursor {
           cursorResult.flatMap { x =>
             Decoder[T].decode(x) match {
               case Valid(a)       => CursorResult.Focused(a)
-              case e @ Invalid(_) => CursorResult.DecodingFailure(cursor.path, e)
+              case e @ Invalid(_) => CursorResult.CursorDecodingFailure(cursor.path, e)
             }
           }
         )

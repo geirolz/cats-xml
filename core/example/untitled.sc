@@ -53,26 +53,27 @@ val result1: CursorResult[Int] =
 val result1: CursorResult[Int] =
   (Root \ "foo" \ "bar" \ "root" \ "foo"
     \ "bar" \ "root" \ "foo" \ "bar"
-    \ "roar" attr "a").as[Int]
+    \ "roar" attr "bb").as[Int]
     .focus(node)
 
 // ############### DECODER ###############
-val tree: XmlNode = Xml.fromNodeSeq(<Foo name="TEST" age="10">100</Foo>)
+val tree: XmlNode = Xml.fromNodeSeq(<Foo name="TEST" age="10">1</Foo>)
 
 val ressa = tree.findChild("foo")
 
 
-case class Foo(name: Option[String], bar: Int, text: Int)
+case class Foo(name: Option[String], bar: Int, text: Boolean)
 val dec: Decoder[Foo] =
   Decoder.fromCursor(c =>
     for {
       foo <- c.attr("name").as[Option[String]]
       bar <- c.attr("age").as[Int]
-      text <- c.text.as[Int]
+      text <- c.text.as[Boolean]
     } yield Foo(foo, bar, text)
   )
 
 val result: Decoder.Result[Foo] = dec.decode(tree) //Valid(Foo(None,10))
+result.toString
 
 //############### ENCODER ###############
 val encoder: Encoder[Foo] = Encoder.of(t =>

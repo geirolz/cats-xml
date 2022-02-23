@@ -20,6 +20,7 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
   def apply[T: DataEncoder](key: String, value: T): XmlAttribute =
     XmlAttribute(key, DataEncoder[T].encode(value))
 
+  // TODO: DEPENDS ON STD XML - MOVE TO PROPER MODULE
   def fromMetaData(metaData: MetaData): List[XmlAttribute] =
     metaData.iterator.map(m => XmlAttribute(m.key, XmlString(m.value.text))).toList
 
@@ -42,6 +43,7 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
       case (k, v) => XmlAttribute(k, v)
     }.toList
 
+  // TODO: DEPENDS ON STD XML - MOVE TO PROPER MODULE
   def toMetaData(attr: XmlAttribute): MetaData =
    new scala.xml.UnprefixedAttribute(attr.key, attr.value.toString, Null)
 
@@ -64,6 +66,6 @@ private[xml] sealed trait XmlAttributeInstances {
   implicit def showInstanceForAttr(implicit sd: Show[XmlData]): Show[XmlAttribute] =
     attr => XmlAttribute.stringify(attr)
 
-  implicit val eqInstanceForAttr: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
+  implicit val eqForXmlAttribute: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
     x.key == y.key && x.value == y.value
 }

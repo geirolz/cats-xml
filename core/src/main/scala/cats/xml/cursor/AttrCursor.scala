@@ -12,7 +12,7 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
     extends HCursor[XmlAttribute, NodeCursor, AttrCursor] {
 
   import cats.implicits.*
-  lazy val path: String = s"${vCursor.path}${op.show}"
+  lazy val path: String = vCursor.path
 
   // modifier
 //  def rename(newK: String): Modifier[Attribute] =

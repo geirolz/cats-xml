@@ -2,6 +2,7 @@ package cats.xml.codec
 
 import cats.xml.Xml
 import cats.xml.cursor.CursorResult
+import cats.Show
 
 trait DecodingResult
 
@@ -20,11 +21,13 @@ object DecodingFailure {
   def custom(message: String): DecodingFailure =
     DecodingFailure(DecodingFailureReason.Custom(message))
 
-  def coproductUnmatch[T](actual: Any, coproductValues: Seq[? <: T]): DecodingFailure =
+  def coproductUnmatch(actual: Any, coproductValues: Seq[Any]): DecodingFailure =
     DecodingFailure(DecodingFailureReason.CoproductUnmatch(actual, coproductValues))
 }
 
-sealed trait DecodingFailureReason
+sealed trait DecodingFailureReason {
+  override def toString: String = Show[DecodingFailureReason].show(this)
+}
 object DecodingFailureReason {
   case class Error(ex: Throwable) extends DecodingFailureReason
   case class NoTextAvailable(subject: Xml) extends DecodingFailureReason
@@ -32,4 +35,13 @@ object DecodingFailureReason {
   case class CoproductUnmatch[T](actual: Any, coproductValues: Seq[? <: T])
       extends DecodingFailureReason
   case class Custom(message: String) extends DecodingFailureReason
+
+  implicit val showDecodingFailureReason: Show[DecodingFailureReason] = {
+    case Error(ex)                => ex.getMessage
+    case NoTextAvailable(subject) => s"No text available inside $subject"
+    case CursorFailure(failed)    => failed.toString
+    case Custom(message)          => message
+    case CoproductUnmatch(actual, vals) =>
+      s"Value '$actual' not in [${vals.mkString(", ")}]"
+  }
 }

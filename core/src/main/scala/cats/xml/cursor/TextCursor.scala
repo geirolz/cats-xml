@@ -6,7 +6,7 @@ import cats.xml.{XmlData, XmlNode}
   */
 class TextCursor(protected val lastCursor: NodeCursor) extends VCursor[XmlData, NodeCursor] {
 
-  override lazy val path: String = s"${lastCursor.path} | text"
+  override lazy val path: String = lastCursor.path
 
   // focus
   override def focus(node: XmlNode): CursorResult[XmlData] =

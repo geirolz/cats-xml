@@ -142,7 +142,7 @@ sealed private[xml] trait DecoderPrimitivesInstances {
   implicit val decodeBoolean: Decoder[Boolean] = decodeString.map(_.toLowerCase).emap[Boolean] {
     case "true" | "1"  => Right(true)
     case "false" | "0" => Right(false)
-    case v             => Left(DecodingFailure.coproductUnmatch(v, Vector(true, false)))
+    case v             => Left(DecodingFailure.coproductUnmatch(v, Vector(true, false, 1, 0)))
   }
   implicit val decodeCharArray: Decoder[Array[Char]] = decodeString.map(_.toCharArray)
   implicit val decodeInt: Decoder[Int]               = decodeString.emapTry(s => Try(s.toInt))

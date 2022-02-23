@@ -90,7 +90,7 @@ object NodeCursor {
                   case Some(node) =>
                     CursorResult.Focused(node)
                   case None =>
-                    CursorResult.MissingNode(CursorOp.buildOpsPath(currentPath), nodeName)
+                    CursorResult.MissingNode(nodeName, CursorOp.buildOpsPath(currentPath))
                 }
             }
 
