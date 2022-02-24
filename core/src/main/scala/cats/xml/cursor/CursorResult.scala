@@ -94,15 +94,17 @@ private[xml] sealed trait CursorResultInstances {
   implicit def showInstanceForCursorResult[T](implicit
     showT: Show[T] = Show.fromToString[T]
   ): Show[CursorResult[T]] = {
-    case Focused(value)                     => Show[T].show(value)
-    case MissingAttrByKey(path, key)        => s"Missing attribute '$key' at '$path'"
-    case MissingAttrAtIndex(path, index)    => s"Missing attribute at index '$index' at '$path'"
-    case MissingAttrHead(path)              => s"Head attribute on empty list at '$path'"
-    case MissingAttrLast(path)              => s"Last attribute on empty list at '$path'"
-    case LeftBoundLimitAttr(path, lastKey)  => s"Reached left bound limit attribute at '$path'"
-    case RightBoundLimitAttr(path, lastKey) => s"Reached right bound limit attribute at '$path'"
-    case MissingNode(nodeName, path)        => s"Missing node '$nodeName' at '$path'"
-    case MissingText(path)                  => s"Missing text at '$path'"
+    case Focused(value)                  => Show[T].show(value)
+    case MissingAttrByKey(path, key)     => s"Missing attribute '$key' at '$path'"
+    case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index' at '$path'"
+    case MissingAttrHead(path)           => s"Head attribute on empty list at '$path'"
+    case MissingAttrLast(path)           => s"Last attribute on empty list at '$path'"
+    case MissingNode(nodeName, path)     => s"Missing node '$nodeName' at '$path'"
+    case MissingText(path)               => s"Missing text at '$path'"
+    case LeftBoundLimitAttr(path, lastKey) =>
+      s"Reached left bound limit attribute at '$path', last valid key '$lastKey'"
+    case RightBoundLimitAttr(path, lastKey) =>
+      s"Reached right bound limit attribute at '$path', last valid key '$lastKey'"
     case CursorDecodingFailure(path, error) =>
       s"Unable to decode value at '$path'. ${error.e.map(_.reason).mkString_(", ")}"
 

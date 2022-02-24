@@ -121,12 +121,14 @@ sealed private[xml] trait DecoderPrimitivesInstances {
 
   implicit val decodeString: Decoder[String] = Decoder.of {
     case XmlAttribute(_, value) => decodeString.decode(value)
-    case data: XmlData =>
+    case data: XmlData          =>
+      // TODO: TO CHECK EQ TO SHOW
       def rec(d: XmlData): String = d match {
         case XmlString(value) => value
         case XmlNumber(value) => value.toString
-        case XmlArray(value)  => value.map(rec).mkString("(", ",", ")")
+        case XmlArray(value)  => value.map(rec).mkString(",")
         case XmlByte(value)   => value.toString
+        case XmlBool(value)   => value.toString
       }
 
       rec(data).validNel

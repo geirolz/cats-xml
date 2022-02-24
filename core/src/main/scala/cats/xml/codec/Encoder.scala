@@ -3,8 +3,6 @@ package cats.xml.codec
 import cats.xml.{Xml, XmlData, XmlString}
 import cats.Contravariant
 
-import scala.xml.{Atom, NodeSeq}
-
 // T => XML
 trait Encoder[-T] {
 
@@ -23,10 +21,6 @@ object Encoder extends EncoderInstances {
   def of[T](f: T => Xml): Encoder[T] = (t: T) => f(t)
 
   def pure[T](ns: => Xml): Encoder[T] = Encoder(_ => ns)
-
-  // TODO: DEPENDS ON STD XML - MOVE TO PROPER MODULE
-  def ofNodeSeq[T](f: T => NodeSeq): Encoder[T] =
-    Encoder.of(t => Xml.fromNodeSeq(f(t)))
 }
 
 private[xml] trait EncoderInstances extends EncoderPrimitivesInstances {
@@ -66,5 +60,4 @@ private[xml] trait DataEncoderPrimitivesInstances {
   implicit val encoderBigDecimal: DataEncoder[BigDecimal] = encoderString.contramap(_.toString)
 
   // std scala
-  implicit val encoderStdAtomStr: DataEncoder[Atom[String]] = encoderString.contramap(_.data.trim)
 }

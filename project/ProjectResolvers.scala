@@ -6,7 +6,7 @@ import sbt.librarymanagement.MavenRepository
   * @author
   *   geirolz
   */
-object Resolvers {
+object ProjectResolvers {
 
   lazy val all: Seq[MavenRepository] = Seq(
     Resolver.sonatypeRepo("public"),

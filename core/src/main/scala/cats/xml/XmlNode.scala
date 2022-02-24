@@ -3,8 +3,6 @@ package cats.xml
 import cats.{Endo, Show}
 import cats.xml.codec.DataEncoder
 
-import scala.xml.NodeSeq
-
 class XmlNode private (
   private var mLabel: String,
   private var mAttributes: Seq[XmlAttribute],
@@ -58,9 +56,6 @@ object XmlNode extends XmlTreeInstances {
 }
 
 private[xml] sealed trait XmlTreeInstances {
-
-  implicit def nodeSeqToXmlNode(ns: NodeSeq): XmlNode = Xml.fromNodeSeq(ns)
-
   implicit val showXmlTree: Show[XmlNode] = XmlPrinter.prettyString(_)
 }
 

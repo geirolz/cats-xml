@@ -1,95 +1,131 @@
+import sbt.project
+
 val prjName = "cats-xml"
-val org     = "com.github.geirolz"
+val org     = "com.geirolz"
 
-inThisBuild(
-  List(
-    organization := "com.github.geirolz",
-    homepage := Some(url(s"https://github.com/geirolz/$prjName")),
-    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers := List(
-      Developer(
-        "DavidGeirola",
-        "David Geirola",
-        "david.geirola@gmail.com",
-        url("https://github.com/geirolz")
-      )
-    )
-  )
-)
-
-//=============================== MODULES ===============================
 //## global project to no publish ##
-lazy val cats_xml: Project = project
+val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
+lazy val root: Project = project
   .in(file("."))
-  .settings(allSettings)
-  .settings(noPublishSettings)
+  .aggregate(docs, core)
+  .settings(allSettings: _*)
+  .settings(noPublishSettings: _*)
   .settings(
     name := prjName,
-    description := "A lightweight, simple and functional library DSL to work with XML in Scala with Cats",
-    organization := org
+    description := "A purely functional XML library",
+    organization := org,
+    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
+    (Compile / compile) := (Compile / compile)
+      .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
+      .value
   )
-  .aggregate(core)
+
+lazy val docs: Project = {
+  project
+    .in(file("docs"))
+    .dependsOn(core)
+    .settings(allSettings: _*)
+    .settings(noPublishSettings: _*)
+    .enablePlugins(MdocPlugin)
+    .settings(
+      libraryDependencies ++= Seq(
+        ProjectDependencies.Docs.dedicated
+      ).flatten
+    )
+    .settings(
+      // task
+      // config
+      scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
+      mdocIn := file("docs/source"),
+      mdocOut := file("docs/compiled"),
+      mdocVariables := Map(
+        "VERSION" -> version.value,
+        "DOC_OUT" -> mdocOut.value.getPath
+      )
+    )
+}
 
 lazy val core: Project =
   buildModule(
-    path      = "core",
-    toPublish = true,
-    folder    = "."
+    prjModuleName = "core",
+    toPublish     = true,
+    folder        = "."
   )
 
-//=============================== MODULES UTILS ===============================
-def buildModule(path: String, toPublish: Boolean, folder: String = "modules"): Project = {
-  val keys    = path.split("-")
-  val id      = keys.reduce(_ + _.capitalize)
-  val docName = keys.mkString(" ")
-  val prjFile = file(s"$folder/$path")
-
-  Project(id, prjFile)
+lazy val generic: Project =
+  buildModule(
+    prjModuleName = "generic",
+    toPublish     = true,
+    folder        = "modules"
+  ).dependsOn(core)
     .settings(
-      description := moduleName.value,
-      moduleName := s"$prjName-$path",
-      name := s"$prjName $docName",
-      publish / skip := !toPublish,
-      allSettings
+      libraryDependencies ++= ProjectDependencies.Generic.dedicated
     )
 
+lazy val catsEffect: Project =
+  buildModule(
+    prjModuleName = "cats-effect",
+    toPublish     = true,
+    folder        = "modules"
+  ).dependsOn(core)
+    .settings(
+      libraryDependencies ++= ProjectDependencies.CatsEffect.dedicated
+    )
+
+lazy val scalaXml: Project =
+  buildModule(
+    prjModuleName = "scala-xml",
+    toPublish     = true,
+    folder        = "modules"
+  ).dependsOn(core)
+    .settings(
+      libraryDependencies ++= ProjectDependencies.ScalaXml.dedicated
+    )
+
+//=============================== MODULES UTILS ===============================
+def buildModule(
+  prjModuleName: String,
+  toPublish: Boolean,
+  folder: String
+): Project = {
+  val keys    = prjModuleName.split("-")
+  val docName = keys.mkString(" ")
+  val prjFile = file(s"$folder/$prjModuleName")
+
+  Project(prjModuleName, prjFile)
+    .settings(
+      description := moduleName.value,
+      moduleName := s"$prjName-$prjModuleName",
+      name := s"$prjName $docName",
+      publish / skip := !toPublish
+    )
+    .settings(allSettings: _*)
 }
 
 //=============================== SETTINGS ===============================
-lazy val allSettings = baseSettings ++ compilePlugins
-
-lazy val noPublishSettings = Seq(
+lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
   publish := {},
   publishLocal := {},
   publishArtifact := false,
   publish / skip := true
 )
 
-lazy val baseSettings = Seq(
-  // scala options
-  crossScalaVersions := List("2.13.8", "3.1.1"),
+lazy val allSettings: Seq[Def.Setting[_]] = Seq(
+  // scala
+  crossScalaVersions := List("2.13.8", "3.1.0"),
   scalaVersion := crossScalaVersions.value.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
-  Compile / console / scalacOptions --= Seq(
-    "-Ywarn-unused:imports",
-    "-Xfatal-warnings"
-  ),
   // dependencies
-  resolvers ++= Resolvers.all,
-  libraryDependencies ++= Dependencies.common,
-  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 13)) => Dependencies.extraDependenciesForScala2_13
-    case Some((3, _))  => Dependencies.extraDependenciesForScala3
-    case _             => Nil
-  })
-)
-
-lazy val compilePlugins = Seq(
-  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, _)) => Dependencies.Plugins.compilerPluginsFor2
-    case Some((3, _)) => Dependencies.Plugins.compilerPluginsFor3
-    case _            => Nil
-  })
+  resolvers ++= ProjectResolvers.all,
+  libraryDependencies ++= ProjectDependencies.common ++ {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 13)) => ProjectDependencies.Plugins.compilerPluginsFor2_13
+      case Some((3, _))  => ProjectDependencies.Plugins.compilerPluginsFor3
+      case _             => Nil
+    }
+  },
+  // fmt
+  scalafmtOnCompile := true
 )
 
 def scalacSettings(scalaVersion: String): Seq[String] =
@@ -107,25 +143,16 @@ def scalacSettings(scalaVersion: String): Seq[String] =
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((3, _)) =>
         Seq(
-          "-Ykind-projector",
+//          "-Ykind-projector",
           "-explain-types", // Explain type errors in more detail.
           "-Xfatal-warnings" // Fail the compilation if there are any warnings.
         )
       case Some((2, 13)) =>
         Seq(
-          //        "-Xlog-implicits",
-          "-deprecation", // Emit warning and location for usages of deprecated APIs.
-          "-encoding",
-          "utf-8", // Specify character encoding used by source files.
           "-explaintypes", // Explain type errors in more detail.
-          "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-          "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-          "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-          "-language:higherKinds", // Allow higher-kinded types
-          "-language:implicitConversions", // Allow definition of implicit functions called views
           "-unchecked", // Enable additional warnings where generated code depends on assumptions.
           "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
-//          "-Xfatal-warnings", // Fail the compilation if there are any warnings.
+          "-Xfatal-warnings", // Fail the compilation if there are any warnings.
           "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
           "-Xlint:constant", // Evaluation of a constant arithmetic expression results in an error.
           "-Xlint:delayedinit-select", // Selecting member of DelayedInit.
@@ -154,11 +181,8 @@ def scalacSettings(scalaVersion: String): Seq[String] =
           "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
           "-Ywarn-unused:privates", // Warn if a private member is unused.
           "-Ywarn-macros:after", // Tells the compiler to make the unused checks after macro expansion
-          "-Xsource:3" // Enable Scala 3 syntax
+          "-Xsource:3"
         )
       case _ => Nil
     }
   }
-
-//=============================== ALIASES ===============================
-addCommandAlias("check", ";clean;test")
