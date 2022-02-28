@@ -1,5 +1,7 @@
 package cats.xml
 
+import scala.collection.mutable
+
 object XmlPrinter {
 
   def stringify(tree: XmlNode): String =
@@ -47,7 +49,7 @@ object XmlPrinter {
       }
     }
 
-    def rec(t: XmlNode, stringBuilder: StringBuilder, deep: Int): String =
+    def rec(t: XmlNode, stringBuilder: mutable.StringBuilder, deep: Int): String =
       t.content match {
         case NodeContent.Empty =>
           stringBuilder
@@ -65,7 +67,7 @@ object XmlPrinter {
             contentOpt = Some(
               childrenNel
                 .map(n => {
-                  rec(n, new StringBuilder, deep + 1)
+                  rec(n, new mutable.StringBuilder, deep + 1)
                 })
                 .toList
                 .mkString("")
@@ -77,7 +79,7 @@ object XmlPrinter {
 
     rec(
       t             = tree,
-      stringBuilder = new StringBuilder(),
+      stringBuilder = new mutable.StringBuilder(),
       deep          = 0
     )
   }

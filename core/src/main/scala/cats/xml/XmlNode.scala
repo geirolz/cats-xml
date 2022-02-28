@@ -68,7 +68,7 @@ private[xml] sealed trait LabelOps { $this: XmlNode =>
   def updateLabel(f: Endo[String]): XmlNode
 }
 
-private[xml] sealed trait AttrsOps { $this: XmlNode =>
+private[xml] sealed trait AttrsOps { this: XmlNode =>
 
   // ---- GET ----
   def findAttr(key: String): Option[XmlAttribute] =

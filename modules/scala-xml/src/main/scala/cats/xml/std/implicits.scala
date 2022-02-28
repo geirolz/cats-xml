@@ -1,6 +1,6 @@
-package cats.xml.scala.xml
+package cats.xml.std
 
-import cats.xml.scala.xml.codec.NodeSeqEncoderSyntax
+import cats.xml.std.codec.NodeSeqEncoderSyntax
 
 object implicits extends AllSyntax
 

@@ -1,7 +1,7 @@
-package cats.xml.scala.xml.codec
+package cats.xml.std.codec
 
 import cats.xml.codec.{DataEncoder, Encoder}
-import cats.xml.scala.xml.NodeSeqInterop
+import cats.xml.std.NodeSeqInterop
 
 import scala.annotation.unused
 import scala.xml.{Atom, NodeSeq}

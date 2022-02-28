@@ -1,4 +1,4 @@
-package cats.xml.scala.xml
+package cats.xml.std
 
 import cats.xml.{XmlAttribute, XmlString}
 

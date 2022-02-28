@@ -1,13 +1,13 @@
-package cats.xml.scala.xml
+package cats.xml.std
 
-import cats.xml.{NodeContent, Xml, XmlAttribute, XmlNode, XmlString}
+import cats.xml.*
 
 import scala.annotation.{tailrec, unused}
-import scala.xml.{Atom, Document, Elem, MetaData, Node, NodeSeq, Null, Text, TopScope}
+import scala.xml.*
 
 private[xml] object NodeSeqInterop extends XmlToNodeSeqSyntax {
 
-  import implicits.*
+  import cats.xml.std.implicits.*
 
   def fromNodeSeq(ns: NodeSeq): XmlNode =
     ns match {
