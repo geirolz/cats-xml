@@ -59,7 +59,13 @@ lazy val generic: Project =
     folder        = "modules"
   ).dependsOn(core)
     .settings(
-      libraryDependencies ++= ProjectDependencies.Generic.dedicated
+      libraryDependencies ++= {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, _)) => ProjectDependencies.Generic.scala2
+          case Some((3, _)) => ProjectDependencies.Generic.scala3
+          case _            => Nil
+        }
+      }
     )
 
 lazy val catsEffect: Project =
@@ -117,29 +123,32 @@ lazy val allSettings: Seq[Def.Setting[_]] = Seq(
   scalacOptions ++= scalacSettings(scalaVersion.value),
   // dependencies
   resolvers ++= ProjectResolvers.all,
-  libraryDependencies ++= ProjectDependencies.common ++ {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) => ProjectDependencies.Plugins.compilerPluginsFor2_13
-      case Some((3, _))  => ProjectDependencies.Plugins.compilerPluginsFor3
-      case _             => Nil
-    }
-  },
+  libraryDependencies ++=
+    Seq(
+      ProjectDependencies.common,
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) => ProjectDependencies.Plugins.compilerPluginsFor2_13
+        case Some((3, _))  => ProjectDependencies.Plugins.compilerPluginsFor3
+        case _             => Nil
+      }
+    ).flatten,
   // fmt
   scalafmtOnCompile := true
 )
 
 def scalacSettings(scalaVersion: String): Seq[String] =
   Seq(
-    //    "-Xlog-implicits",
-    "-deprecation", // Emit warning and location for usages of deprecated APIs.
-    "-encoding",
-    "utf-8", // Specify character encoding used by source files.
-    "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-    "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-    "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-    "-language:higherKinds", // Allow higher-kinded types
-    "-language:implicitConversions" // Allow definition of implicit functions called views
-  ) ++ {
+    Seq(
+//    "-Xlog-implicits",
+      "-deprecation", // Emit warning and location for usages of deprecated APIs.
+      "-encoding",
+      "utf-8", // Specify character encoding used by source files.
+      "-feature", // Emit warning and location for usages of features that should be imported explicitly.
+      "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
+      "-language:experimental.macros", // Allow macro definition (besides implementation and application)
+      "-language:higherKinds", // Allow higher-kinded types
+      "-language:implicitConversions" // Allow definition of implicit functions called views
+    ),
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((3, _)) =>
         Seq(
@@ -185,4 +194,4 @@ def scalacSettings(scalaVersion: String): Seq[String] =
         )
       case _ => Nil
     }
-  }
+  ).flatten

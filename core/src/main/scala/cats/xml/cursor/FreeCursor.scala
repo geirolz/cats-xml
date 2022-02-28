@@ -1,28 +1,35 @@
 package cats.xml.cursor
 
+import cats.data.Validated.{Invalid, Valid}
 import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.Decoder
-import cats.data.Validated.{Invalid, Valid}
+import cats.{Monad, StackSafeMonad}
 
-trait FreeCursor[+T] extends GenericCursor[Xml, T] with Serializable { $this =>
+trait FreeCursor[I, +O] extends GenericCursor[I, O] with Serializable { $this =>
 
-  def map[U](f: T => U): FreeCursor[U] =
-    (xml: Xml) => $this.focus(xml).map(f)
+  def map[U](f: O => U): FreeCursor[I, U] =
+    (in: I) => $this.focus(in).map(f)
 
-  def flatMap[U](f: T => FreeCursor[U]): FreeCursor[U] =
-    (xml: Xml) =>
-      $this.focus(xml) match {
-        case CursorResult.Focused(value) => f(value).focus(xml)
+  def flatMap[U](f: O => FreeCursor[I, U]): FreeCursor[I, U] =
+    (in: I) =>
+      $this.focus(in) match {
+        case CursorResult.Focused(value) => f(value).focus(in)
         case failed: CursorResult.Failed => failed
       }
 }
-object FreeCursor {
+object FreeCursor extends FreeCursorInstances {
 
-  def apply[T: Decoder: CursorResultInterpreter](
+  def id[T]: FreeCursor[T, T] =
+    (i: T) => CursorResult.Focused(i)
+
+  def const[I, O](result: CursorResult[O]): FreeCursor[I, O] =
+    _ => result
+
+  def apply[O: Decoder: CursorResultInterpreter](
     cursor: Cursor[Xml]
-  ): FreeCursor[T] =
-    new FreeCursor[T] { $this =>
-      override def focus(xml: Xml): CursorResult[T] = {
+  ): FreeCursor[Xml, O] =
+    new FreeCursor[Xml, O] { $this =>
+      override def focus(xml: Xml): CursorResult[O] = {
 
         // TODO this smell
         val cursorResult: CursorResult[Xml] = xml match {
@@ -30,9 +37,9 @@ object FreeCursor {
           case x             => CursorResult.Focused(x)
         }
 
-        CursorResultInterpreter[T].interpret(
+        CursorResultInterpreter[O].interpret(
           cursorResult.flatMap { x =>
-            Decoder[T].decode(x) match {
+            Decoder[O].decode(x) match {
               case Valid(a)       => CursorResult.Focused(a)
               case e @ Invalid(_) => CursorResult.CursorDecodingFailure(cursor.path, e)
             }
@@ -40,4 +47,16 @@ object FreeCursor {
         )
       }
     }
+}
+
+sealed trait FreeCursorInstances {
+
+  implicit def monadFreeCursor[T]: Monad[FreeCursor[T, *]] = new StackSafeMonad[FreeCursor[T, *]] {
+
+    override def pure[A](in: A): FreeCursor[T, A] =
+      FreeCursor.const(CursorResult.Focused(in))
+
+    override def flatMap[A, B](fa: FreeCursor[T, A])(f: A => FreeCursor[T, B]): FreeCursor[T, B] =
+      fa.flatMap(f)
+  }
 }

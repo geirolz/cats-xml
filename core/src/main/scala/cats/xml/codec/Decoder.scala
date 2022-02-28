@@ -64,7 +64,7 @@ object Decoder extends DecoderInstances {
     Decoder.of(_ => r)
 
   def fromCursor[T, U](
-    f: NodeCursor => FreeCursor[U]
+    f: NodeCursor => FreeCursor[Xml, U]
   ): Decoder[U] =
     Decoder.of { tree =>
       f(Root).focus(tree) match {
