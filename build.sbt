@@ -146,9 +146,10 @@ def scalacSettings(scalaVersion: String): Seq[String] =
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((3, _)) =>
         Seq(
-//          "-Ykind-projector",
+          "-Ykind-projector",
           "-explain-types", // Explain type errors in more detail.
-          "-Xfatal-warnings" // Fail the compilation if there are any warnings.
+          "-Xfatal-warnings", // Fail the compilation if there are any warnings.
+          "-language:dynamics" // Enable language dynamic support
         )
       case Some((2, 13)) =>
         Seq(

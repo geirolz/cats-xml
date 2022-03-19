@@ -90,7 +90,7 @@ private[xml] trait DecoderInstances
 
   import cats.implicits.*
 
-  implicit def monadErrorForDecoder[T]: MonadError[Decoder, NonEmptyList[DecodingFailure]] =
+  implicit val monadErrorForDecoder: MonadError[Decoder, NonEmptyList[DecodingFailure]] =
     new MonadError[Decoder, NonEmptyList[DecodingFailure]] {
 
       override def raiseError[A](e: NonEmptyList[DecodingFailure]): Decoder[A] =
@@ -176,7 +176,8 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderPrimitivesInstan
       })
 }
 
-sealed private[xml] trait DecoderCatsDataInstances { this: DecoderLifterInstances =>
+sealed private[xml] trait DecoderCatsDataInstances {
+  this: DecoderLifterInstances & DecoderPrimitivesInstances =>
 
   implicit def decodeCatsNel[T: Decoder]: Decoder[NonEmptyList[T]] =
     decoderLiftToSeq[Vector, T].flatMapR {

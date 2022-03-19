@@ -1,7 +1,7 @@
 package cats.xml.modifier
 
 import cats.xml.cursor.CursorResult.Failed
-import cats.xml.modifier.ModifierResult.ModifierFailed
+import cats.xml.modifier.ModifierResult.{Modified, ModifierFailed}
 import cats.{MonadError, StackSafeMonad}
 
 sealed trait ModifierResult[+T] {
@@ -48,7 +48,7 @@ sealed trait ModifierResultInstances {
       override def handleErrorWith[A](fa: ModifierResult[A])(
         f: ModifierFailed => ModifierResult[A]
       ): ModifierResult[A] = fa match {
-        case modified: ModifierResult.Modified[A] => modified
+        case modified: ModifierResult.Modified[?] => modified.asInstanceOf[Modified[A]]
         case failed: ModifierFailed               => f(failed)
       }
 

@@ -7,10 +7,7 @@ class XmlNode private (
   private var mLabel: String,
   private var mAttributes: Seq[XmlAttribute],
   private var mContent: NodeContent
-) extends Xml
-    with LabelOps
-    with AttrsOps
-    with ContentOps {
+) extends Xml {
 
   def label: String = mLabel
 
@@ -18,63 +15,17 @@ class XmlNode private (
 
   def content: NodeContent = mContent
 
-  // update ops
-  override def updateLabel(f: Endo[String]): XmlNode =
-    copy(label = f(label))
-
-  override def updateAttrs(f: Endo[Seq[XmlAttribute]]): XmlNode =
-    copy(attributes = f(attributes))
-
-  def copy(
-    label: String                 = this.label,
-    attributes: Seq[XmlAttribute] = this.attributes,
-    content: NodeContent          = this.content
-  ): XmlNode = new XmlNode(label, attributes, content)
-
-  /** ##### BE CAREFUL! ##### */
-  private[xml] def mute(f: Endo[XmlNode]): Unit = {
-    val n: XmlNode = f(this)
-    this.mLabel      = n.label
-    this.mAttributes = n.attributes
-    this.mContent    = n.content
-  }
-
-  private[xml] override def updateContent(f: Endo[NodeContent]): XmlNode =
-    copy(content = f(content))
-
-  override final def toString: String =
-    Show[XmlNode].show(this)
-}
-
-object XmlNode extends XmlTreeInstances {
-
-  def apply(
-    label: String,
-    attributes: Seq[XmlAttribute] = Nil,
-    content: NodeContent          = NodeContent.empty
-  ): XmlNode = new XmlNode(label, attributes, content)
-}
-
-private[xml] sealed trait XmlTreeInstances {
-  implicit val showXmlTree: Show[XmlNode] = XmlPrinter.prettyString(_)
-}
-
-// ######################## OPS ########################
-private[xml] sealed trait LabelOps { $this: XmlNode =>
-
+  // ---- LABEL ----
   def updateLabel(newLabel: String): XmlNode =
     updateLabel(_ => newLabel)
 
-  def updateLabel(f: Endo[String]): XmlNode
-}
+  def updateLabel(f: Endo[String]): XmlNode =
+    copy(label = f(label))
 
-private[xml] sealed trait AttrsOps { this: XmlNode =>
-
-  // ---- GET ----
+  // ---- ATTRS ----
   def findAttr(key: String): Option[XmlAttribute] =
     attributes.find(_.key == key)
 
-  // ---- UPDATE ----
   def withAttributes(attrs: Seq[XmlAttribute]): XmlNode =
     updateAttrs(_ => attrs)
 
@@ -93,40 +44,34 @@ private[xml] sealed trait AttrsOps { this: XmlNode =>
   def removeAttr(key: String): XmlNode =
     updateAttrs(_.filterNot(_.key == key))
 
-  def updateAttrs(f: Endo[Seq[XmlAttribute]]): XmlNode
-}
+  def updateAttrs(f: Endo[Seq[XmlAttribute]]): XmlNode =
+    copy(attributes = f(attributes))
 
-private[xml] sealed trait ContentOps { $this: XmlNode =>
-
-  // ------ PROPS ------
+  // ------ CONTENT ------
   val hasChildren: Boolean = children.nonEmpty
 
   val hasText: Boolean = text.nonEmpty
 
   val isEmpty: Boolean = content.isEmpty
 
-  // ------ UPDATE ------
-  // text
   def withText[T: DataEncoder](data: T): XmlNode =
     withContent(NodeContent.text(data))
 
-  // child
   def withChild(child: XmlNode, children: XmlNode*): XmlNode =
     withChildren(child +: children)
 
   def withChildren(children: Seq[XmlNode]): XmlNode =
     withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
 
-  // generic
   def drain: XmlNode =
     withContent(NodeContent.empty)
 
   private[xml] def withContent(newContent: NodeContent): XmlNode =
     updateContent(_ => newContent)
 
-  private[xml] def updateContent(f: Endo[NodeContent]): XmlNode
+  private[xml] def updateContent(f: Endo[NodeContent]): XmlNode =
+    copy(content = f(content))
 
-  // ------  GET ------
   def text: Option[XmlData] =
     content.text
 
@@ -147,4 +92,35 @@ private[xml] sealed trait ContentOps { $this: XmlNode =>
       case NodeContent.Children(childrenNel) => childrenNel.toList.flatMap(_.deepSubNodes)
       case _                                 => List(this)
     }
+
+  // -----------------------------//
+  def copy(
+    label: String                 = this.label,
+    attributes: Seq[XmlAttribute] = this.attributes,
+    content: NodeContent          = this.content
+  ): XmlNode = new XmlNode(label, attributes, content)
+
+  /** ##### BE CAREFUL! ##### */
+  private[xml] def mute(f: Endo[XmlNode]): Unit = {
+    val n: XmlNode = f(this)
+    this.mLabel      = n.label
+    this.mAttributes = n.attributes
+    this.mContent    = n.content
+  }
+
+  override final def toString: String =
+    Show[XmlNode].show(this)
+}
+
+object XmlNode extends XmlTreeInstances {
+
+  def apply(
+    label: String,
+    attributes: Seq[XmlAttribute] = Nil,
+    content: NodeContent          = NodeContent.empty
+  ): XmlNode = new XmlNode(label, attributes, content)
+}
+
+private[xml] sealed trait XmlTreeInstances {
+  implicit val showXmlTree: Show[XmlNode] = XmlPrinter.prettyString(_)
 }
