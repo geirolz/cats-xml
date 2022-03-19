@@ -1,8 +1,6 @@
-import cats.xml.{Xml, XmlNode}
+import cats.xml.XmlNode
 import cats.xml.codec.{Decoder, Encoder}
-import cats.xml.cursor.CursorResult
-import cats.xml.cursor.NodeCursor.Root
-import cats.xml.XmlAttribute.XmlAttrStringOps
+import cats.xml.implicits.*
 //
 ////############### PARSING from NODESEQ ###############
 //val n1: XmlNode = <root>TEST</root>

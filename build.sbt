@@ -7,14 +7,13 @@ val org     = "com.geirolz"
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
 lazy val root: Project = project
   .in(file("."))
-  .aggregate(docs, core)
+  .aggregate(docs, core, generic, catsEffect, scalaXml)
   .settings(allSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
-    name := prjName,
+    name        := prjName,
     description := "A purely functional XML library",
-    organization := org,
-    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
+    copyReadMe  := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
     (Compile / compile) := (Compile / compile)
       .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
       .value
@@ -36,7 +35,7 @@ lazy val docs: Project = {
       // task
       // config
       scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
-      mdocIn := file("docs/source"),
+      mdocIn  := file("docs/source"),
       mdocOut := file("docs/compiled"),
       mdocVariables := Map(
         "VERSION" -> version.value,
@@ -55,7 +54,7 @@ lazy val core: Project =
 lazy val generic: Project =
   buildModule(
     prjModuleName = "generic",
-    toPublish     = true,
+    toPublish     = false, // TODO ENABLE ONCE READY
     folder        = "modules"
   ).dependsOn(core)
     .settings(
@@ -93,33 +92,28 @@ def buildModule(
   prjModuleName: String,
   toPublish: Boolean,
   folder: String
-): Project = {
-  val keys    = prjModuleName.split("-")
-  val docName = keys.mkString(" ")
-  val prjFile = file(s"$folder/$prjModuleName")
-
-  Project(prjModuleName, prjFile)
+): Project =
+  Project(prjModuleName, file(s"$folder/$prjModuleName"))
     .settings(
-      description := moduleName.value,
-      moduleName := s"$prjName-$prjModuleName",
-      name := s"$prjName $docName",
+      moduleName     := s"$prjName-$prjModuleName",
+      description    := moduleName.value,
+      organization   := org,
       publish / skip := !toPublish
     )
     .settings(allSettings: _*)
-}
 
 //=============================== SETTINGS ===============================
 lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
-  publish := {},
-  publishLocal := {},
+  publish         := {},
+  publishLocal    := {},
   publishArtifact := false,
-  publish / skip := true
+  publish / skip  := true
 )
 
 lazy val allSettings: Seq[Def.Setting[_]] = Seq(
   // scala
   crossScalaVersions := List("2.13.8", "3.1.0"),
-  scalaVersion := crossScalaVersions.value.head,
+  scalaVersion       := crossScalaVersions.value.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
   // dependencies
   resolvers ++= ProjectResolvers.all,
