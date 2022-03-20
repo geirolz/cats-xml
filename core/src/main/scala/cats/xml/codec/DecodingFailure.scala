@@ -4,8 +4,6 @@ import cats.xml.Xml
 import cats.xml.cursor.CursorResult
 import cats.Show
 
-trait DecodingResult
-
 case class DecodingFailure(reason: DecodingFailureReason)
 object DecodingFailure {
 
@@ -21,7 +19,7 @@ object DecodingFailure {
   def custom(message: String): DecodingFailure =
     DecodingFailure(DecodingFailureReason.Custom(message))
 
-  def coproductNomatch(actual: Any, coproductValues: Seq[Any]): DecodingFailure =
+  def coproductNoMatch(actual: Any, coproductValues: Seq[Any]): DecodingFailure =
     DecodingFailure(DecodingFailureReason.CoproductUnmatch(actual, coproductValues))
 }
 

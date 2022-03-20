@@ -58,6 +58,4 @@ private[xml] trait DataEncoderPrimitivesInstances {
   implicit val encoderFloat: DataEncoder[Float]           = encoderString.contramap(_.toString)
   implicit val encoderDouble: DataEncoder[Double]         = encoderString.contramap(_.toString)
   implicit val encoderBigDecimal: DataEncoder[BigDecimal] = encoderString.contramap(_.toString)
-
-  // std scala
 }

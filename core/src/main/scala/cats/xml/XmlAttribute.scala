@@ -37,7 +37,10 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
     }.toList
 
   def stringify(ls: XmlAttribute)(implicit showData: Show[XmlData]): String =
-    s"${ls.key}=\"${showData.show(ls.value)}\""
+    ls.value match {
+      case XmlNull => s"${ls.key}=\"${showData.show(ls.value)}\""
+      case _       => ""
+    }
 }
 private[xml] trait XmlAttributeSyntax {
 
@@ -46,7 +49,9 @@ private[xml] trait XmlAttributeSyntax {
   }
 
   implicit class XmlAttrOps(attr: XmlAttribute) {
-    def +(attr2: XmlAttribute): Seq[XmlAttribute]       = Vector(attr, attr2)
+
+    def +(attr2: XmlAttribute): Seq[XmlAttribute] = Vector(attr, attr2)
+
     def ++(attrs: Seq[XmlAttribute]): Seq[XmlAttribute] = attr +: attrs
   }
 }
