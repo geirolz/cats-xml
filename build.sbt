@@ -69,7 +69,7 @@ lazy val generic: Project =
 
 lazy val catsEffect: Project =
   buildModule(
-    prjModuleName = "cats-effect",
+    prjModuleName = "effect",
     toPublish     = true,
     folder        = "modules"
   ).dependsOn(core)
@@ -79,7 +79,7 @@ lazy val catsEffect: Project =
 
 lazy val scalaXml: Project =
   buildModule(
-    prjModuleName = "scala-xml",
+    prjModuleName = "standard",
     toPublish     = true,
     folder        = "modules"
   ).dependsOn(core)
