@@ -11,9 +11,10 @@ object ProjectDependencies {
     // SCALA
     "org.typelevel" %% "cats-core" % "2.7.0" cross CrossVersion.binary,
     // TEST
-    "org.scalameta" %% "munit" % "0.7.29" % Test,
-    "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test,
-    "org.scalacheck" %% "scalacheck" % "1.15.4" % Test cross CrossVersion.binary
+    "org.scalameta"  %% "munit"            % "0.7.29" % Test,
+    "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
+    "org.typelevel"  %% "cats-laws"        % "2.7.0"  % Test,
+    "org.scalacheck" %% "scalacheck"       % "1.15.4" % Test cross CrossVersion.binary
   )
 
   object Docs {
@@ -29,13 +30,13 @@ object ProjectDependencies {
     )
   }
 
-  object CatsEffect {
+  object Effect {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.typelevel" %% "cats-effect" % "3.3.5" cross CrossVersion.binary
+      "org.typelevel" %% "cats-effect" % "3.3.6" cross CrossVersion.binary
     )
   }
 
-  object ScalaXml {
+  object Standard {
     val dedicated: Seq[ModuleID] = Seq(
       "org.scala-lang.modules" %% "scala-xml" % "2.0.1" cross CrossVersion.binary
     )
@@ -43,7 +44,7 @@ object ProjectDependencies {
 
   object Plugins {
     lazy val compilerPluginsFor2_13: Seq[ModuleID] = Seq(
-      compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3" cross CrossVersion.binary)
+      compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.binary)
     )
     lazy val compilerPluginsFor3: Seq[ModuleID] = Nil
   }

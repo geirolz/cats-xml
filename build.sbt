@@ -74,7 +74,7 @@ lazy val catsEffect: Project =
     folder        = "modules"
   ).dependsOn(core)
     .settings(
-      libraryDependencies ++= ProjectDependencies.CatsEffect.dedicated
+      libraryDependencies ++= ProjectDependencies.Effect.dedicated
     )
 
 lazy val scalaXml: Project =
@@ -84,7 +84,7 @@ lazy val scalaXml: Project =
     folder        = "modules"
   ).dependsOn(core)
     .settings(
-      libraryDependencies ++= ProjectDependencies.ScalaXml.dedicated
+      libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
 
 //=============================== MODULES UTILS ===============================
