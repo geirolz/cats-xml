@@ -34,8 +34,6 @@ trait Decoder[T] {
 
   def flatMap[U](f: T => Decoder[U]): Decoder[U] =
     Decoder.of(ns => decode(ns).andThen(t => f(t).decode(ns)))
-
-  def liftToOption: Decoder[Option[T]] = map(Some(_))
 }
 
 object Decoder extends DecoderInstances {
@@ -63,7 +61,7 @@ object Decoder extends DecoderInstances {
   def const[T](r: => Decoder.Result[T]): Decoder[T] =
     Decoder.of(_ => r)
 
-  def fromCursor[T, U](
+  def fromCursor[U](
     f: NodeCursor => FreeCursor[Xml, U]
   ): Decoder[U] =
     Decoder.of { tree =>
@@ -144,7 +142,7 @@ sealed private[xml] trait DecoderPrimitivesInstances {
   implicit val decodeBoolean: Decoder[Boolean] = decodeString.map(_.toLowerCase).emap[Boolean] {
     case "true" | "1"  => Right(true)
     case "false" | "0" => Right(false)
-    case v             => Left(DecodingFailure.coproductUnmatch(v, Vector(true, false, 1, 0)))
+    case v             => Left(DecodingFailure.coproductNomatch(v, Vector(true, false, 1, 0)))
   }
   implicit val decodeCharArray: Decoder[Array[Char]] = decodeString.map(_.toCharArray)
   implicit val decodeInt: Decoder[Int]               = decodeString.emapTry(s => Try(s.toInt))

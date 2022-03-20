@@ -21,7 +21,7 @@ object DecodingFailure {
   def custom(message: String): DecodingFailure =
     DecodingFailure(DecodingFailureReason.Custom(message))
 
-  def coproductUnmatch(actual: Any, coproductValues: Seq[Any]): DecodingFailure =
+  def coproductNomatch(actual: Any, coproductValues: Seq[Any]): DecodingFailure =
     DecodingFailure(DecodingFailureReason.CoproductUnmatch(actual, coproductValues))
 }
 
@@ -37,7 +37,7 @@ object DecodingFailureReason {
   case class Custom(message: String) extends DecodingFailureReason
 
   implicit val showDecodingFailureReason: Show[DecodingFailureReason] = {
-    case Error(ex)                => ex.getMessage
+    case Error(ex)                => s"Exception: ${ex.getMessage}"
     case NoTextAvailable(subject) => s"No text available inside $subject"
     case CursorFailure(failed)    => failed.toString
     case Custom(message)          => message
