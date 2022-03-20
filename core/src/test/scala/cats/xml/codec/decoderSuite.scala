@@ -76,6 +76,106 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       expected = Decoder.Result.failed(DecodingFailure.error(ex))
     )
   }
+
+  test("Decoder.flatMapF - success >=> success") {
+    assertEquals(
+      obtained = Decoder.id
+        .flatMapF(_ => Decoder.Result.success(1))
+        .decode(dummyNode),
+      expected = Decoder.Result.success(1)
+    )
+  }
+
+  test("Decoder.flatMapF - success >=> failed") {
+    assertEquals(
+      obtained = Decoder.id
+        .flatMapF(_ => Decoder.Result.failed(DecodingFailure.custom("ERROR")))
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+    )
+  }
+
+  test("Decoder.flatMapF - failed >=> success") {
+    assertEquals(
+      obtained = Decoder
+        .const[Int](
+          Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+        )
+        .flatMapF(_ => Decoder.Result.success(1))
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+    )
+  }
+
+  test("Decoder.flatMapF - failed >=> failed") {
+    assertEquals(
+      obtained = Decoder
+        .const[Int](
+          Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+        )
+        .flatMapF(_ => Decoder.Result.failed(DecodingFailure.custom("ERROR 2")))
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+    )
+  }
+
+  test("Decoder.flatMap - success >=> success") {
+    assertEquals(
+      obtained = Decoder.id
+        .flatMap(_ =>
+          Decoder.const(
+            Decoder.Result.success(1)
+          )
+        )
+        .decode(dummyNode),
+      expected = Decoder.Result.success(1)
+    )
+  }
+
+  test("Decoder.flatMap - success >=> failed") {
+    assertEquals(
+      obtained = Decoder.id
+        .flatMap(_ =>
+          Decoder.const[Xml](
+            Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+          )
+        )
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+    )
+  }
+
+  test("Decoder.flatMap - failed >=> success") {
+    assertEquals(
+      obtained = Decoder
+        .const[Int](
+          Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+        )
+        .flatMap(_ =>
+          Decoder.const[Int](
+            Decoder.Result.success(1)
+          )
+        )
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+    )
+  }
+
+  test("Decoder.flatMap - failed >=> failed") {
+    assertEquals(
+      obtained = Decoder
+        .const[Int](
+          Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+        )
+        .flatMap(_ =>
+          Decoder.const[Int](
+            Decoder.Result.failed(DecodingFailure.custom("ERROR 2"))
+          )
+        )
+        .decode(dummyNode),
+      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+    )
+  }
 }
 
 class DecoderCompanionSuite extends munit.ScalaCheckSuite {

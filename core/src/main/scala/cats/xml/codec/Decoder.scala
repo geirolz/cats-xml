@@ -29,7 +29,7 @@ trait Decoder[T] {
   def emapTry[U](f: T => Try[U]): Decoder[U] =
     emap(f.andThen(_.toEither))
 
-  def flatMapR[U](f: T => Decoder.Result[U]): Decoder[U] =
+  def flatMapF[U](f: T => Decoder.Result[U]): Decoder[U] =
     Decoder.of(ns => decode(ns).andThen(t => f(t)))
 
   def flatMap[U](f: T => Decoder[U]): Decoder[U] =
@@ -164,7 +164,7 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderPrimitivesInstan
     f: Factory[T, F[T]]
   ): Decoder[F[T]] =
     decodeString
-      .flatMapR(str => {
+      .flatMapF(str => {
         str
           .split(",")
           .map(s => Decoder[T].decode(XmlString(s)))
@@ -178,26 +178,26 @@ sealed private[xml] trait DecoderCatsDataInstances {
   this: DecoderLifterInstances & DecoderPrimitivesInstances =>
 
   implicit def decodeCatsNel[T: Decoder]: Decoder[NonEmptyList[T]] =
-    decoderLiftToSeq[Vector, T].flatMapR {
+    decoderLiftToSeq[Vector, T].flatMapF {
       case xs if xs.isEmpty =>
         Result.failed(DecodingFailure.custom("a NonEmptyChain is required."))
       case xs => Result.success(NonEmptyList.of(xs.head, xs.tail*))
     }
 
   implicit def decodeCatsNec[T: Decoder]: Decoder[NonEmptyChain[T]] =
-    decoderLiftToSeq[Vector, T].flatMapR {
+    decoderLiftToSeq[Vector, T].flatMapF {
       case xs if xs.isEmpty => Result.failed(DecodingFailure.custom("a NonEmptyChain is required."))
       case xs               => Result.success(NonEmptyChain.of(xs.head, xs.tail*))
     }
 
   implicit def decodeCatsNes[T: Decoder]: Decoder[NonEmptySeq[T]] =
-    decoderLiftToSeq[Vector, T].flatMapR {
+    decoderLiftToSeq[Vector, T].flatMapF {
       case xs if xs.isEmpty => Result.failed(DecodingFailure.custom("a NonEmptySeq is required."))
       case xs               => Result.success(NonEmptySeq.of(xs.head, xs.tail*))
     }
 
   implicit def decodeCatsNev[T: Decoder]: Decoder[NonEmptyVector[T]] =
-    decoderLiftToSeq[Vector, T].flatMapR {
+    decoderLiftToSeq[Vector, T].flatMapF {
       case xs if xs.isEmpty => Result.failed(DecodingFailure.custom("a NonEmptySeq is required."))
       case xs               => Result.success(NonEmptyVector.of(xs.head, xs.tail*))
     }
