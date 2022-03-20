@@ -1,7 +1,7 @@
 import sbt.project
 
 val prjName = "cats-xml"
-val org     = "com.geirolz"
+val org     = "com.github.geirolz"
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
