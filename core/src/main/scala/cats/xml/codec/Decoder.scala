@@ -1,12 +1,12 @@
 package cats.xml.codec
 
+import cats.{Applicative, MonadError}
+import cats.data.*
+import cats.data.Validated.Invalid
 import cats.xml.*
 import cats.xml.codec.Decoder.Result
 import cats.xml.cursor.{CursorResult, FreeCursor, NodeCursor}
 import cats.xml.cursor.NodeCursor.Root
-import cats.{Applicative, MonadError}
-import cats.data.*
-import cats.data.Validated.Invalid
 
 import scala.collection.Factory
 import scala.util.Try
@@ -81,6 +81,7 @@ object Decoder extends DecoderInstances {
     id.emapTry(f)
 }
 
+// ####################### INSTANCES #######################
 private[xml] trait DecoderInstances
     extends DecoderPrimitivesInstances
     with DecoderLifterInstances

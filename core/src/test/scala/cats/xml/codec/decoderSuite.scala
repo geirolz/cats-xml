@@ -1,7 +1,10 @@
 package cats.xml.codec
 
+import cats.data.NonEmptyList
+import cats.laws.discipline.MonadErrorTests
 import cats.xml.{Xml, XmlNode}
-import cats.xml.Samples.dummyNode
+import cats.xml.testing.Samples.dummyNode
+import cats.Eq
 
 import scala.util.{Failure, Success}
 
@@ -176,6 +179,22 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       expected = Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
     )
   }
+}
+
+class DecoderInstancesSuite extends munit.DisciplineSuite {
+
+  import cats.implicits.*
+  import cats.laws.discipline.arbitrary.*
+  import cats.xml.testing.codec.arbitrary.*
+
+  // TODO TO FIX
+  implicit def eqDecoder[T]: Eq[Decoder[T]] = Eq.allEqual
+
+  checkAll(
+    "Decoder.MonadErrorLaws",
+    MonadErrorTests[Decoder, NonEmptyList[DecodingFailure]]
+      .monadError[Int, Int, String]
+  )
 }
 
 class DecoderCompanionSuite extends munit.ScalaCheckSuite {

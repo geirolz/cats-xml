@@ -1,4 +1,6 @@
-package cats.xml
+package cats.xml.testing
+
+import cats.xml.XmlNode
 
 object Samples {
 

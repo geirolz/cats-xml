@@ -3,6 +3,22 @@ import sbt.project
 val prjName = "cats-xml"
 val org     = "com.github.geirolz"
 
+inThisBuild(
+  List(
+    organization := "com.github.geirolz",
+    homepage     := Some(url(s"https://github.com/geirolz/$prjName")),
+    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(
+      Developer(
+        "DavidGeirola",
+        "David Geirola",
+        "david.geirola@gmail.com",
+        url("https://github.com/geirolz")
+      )
+    )
+  )
+)
+
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
 lazy val root: Project = project
@@ -11,9 +27,10 @@ lazy val root: Project = project
   .settings(allSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
-    name        := prjName,
-    description := "A purely functional XML library",
-    copyReadMe  := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
+    name                          := prjName,
+    description                   := "A purely functional XML library",
+    Global / onChangedBuildSource := ReloadOnSourceChanges,
+    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
     (Compile / compile) := (Compile / compile)
       .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
       .value

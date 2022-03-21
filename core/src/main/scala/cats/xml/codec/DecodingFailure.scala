@@ -1,11 +1,11 @@
 package cats.xml.codec
 
+import cats.{Eq, Show}
 import cats.xml.Xml
 import cats.xml.cursor.CursorResult
-import cats.Show
 
 case class DecodingFailure(reason: DecodingFailureReason)
-object DecodingFailure {
+object DecodingFailure extends DecodingFailureInstances {
 
   def error(ex: Throwable): DecodingFailure =
     DecodingFailure(DecodingFailureReason.Error(ex))
@@ -23,6 +23,12 @@ object DecodingFailure {
     DecodingFailure(DecodingFailureReason.CoproductUnmatch(actual, coproductValues))
 }
 
+sealed trait DecodingFailureInstances {
+
+  implicit def eqDecodingFailure(implicit eqR: Eq[DecodingFailureReason]): Eq[DecodingFailure] =
+    (x: DecodingFailure, y: DecodingFailure) => eqR.eqv(x.reason, y.reason)
+}
+
 sealed trait DecodingFailureReason {
   override def toString: String = Show[DecodingFailureReason].show(this)
 }
@@ -33,6 +39,9 @@ object DecodingFailureReason {
   case class CoproductUnmatch[T](actual: Any, coproductValues: Seq[? <: T])
       extends DecodingFailureReason
   case class Custom(message: String) extends DecodingFailureReason
+
+  implicit val eqDecodingFailureReason: Eq[DecodingFailureReason] =
+    Eq.fromUniversalEquals
 
   implicit val showDecodingFailureReason: Show[DecodingFailureReason] = {
     case Error(ex)                => s"Exception: ${ex.getMessage}"
