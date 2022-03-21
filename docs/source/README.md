@@ -21,7 +21,7 @@ This library is not production ready yet. There is a lot of work to do to comple
 
 
 Given `Foo` class 
-```scala mdoc
+```scala mdoc:silent
 case class Foo(
     foo: Option[String], 
     bar: Int, 
@@ -30,7 +30,7 @@ case class Foo(
 ```
 
 ### Decoder
-```scala mdoc
+```scala mdoc:silent
 
 import cats.xml.codec.Decoder
 import cats.xml.implicits.*
@@ -47,7 +47,7 @@ val decoder: Decoder[Foo] =
 
 
 ### Encoder
-```scala mdoc
+```scala mdoc:silent
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
 
@@ -59,4 +59,21 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
     )
     .withText(t.text)
 )
+```
+
+### Modify XML
+```scala mdoc
+import cats.xml.cursor.NodeCursor.Root
+import cats.xml.modifier.ModifierResult
+
+val node: XmlNode = XmlNode("Foo")
+  .withAttributes(
+    "name" := "Foo",
+    "age"  := 10
+  )
+  .withText("ORIGINAL")
+  
+val result: ModifierResult[XmlNode] = Root
+  .modify(_.withText("NEW"))
+  .apply(node)  
 ```

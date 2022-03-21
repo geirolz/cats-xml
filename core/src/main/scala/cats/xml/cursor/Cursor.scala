@@ -4,8 +4,6 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.Decoder
 import cats.Show
 
-import scala.language.dynamics
-
 sealed trait Cursor[+X <: Xml] extends GenericCursor[XmlNode, X] with Serializable {
 
   def path: String

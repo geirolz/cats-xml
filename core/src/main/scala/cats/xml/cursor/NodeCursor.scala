@@ -1,14 +1,13 @@
 package cats.xml.cursor
 
+import cats.{Endo, Show}
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor.CursorOp
 import cats.xml.cursor.CursorResult.{Failed, Focused}
 import cats.xml.modifier.Modifier
-import cats.{Endo, Show}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.language.dynamics
 
 /** Vertical cursor for nodes
   */
