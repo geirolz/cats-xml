@@ -3,27 +3,28 @@ import sbt.project
 val prjName = "cats-xml"
 val org     = "com.github.geirolz"
 
-inThisBuild(
-  List(
-    organization := "com.github.geirolz",
-    homepage     := Some(url(s"https://github.com/geirolz/$prjName")),
-    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers := List(
-      Developer(
-        "DavidGeirola",
-        "David Geirola",
-        "david.geirola@gmail.com",
-        url("https://github.com/geirolz")
-      )
-    )
-  )
-)
-
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
 lazy val root: Project = project
   .in(file("."))
   .aggregate(docs, core, generic, catsEffect, scalaXml)
+  .settings(
+    inThisBuild(
+      List(
+        organization := "com.github.geirolz",
+        homepage     := Some(url(s"https://github.com/geirolz/$prjName")),
+        licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+        developers := List(
+          Developer(
+            "DavidGeirola",
+            "David Geirola",
+            "david.geirola@gmail.com",
+            url("https://github.com/geirolz")
+          )
+        )
+      )
+    )
+  )
   .settings(allSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(

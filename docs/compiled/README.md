@@ -42,7 +42,7 @@ val decoder: Decoder[Foo] =
       text <- c.text.as[Boolean]
     } yield Foo(foo, bar, text)
   )
-// decoder: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@7e61c974
+// decoder: Decoder[Foo] = cats.xml.codec.Decoder$$$Lambda$21218/1244075180@3ca6224f
 ```
 
 
@@ -59,5 +59,5 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
     )
     .withText(t.text)
 )
-// encoder: Encoder[Foo] = cats.xml.codec.Encoder$$anonfun$of$2@599527b1
+// encoder: Encoder[Foo] = cats.xml.codec.Encoder$$$Lambda$21239/1892515684@46ee4740
 ```
