@@ -1,10 +1,10 @@
 package cats.xml.cursor
 
+import cats.Show
 import cats.xml.{XmlAttribute, XmlNode}
 import cats.xml.cursor.AttrCursor.Op
 import cats.xml.cursor.Cursor.CursorOp
 import cats.xml.cursor.CursorResult.*
-import cats.Show
 
 /** Horizontal cursor for node attributes
   */
@@ -14,21 +14,7 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
   import cats.implicits.*
   lazy val path: String = vCursor.path
 
-  // modifier
-//  def rename(newK: String): Modifier[Attribute] =
-//    if (newK.isEmpty)
-//      Modifier.fail(this, ModifierResult.InvalidData("", newK))
-//    else
-//      modify(_.copy(key = newK))
-
-//  def set(v: => String): Modifier[Attribute] =
-//    modify(_.copy(value = v))
-//
-//  def update(f: Endo[String]): Modifier[Attribute] =
-//    modify(a => a.copy(value = f(a.value)))
-
   // focus
-//  private[xml]
   override def focus(xml: XmlNode): CursorResult[XmlAttribute] = {
 
     // TODO: tail rec

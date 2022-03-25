@@ -1,18 +1,19 @@
 package cats.xml.modifier
 
-import cats.xml.XmlNode
-import cats.xml.cursor.{CursorResult, NodeCursor}
+import cats.xml.{XmlData, XmlNode}
+import cats.xml.cursor.{CursorResult, NodeCursor, TextCursor}
 import cats.{Endo, Monoid}
+import cats.xml.codec.DataEncoder
 
 /** Create a modified copy of input [[XmlNode]]
   */
 trait Modifier[T] {
-  def apply(node: T): ModifierResult[T]
+  def apply(value: T): ModifierResult[T]
 }
 
 object Modifier extends ModifierInstances {
 
-  def apply(
+  def fromNodeCursor(
     cursor: NodeCursor,
     modifier: Endo[XmlNode]
   ): Modifier[XmlNode] =
@@ -25,6 +26,12 @@ object Modifier extends ModifierInstances {
           ModifierResult.Modified(focus)
       }
     })
+
+  def fromTextCursor[T: DataEncoder](
+    cursor: TextCursor,
+    modifier: Option[XmlData] => T
+  ): Modifier[XmlNode] =
+    cursor.lastCursor.modify(n => n.withText(modifier(n.text)))
 
   def apply[T](
     f: T => ModifierResult[T]

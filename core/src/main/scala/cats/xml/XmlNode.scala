@@ -63,7 +63,7 @@ class XmlNode private (
   def withChildren(children: Seq[XmlNode]): XmlNode =
     withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
 
-  def drain: XmlNode =
+  def drainContent: XmlNode =
     withContent(NodeContent.empty)
 
   private[xml] def withContent(newContent: NodeContent): XmlNode =
