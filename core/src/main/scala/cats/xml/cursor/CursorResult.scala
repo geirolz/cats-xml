@@ -1,8 +1,8 @@
 package cats.xml.cursor
 
+import cats.{MonadError, Show, StackSafeMonad}
 import cats.xml.codec.Decoder
 import cats.xml.cursor.CursorResult.*
-import cats.Show
 
 sealed trait CursorResult[+T] {
 
@@ -18,9 +18,9 @@ sealed trait CursorResult[+T] {
   }
 
   def recover[U >: T](f: Failed => U): CursorResult[U] =
-    recoverWith(failed => Focused(f(failed)))
+    handleErrorWith(failed => Focused(f(failed)))
 
-  def recoverWith[U >: T](f: Failed => CursorResult[U]): CursorResult[U] =
+  def handleErrorWith[U >: T](f: Failed => CursorResult[U]): CursorResult[U] =
     this match {
       case Focused(target) => Focused[U](target)
       case failed: Failed  => f(failed)
@@ -84,6 +84,7 @@ object CursorResult extends CursorResultInstances {
 
   // ops
   case class CursorFailureException(failed: Failed) extends RuntimeException(failed.toString)
+
   def fromOption[T](opt: Option[T])(ifEmpty: => CursorResult[T]): CursorResult[T] =
     opt.fold(ifEmpty)(Focused(_))
 }
@@ -91,7 +92,25 @@ private[xml] sealed trait CursorResultInstances {
 
   import cats.implicits.*
 
-  implicit def showInstanceForCursorResult[T](implicit
+  implicit def monadCursorResult: MonadError[CursorResult, CursorResult.Failed] =
+    new MonadError[CursorResult, CursorResult.Failed] with StackSafeMonad[CursorResult] {
+
+      override def pure[A](x: A): CursorResult[A] =
+        CursorResult.Focused(x)
+
+      override def raiseError[A](e: Failed): CursorResult[A] = e
+
+      override def flatMap[A, B](fa: CursorResult[A])(f: A => CursorResult[B]): CursorResult[B] =
+        fa.flatMap(f)
+
+      override def handleErrorWith[A](fa: CursorResult[A])(
+        f: Failed => CursorResult[A]
+      ): CursorResult[A] =
+        fa.handleErrorWith(f)
+
+    }
+
+  implicit def showCursorResult[T](implicit
     showT: Show[T] = Show.fromToString[T]
   ): Show[CursorResult[T]] = {
     case Focused(value)                  => Show[T].show(value)

@@ -37,7 +37,7 @@ object Modifier extends ModifierInstances {
     f: T => ModifierResult[T]
   ): Modifier[T] = (input: T) => f(input)
 
-  def id[T]: Modifier[T] = Modifier(ModifierResult.pure)
+  def id[T]: Modifier[T] = Modifier(ModifierResult.Modified(_))
 
   def const[T](
     result: => ModifierResult[T]

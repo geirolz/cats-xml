@@ -3,6 +3,8 @@ package cats.xml
 import cats.{Endo, Show}
 import cats.xml.codec.DataEncoder
 
+import scala.annotation.tailrec
+
 class XmlNode private (
   private var mLabel: String,
   private var mAttributes: Seq[XmlAttribute],
@@ -87,11 +89,20 @@ class XmlNode private (
   def findDeepChild(thatLabel: String): Option[XmlNode] =
     deepSubNodes.find(_.label == thatLabel)
 
-  def deepSubNodes: List[XmlNode] =
-    content match {
-      case NodeContent.Children(childrenNel) => childrenNel.toList.flatMap(_.deepSubNodes)
-      case _                                 => List(this)
+  def deepSubNodes: List[XmlNode] = {
+
+    @tailrec
+    def rec(left: List[XmlNode], acc: List[XmlNode]): List[XmlNode] =
+      left match {
+        case Nil          => acc
+        case head :: tail => rec(tail, acc ++ head.deepSubNodes)
+      }
+
+    content.children match {
+      case Nil                 => Nil
+      case currentNodeChildren => rec(currentNodeChildren, Nil)
     }
+  }
 
   // -----------------------------//
   def copy(
