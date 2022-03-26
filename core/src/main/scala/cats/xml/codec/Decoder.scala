@@ -67,7 +67,8 @@ object Decoder extends DecoderInstances {
     Decoder.of { tree =>
       f(Root).focus(tree) match {
         case CursorResult.Focused(value) => Result.success(value)
-        case failed: CursorResult.Failed => Result.failed(DecodingFailure.cursorFailure(failed))
+        case failed: CursorResult.Failed =>
+          Result.failed(DecodingFailure.cursorFailure(failed))
       }
     }
 

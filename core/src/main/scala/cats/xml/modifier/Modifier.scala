@@ -1,9 +1,9 @@
 package cats.xml.modifier
 
-import cats.xml.{XmlData, XmlNode}
-import cats.xml.cursor.{CursorResult, NodeCursor, TextCursor}
 import cats.{Endo, Monoid}
+import cats.xml.{XmlData, XmlNode}
 import cats.xml.codec.DataEncoder
+import cats.xml.cursor.{CursorResult, NodeCursor, TextCursor}
 
 /** Create a modified copy of input [[XmlNode]]
   */
@@ -39,13 +39,16 @@ object Modifier extends ModifierInstances {
 
   def id[T]: Modifier[T] = Modifier(ModifierResult.Modified(_))
 
+  def pure[T](value: T): Modifier[T] =
+    const(ModifierResult.Modified(value))
+
   def const[T](
     result: => ModifierResult[T]
   ): Modifier[T] =
     Modifier(_ => result)
 
   def failed[T](
-    result: => ModifierResult.ModifierFailed
+    result: => ModifierResult.Failed
   ): Modifier[T] =
     const(result)
 }
@@ -56,8 +59,8 @@ sealed trait ModifierInstances {
     override def empty: Modifier[T] = Modifier.id[T]
     override def combine(x: Modifier[T], y: Modifier[T]): Modifier[T] = Modifier[T](node => {
       x.apply(node) match {
-        case ModifierResult.Modified(value)        => y.apply(value)
-        case failed: ModifierResult.ModifierFailed => failed
+        case ModifierResult.Modified(value) => y.apply(value)
+        case failed: ModifierResult.Failed  => failed
       }
     })
   }

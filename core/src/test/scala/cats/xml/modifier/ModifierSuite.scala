@@ -18,8 +18,8 @@ class ModifierSuite extends munit.FunSuite {
 
   test("Modifier.failed") {
     assertEquals(
-      obtained = Modifier.failed[String](ModifierResult.Custom("BOOM!"))("BAR"),
-      expected = ModifierResult.Custom("BOOM!")
+      obtained = Modifier.failed[String](ModifierResult.CustomError("BOOM!"))("BAR"),
+      expected = ModifierResult.CustomError("BOOM!")
     )
   }
 }
