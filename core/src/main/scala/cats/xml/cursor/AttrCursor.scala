@@ -4,7 +4,6 @@ import cats.Show
 import cats.xml.{XmlAttribute, XmlNode}
 import cats.xml.cursor.AttrCursor.Op
 import cats.xml.cursor.Cursor.CursorOp
-import cats.xml.cursor.CursorResult.*
 
 /** Horizontal cursor for node attributes
   */
@@ -12,60 +11,58 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
     extends HCursor[XmlAttribute, NodeCursor, AttrCursor] {
 
   import cats.implicits.*
+
   lazy val path: String = vCursor.path
 
   // focus
-  override def focus(xml: XmlNode): CursorResult[XmlAttribute] = {
+  override def focus(xml: XmlNode): Cursor.Result[XmlAttribute] = {
 
     // TODO: tail rec
-    def applyFocus(node: XmlNode, op: Op): CursorResult[XmlAttribute] =
+    def applyFocus(node: XmlNode, op: Op): Cursor.Result[XmlAttribute] =
       op match {
         case Op.SelectAttr(key) =>
-          CursorResult.fromOption(
-            node.findAttr(key)
-          )(ifEmpty = MissingAttrByKey(path, key))
+          node
+            .findAttr(key)
+            .toRight(CursorFailure.MissingAttrByKey(path, key))
 
         case Op.SelectAttrByIndex(index) =>
-          CursorResult.fromOption(
-            node.attributes.get(index)
-          )(ifEmpty = MissingAttrAtIndex(path, index))
+          node.attributes
+            .get(index)
+            .toRight(CursorFailure.MissingAttrAtIndex(path, index))
 
         case Op.Head =>
-          CursorResult.fromOption(
-            node.attributes.headOption
-          )(ifEmpty = MissingAttrHead(path))
+          node.attributes.headOption
+            .toRight(CursorFailure.MissingAttrHead(path))
 
         case Op.Last =>
-          CursorResult.fromOption(
-            node.attributes.lastOption
-          )(ifEmpty = MissingAttrLast(path))
+          node.attributes.lastOption
+            .toRight(CursorFailure.MissingAttrLast(path))
 
         // nested
         case Op.Left(leftOp) =>
           applyFocus(node, leftOp)
             .flatMap(attr =>
-              CursorResult.fromOption(
-                node.children.headOption
-                  .flatMap(
-                    _.attributes
-                      .takeWhile(_.key.ne(attr.key))
-                      .lastOption
-                  )
-              )(LeftBoundLimitAttr(path, attr.key))
+              node.children.headOption
+                .flatMap(
+                  _.attributes
+                    .takeWhile(_.key.ne(attr.key))
+                    .lastOption
+                )
+                .toRight(CursorFailure.LeftBoundLimitAttr(path, attr.key))
             )
+
         case Op.Right(rightOp) =>
           applyFocus(node, rightOp)
             .flatMap(attr =>
-              CursorResult.fromOption(
-                node.children.headOption
-                  .flatMap(n => {
-                    val attrs = n.attributes
-                    val prev  = attrs.takeWhile(_.key.ne(attr.key))
-                    val next  = attrs.drop(prev.size + 1)
+              node.children.headOption
+                .flatMap(n => {
+                  val attrs = n.attributes
+                  val prev  = attrs.takeWhile(_.key.ne(attr.key))
+                  val next  = attrs.drop(prev.size + 1)
 
-                    next.headOption
-                  })
-              )(RightBoundLimitAttr(path, attr.key))
+                  next.headOption
+                })
+                .toRight(CursorFailure.RightBoundLimitAttr(path, attr.key))
             )
       }
 

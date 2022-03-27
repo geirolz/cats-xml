@@ -6,10 +6,14 @@ import cats.xml.std.NodeSeqInterop
 import scala.annotation.unused
 import scala.xml.{Atom, NodeSeq}
 
-private[xml] object NodeSeqEncoder {
+private[xml] object NodeSeqEncoder extends NodeSeqEncoderInstances with NodeSeqEncoderSyntax {
 
   def apply[T](f: T => NodeSeq): Encoder[T] =
     Encoder.of(t => NodeSeqInterop.fromNodeSeq(f(t)))
+}
+private[xml] trait NodeSeqEncoderInstances {
+  implicit val encoderStdAtomStr: DataEncoder[Atom[String]] =
+    DataEncoder.encoderString.contramap(_.data.trim)
 }
 
 private[xml] trait NodeSeqEncoderSyntax {
@@ -18,9 +22,4 @@ private[xml] trait NodeSeqEncoderSyntax {
     def ofNodeSeq[T](f: T => NodeSeq): Encoder[T] =
       NodeSeqEncoder(f)
   }
-}
-
-private[xml] trait NodeSeqEncoderInstances {
-  implicit val encoderStdAtomStr: DataEncoder[Atom[String]] =
-    DataEncoder.encoderString.contramap(_.data.trim)
 }

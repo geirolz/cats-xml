@@ -64,7 +64,7 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 ### Modify XML
 ```scala
 import cats.xml.cursor.NodeCursor.Root
-import cats.xml.modifier.ModifierResult
+import cats.xml.modifier.Modifier
 
 val node: XmlNode = XmlNode("Foo")
   .withAttributes(
@@ -74,10 +74,10 @@ val node: XmlNode = XmlNode("Foo")
   .withText("ORIGINAL")
 // node: XmlNode = <Foo name="Foo" age="10">ORIGINAL</Foo>
   
-val result: ModifierResult[XmlNode] = Root
+val result: Modifier.Result[XmlNode] = Root
   .modify(_.withText("NEW"))
   .apply(node)  
-// result: ModifierResult[XmlNode] = Modified(
+// result: Modifier.Result[XmlNode] = Right(
 //   value = <Foo name="Foo" age="10">NEW</Foo>
 // )
 ```

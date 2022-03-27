@@ -5,6 +5,7 @@ import cats.laws.discipline.MonadErrorTests
 import cats.xml.{Xml, XmlNode}
 import cats.xml.testing.Samples.dummyNode
 import cats.Eq
+import cats.data.Validated.Valid
 
 import scala.util.{Failure, Success}
 
@@ -20,7 +21,7 @@ class DecoderSuite extends munit.ScalaCheckSuite {
           case _             => None
         }
         .decode(XmlNode("Root").withText("Text")),
-      expected = Decoder.Result.success("Text".some)
+      expected = "Text".some.validNel
     )
   }
 
@@ -29,16 +30,16 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .emap(_ => 1.asRight)
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
   test("Decoder.emap - Left with DecodingFailure") {
     assertEquals(
       obtained = Decoder.id
-        .emap(_ => DecodingFailure.custom("Missing").asLeft)
+        .emap(_ => DecoderFailure.Custom("Missing").asLeft)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("Missing"))
+      expected = DecoderFailure.Custom("Missing").invalidNel
     )
   }
 
@@ -47,7 +48,7 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .emap(_ => 1.asRight)
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
@@ -57,7 +58,7 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .emap(_ => ex.asLeft)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.error(ex))
+      expected = DecoderFailure.Error(ex).invalidNel
     )
   }
 
@@ -66,7 +67,7 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .emapTry(_ => Success(1))
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
@@ -76,25 +77,25 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .emapTry(_ => Failure(ex))
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.error(ex))
+      expected = DecoderFailure.Error(ex).invalidNel
     )
   }
 
   test("Decoder.flatMapF - success >=> success") {
     assertEquals(
       obtained = Decoder.id
-        .flatMapF(_ => Decoder.Result.success(1))
+        .flatMapF(_ => 1.validNel)
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
   test("Decoder.flatMapF - success >=> failed") {
     assertEquals(
       obtained = Decoder.id
-        .flatMapF(_ => Decoder.Result.failed(DecodingFailure.custom("ERROR")))
+        .flatMapF(_ => DecoderFailure.Custom("ERROR").invalidNel)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -102,11 +103,11 @@ class DecoderSuite extends munit.ScalaCheckSuite {
     assertEquals(
       obtained = Decoder
         .const[Int](
-          Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+          DecoderFailure.Custom("ERROR").invalidNel
         )
-        .flatMapF(_ => Decoder.Result.success(1))
+        .flatMapF(_ => 1.validNel)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -114,11 +115,11 @@ class DecoderSuite extends munit.ScalaCheckSuite {
     assertEquals(
       obtained = Decoder
         .const[Int](
-          Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+          DecoderFailure.Custom("ERROR 1").invalidNel
         )
-        .flatMapF(_ => Decoder.Result.failed(DecodingFailure.custom("ERROR 2")))
+        .flatMapF(_ => DecoderFailure.Custom("ERROR 2").invalidNel)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+      expected = DecoderFailure.Custom("ERROR 1").invalidNel
     )
   }
 
@@ -127,11 +128,11 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .flatMap(_ =>
           Decoder.const(
-            Decoder.Result.success(1)
+            Valid(1)
           )
         )
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = Valid(1)
     )
   }
 
@@ -140,11 +141,11 @@ class DecoderSuite extends munit.ScalaCheckSuite {
       obtained = Decoder.id
         .flatMap(_ =>
           Decoder.const[Xml](
-            Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+            DecoderFailure.Custom("ERROR").invalidNel
           )
         )
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -152,15 +153,15 @@ class DecoderSuite extends munit.ScalaCheckSuite {
     assertEquals(
       obtained = Decoder
         .const[Int](
-          Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+          DecoderFailure.Custom("ERROR").invalidNel
         )
         .flatMap(_ =>
           Decoder.const[Int](
-            Decoder.Result.success(1)
+            1.validNel
           )
         )
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR"))
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -168,15 +169,15 @@ class DecoderSuite extends munit.ScalaCheckSuite {
     assertEquals(
       obtained = Decoder
         .const[Int](
-          Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+          DecoderFailure.Custom("ERROR 1").invalidNel
         )
         .flatMap(_ =>
           Decoder.const[Int](
-            Decoder.Result.failed(DecodingFailure.custom("ERROR 2"))
+            DecoderFailure.Custom("ERROR 2").invalidNel
           )
         )
         .decode(dummyNode),
-      expected = Decoder.Result.failed(DecodingFailure.custom("ERROR 1"))
+      expected = DecoderFailure.Custom("ERROR 1").invalidNel
     )
   }
 }
@@ -192,7 +193,7 @@ class DecoderInstancesSuite extends munit.DisciplineSuite {
 
   checkAll(
     "Decoder.MonadErrorLaws",
-    MonadErrorTests[Decoder, NonEmptyList[DecodingFailure]]
+    MonadErrorTests[Decoder, NonEmptyList[DecoderFailure]]
       .monadError[Int, Int, String]
   )
 }
@@ -206,7 +207,7 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
     val node: XmlNode = dummyNode
     assertEquals(
       obtained = Decoder.id.decode(node),
-      expected = Decoder.Result.success(node)
+      expected = node.validNel
     )
   }
 
@@ -221,38 +222,34 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
   test("Decoder.pure") {
     assertEquals(
       obtained = Decoder.pure(1).decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
   test("Decoder.const with success") {
     assertEquals(
       obtained = Decoder
-        .const(Decoder.Result.success(1))
+        .const(1.validNel)
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
   test("Decoder.failed") {
     assertEquals(
       obtained = Decoder
-        .failed(DecodingFailure.custom("ERROR"))
+        .failure(DecoderFailure.Custom("ERROR"))
         .decode(dummyNode),
-      expected = Decoder.Result.failed(
-        DecodingFailure.custom("ERROR")
-      )
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
   test("Decoder.const with failed") {
     assertEquals(
       obtained = Decoder
-        .const(Decoder.Result.failed(DecodingFailure.custom("ERROR")))
+        .const(DecoderFailure.Custom("ERROR").invalidNel)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(
-        DecodingFailure.custom("ERROR")
-      )
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -281,13 +278,11 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
             XmlNode("Bar").withText(BigDecimal(100))
           )
       ),
-      expected = Decoder.Result.success(
-        Foo(
-          intAttr  = 10,
-          boolAttr = true,
-          bar      = Bar(BigDecimal(100))
-        )
-      )
+      expected = Foo(
+        intAttr  = 10,
+        boolAttr = true,
+        bar      = Bar(BigDecimal(100))
+      ).validNel
     )
   }
 
@@ -296,18 +291,16 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
       obtained = Decoder
         .fromEither(_ => 1.asRight)
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 
   test("Decoder.fromEither - Left DecodingFailure") {
     assertEquals(
       obtained = Decoder
-        .fromEither(_ => DecodingFailure.custom("ERROR").asLeft)
+        .fromEither(_ => DecoderFailure.Custom("ERROR").asLeft)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(
-        DecodingFailure.custom("ERROR")
-      )
+      expected = DecoderFailure.Custom("ERROR").invalidNel
     )
   }
 
@@ -318,9 +311,7 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
       obtained = Decoder
         .fromEither(_ => ex.asLeft)
         .decode(dummyNode),
-      expected = Decoder.Result.failed(
-        DecodingFailure.error(ex)
-      )
+      expected = DecoderFailure.Error(ex).invalidNel
     )
   }
 
@@ -331,9 +322,7 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
       obtained = Decoder
         .fromTry(_ => Failure(ex))
         .decode(dummyNode),
-      expected = Decoder.Result.failed(
-        DecodingFailure.error(ex)
-      )
+      expected = DecoderFailure.Error(ex).invalidNel
     )
   }
 
@@ -342,7 +331,7 @@ class DecoderCompanionSuite extends munit.ScalaCheckSuite {
       obtained = Decoder
         .fromTry(_ => Success(1))
         .decode(dummyNode),
-      expected = Decoder.Result.success(1)
+      expected = 1.validNel
     )
   }
 }

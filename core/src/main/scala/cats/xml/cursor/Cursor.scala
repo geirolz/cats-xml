@@ -14,6 +14,8 @@ sealed trait Cursor[+X <: Xml] extends GenericCursor[XmlNode, X] with Serializab
 
 object Cursor {
 
+  type Result[+T] = Either[CursorFailure, T]
+
   trait CursorOp
   object CursorOp {
 

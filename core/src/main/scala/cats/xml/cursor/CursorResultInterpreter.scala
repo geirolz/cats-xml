@@ -3,7 +3,7 @@ package cats.xml.cursor
 import cats.{Alternative, MonadThrow}
 
 trait CursorResultInterpreter[T] {
-  def interpret(c: CursorResult[T]): CursorResult[T]
+  def interpret(c: Cursor.Result[T]): Cursor.Result[T]
 }
 object CursorResultInterpreter extends CursorResultInterpreterInstances {
 
@@ -12,8 +12,8 @@ object CursorResultInterpreter extends CursorResultInterpreterInstances {
   def id[T]: CursorResultInterpreter[T] =
     CursorResultInterpreter.of(identity)
 
-  def of[T](f: CursorResult[T] => CursorResult[T]): CursorResultInterpreter[T] =
-    (c: CursorResult[T]) => f(c)
+  def of[T](f: Cursor.Result[T] => Cursor.Result[T]): CursorResultInterpreter[T] =
+    (c: Cursor.Result[T]) => f(c)
 }
 
 sealed trait CursorResultInterpreterInstances {
@@ -25,15 +25,15 @@ sealed trait CursorResultInterpreterInstances {
     F: Alternative[F]
   ): CursorResultInterpreter[F[T]] =
     CursorResultInterpreter.of[F[T]] {
-      case CursorResult.Focused(value) => CursorResult.Focused(value)
-      case _: CursorResult.Failed      => CursorResult.Focused(F.empty)
+      case Right(value) => Right(value)
+      case Left(_)      => Right(F.empty)
     }
 
   implicit def CursorResultInterpreterForMonadT[F[_], T](implicit
     F: MonadThrow[F]
   ): CursorResultInterpreter[F[T]] =
     CursorResultInterpreter.of[F[T]] {
-      case CursorResult.Focused(value) => CursorResult.Focused(value)
-      case e: CursorResult.Failed      => CursorResult.Focused(F.raiseError(e.asException))
+      case Right(value)                 => Right(value)
+      case Left(failure: CursorFailure) => Right(F.raiseError(failure.asException))
     }
 }

@@ -5,21 +5,21 @@ class ModifierSuite extends munit.FunSuite {
   test("Modifier.id") {
     assertEquals(
       obtained = Modifier.id[String]("FOO"),
-      expected = ModifierResult.Modified("FOO")
+      expected = Right("FOO")
     )
   }
 
   test("Modifier.const") {
     assertEquals(
-      obtained = Modifier.const[String](ModifierResult.Modified("FOO"))("BAR"),
-      expected = ModifierResult.Modified("FOO")
+      obtained = Modifier.const[String](Right("FOO"))("BAR"),
+      expected = Right("FOO")
     )
   }
 
   test("Modifier.failed") {
     assertEquals(
-      obtained = Modifier.failed[String](ModifierResult.CustomError("BOOM!"))("BAR"),
-      expected = ModifierResult.CustomError("BOOM!")
+      obtained = Modifier.failed[String](ModifierFailure.Custom("BOOM!"))("BAR"),
+      expected = Left(ModifierFailure.Custom("BOOM!"))
     )
   }
 }

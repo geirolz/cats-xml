@@ -15,12 +15,12 @@ class TextCursor(protected[xml] val lastCursor: NodeCursor) extends VCursor[XmlD
     Modifier.fromTextCursor(this, f)
 
   // focus
-  override def focus(node: XmlNode): CursorResult[XmlData] =
+  override def focus(node: XmlNode): Cursor.Result[XmlData] =
     lastCursor
       .focus(node)
       .map(_.text)
       .flatMap {
-        case Some(value: XmlData) => CursorResult.Focused(value)
-        case None                 => CursorResult.MissingText(lastCursor.path)
+        case Some(value: XmlData) => Right(value)
+        case None                 => Left(CursorFailure.MissingText(lastCursor.path))
       }
 }

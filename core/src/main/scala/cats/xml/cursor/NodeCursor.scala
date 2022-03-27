@@ -3,7 +3,6 @@ package cats.xml.cursor
 import cats.{Endo, Show}
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor.CursorOp
-import cats.xml.cursor.CursorResult.{Failed, Focused}
 import cats.xml.modifier.Modifier
 
 import scala.annotation.tailrec
@@ -66,36 +65,33 @@ object NodeCursor {
 
     override def history: List[Op] = Nil
 
-    override def focus(xml: XmlNode): CursorResult[XmlNode] =
-      CursorResult.Focused(xml)
+    override def focus(xml: XmlNode): Cursor.Result[XmlNode] = Right(xml)
   }
 
   class Simple(protected val lastCursor: NodeCursor, protected val lastOp: Op) extends NodeCursor {
 
-    override def focus(ns: XmlNode): CursorResult[XmlNode] = {
+    override def focus(ns: XmlNode): Cursor.Result[XmlNode] = {
       @tailrec
       def rec(
         history: List[NodeCursor.Op],
         currentPath: List[NodeCursor.Op],
         current: XmlNode
-      ): CursorResult[XmlNode] = {
+      ): Cursor.Result[XmlNode] = {
         history match {
-          case Nil =>
-            CursorResult.Focused(current)
+          case Nil => Right(current)
           case op :: ops =>
-            val result: CursorResult[XmlNode] = op match {
+            val result: Cursor.Result[XmlNode] = op match {
               case NodeCursor.Op.Down(nodeName) =>
-                current.findChild(nodeName) match {
-                  case Some(node) =>
-                    CursorResult.Focused(node)
-                  case None =>
-                    CursorResult.MissingNode(nodeName, CursorOp.buildOpsPath(currentPath))
-                }
+                current
+                  .findChild(nodeName)
+                  .toRight(
+                    CursorFailure.MissingNode(nodeName, CursorOp.buildOpsPath(currentPath))
+                  )
             }
 
             result match {
-              case Focused(node)  => rec(ops, currentPath :+ op, node)
-              case failed: Failed => failed
+              case Right(node)                  => rec(ops, currentPath :+ op, node)
+              case Left(failure: CursorFailure) => Left(failure)
             }
         }
       }
