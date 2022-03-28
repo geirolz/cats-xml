@@ -1,0 +1,5 @@
+<Foo intAttr="1" boolAttr="true">
+    <Bar intAttr="2" emptyAttr="">
+        <Baz>100</Baz>
+    </Bar>
+</Foo>

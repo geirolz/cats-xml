@@ -1,6 +1,7 @@
 package cats.xml
 
-import cats.{Endo, Show}
+import cats.{Endo, Eq, Show}
+import cats.data.NonEmptyList
 import cats.xml.codec.DataEncoder
 
 import scala.annotation.tailrec
@@ -59,11 +60,28 @@ class XmlNode private (
   def withText[T: DataEncoder](data: T): XmlNode =
     withContent(NodeContent.text(data))
 
+  def updateText[T: DataEncoder](f: Option[XmlData] => T): XmlNode =
+    withText(f(text))
+
   def withChild(child: XmlNode, children: XmlNode*): XmlNode =
     withChildren(child +: children)
 
   def withChildren(children: Seq[XmlNode]): XmlNode =
     withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
+
+  def updateChildren(f: Endo[Seq[XmlNode]]): XmlNode =
+    updateContent(currentContent =>
+      NonEmptyList.fromFoldable(f(currentContent.children)) match {
+        case Some(newChildrenNel) => NodeContent.Children(newChildrenNel)
+        case None                 => NodeContent.Empty
+      }
+    )
+
+  def appendChild(child: XmlNode, children: XmlNode*): XmlNode =
+    updateChildren(currentChildren => currentChildren ++ List(child) ++ children)
+
+  def prependChild(child: XmlNode, children: XmlNode*): XmlNode =
+    updateChildren(currentChildren => List(child) ++ children ++ currentChildren)
 
   def drainContent: XmlNode =
     withContent(NodeContent.empty)
@@ -119,6 +137,12 @@ class XmlNode private (
     this.mContent    = n.content
   }
 
+  override def equals(obj: Any): Boolean =
+    obj match {
+      case that: XmlNode => Eq[XmlNode].eqv(this, that)
+      case _             => false
+    }
+
   override final def toString: String =
     Show[XmlNode].show(this)
 }
@@ -133,5 +157,12 @@ object XmlNode extends XmlTreeInstances {
 }
 
 private[xml] sealed trait XmlTreeInstances {
+
+  implicit val eqXmlNode: Eq[XmlNode] =
+    (x: XmlNode, y: XmlNode) =>
+      x.label == y.label &&
+      x.attributes == y.attributes &&
+      x.content == y.content
+
   implicit val showXmlTree: Show[XmlNode] = XmlPrinter.prettyString(_)
 }

@@ -1,12 +1,15 @@
 package cats.xml
 
+import cats.MonadThrow
 import org.w3c.dom.{Document as JDocument, Node as JNode, NodeList}
 
 trait Xml
 object Xml {
 
-  // FIXME: LOW PERFORMANCE
-  def fromJavaxDocument(doc: JDocument): Xml = {
+  def fromString[F[_]: MonadThrow](xmlString: String)(implicit loader: XmlLoader[F]): F[XmlNode] =
+    loader.fromString(xmlString)
+
+  def fromJavaxDocument(doc: JDocument): XmlNode = {
 
     // TODO: NO STACK SAFE
     def rec(ns: JNode): XmlNode = {
