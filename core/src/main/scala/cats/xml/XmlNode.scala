@@ -164,5 +164,6 @@ private[xml] sealed trait XmlTreeInstances {
       x.attributes == y.attributes &&
       x.content == y.content
 
-  implicit val showXmlTree: Show[XmlNode] = XmlPrinter.prettyString(_)
+  implicit def showXmlTree(implicit config: XmlPrinter.Config): Show[XmlNode] =
+    XmlPrinter.prettyString(_)
 }

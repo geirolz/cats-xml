@@ -4,20 +4,25 @@ import scala.collection.mutable
 
 object XmlPrinter {
 
-  def stringify(tree: XmlNode): String =
-    prettyString(
-      tree         = tree,
-      returnOnNode = false,
-      indentChar   = None,
-      maxTextSize  = None
-    )
-
-  def prettyString(
-    tree: XmlNode,
+  case class Config(
     returnOnNode: Boolean    = true,
     indentChar: Option[Char] = Some(' '),
     maxTextSize: Option[Int] = Some(30)
-  ): String = {
+  )
+  object Config {
+    implicit val default: Config = Config()
+  }
+
+  def stringify(tree: XmlNode): String =
+    prettyString(tree = tree)(
+      Config(
+        returnOnNode = false,
+        indentChar   = None,
+        maxTextSize  = None
+      )
+    )
+
+  def prettyString(tree: XmlNode)(implicit config: Config): String = {
 
     def build(
       tree: XmlNode,
@@ -29,7 +34,7 @@ object XmlPrinter {
       val nodeName  = tree.label
       val nodeAttrs = tree.attributes.map(XmlAttribute.stringify).mkString(" ")
       val nodeInfo  = s"$nodeName${if (nodeAttrs.isEmpty) "" else " "}$nodeAttrs"
-      val tabs = indentChar match {
+      val tabs = config.indentChar match {
         case Some(indentCharValue) => (0 until deep).map(_ => indentCharValue).mkString("")
         case None                  => ""
       }
@@ -38,13 +43,13 @@ object XmlPrinter {
         case None =>
           s"$tabs<$nodeInfo/>"
         case Some(content) =>
-          val exceedMaxText = maxTextSize match {
+          val exceedMaxText = config.maxTextSize match {
             case Some(maxValue) => content.length > maxValue
             case None           => false
           }
           val startContent =
-            if (!isText && returnOnNode) s"\n" else if (exceedMaxText) s"\n$tabs " else ""
-          val endContent = if ((!isText || exceedMaxText) && returnOnNode) s"\n$tabs" else ""
+            if (!isText && config.returnOnNode) s"\n" else if (exceedMaxText) s"\n$tabs " else ""
+          val endContent = if ((!isText || exceedMaxText) && config.returnOnNode) s"\n$tabs" else ""
           s"$tabs<$nodeInfo>$startContent$content$endContent</$nodeName>"
       }
     }
