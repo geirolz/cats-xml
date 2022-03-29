@@ -6,8 +6,8 @@ import org.w3c.dom.{Document as JDocument, Node as JNode, NodeList}
 trait Xml
 object Xml {
 
-  def fromString[F[_]: MonadThrow](xmlString: String)(implicit loader: XmlLoader[F]): F[XmlNode] =
-    loader.fromString(xmlString)
+  def fromString[F[_]: MonadThrow](xmlString: String)(implicit parser: XmlParser[F]): F[XmlNode] =
+    parser.parseString(xmlString)
 
   def fromJavaxDocument(doc: JDocument): XmlNode = {
 

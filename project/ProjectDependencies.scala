@@ -11,6 +11,7 @@ object ProjectDependencies {
     // SCALA
     "org.typelevel" %% "cats-core" % "2.7.0" cross CrossVersion.binary,
 //    "org.typelevel" %% "mouse"     % "1.0.10",
+//    "org.scala-lang" % "scala-compiler" % "2.13.8",
     // TEST
     "org.scalameta"  %% "munit"            % "0.7.29" % Test,
     "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
