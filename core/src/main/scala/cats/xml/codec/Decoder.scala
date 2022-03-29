@@ -83,6 +83,8 @@ private[xml] trait DecoderInstances
 
   import cats.implicits.*
 
+  implicit def codecToDecoder[T: Codec]: Decoder[T] = Codec[T].decoder
+
   implicit val monadErrorForDecoder: MonadError[Decoder, NonEmptyList[DecoderFailure]] =
     new MonadError[Decoder, NonEmptyList[DecoderFailure]] {
 

@@ -25,6 +25,8 @@ object Encoder extends EncoderInstances {
 
 private[xml] trait EncoderInstances extends EncoderPrimitivesInstances {
 
+  implicit def codecToEncoder[T: Codec]: Encoder[T] = Codec[T].encoder
+
   implicit val catsContravariantInstanceForEncoder: Contravariant[Encoder] =
     new Contravariant[Encoder] {
       override def contramap[A, B](fa: Encoder[A])(f: B => A): Encoder[B] = fa.contramap(f)
