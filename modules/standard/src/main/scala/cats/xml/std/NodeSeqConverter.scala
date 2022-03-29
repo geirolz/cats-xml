@@ -1,11 +1,12 @@
 package cats.xml.std
 
 import cats.xml.*
+import cats.Eq
 
 import scala.annotation.{tailrec, unused}
 import scala.xml.*
 
-private[xml] object NodeSeqInterop extends XmlToNodeSeqSyntax {
+private[std] object NodeSeqConverter extends NodeSeqConverterInstances with NodeSeqConverterSyntax {
 
   import cats.xml.std.implicits.*
 
@@ -78,28 +79,43 @@ private[xml] object NodeSeqInterop extends XmlToNodeSeqSyntax {
     )
   }
 }
-private[xml] trait XmlToNodeSeqSyntax {
+
+private[std] trait NodeSeqConverterInstances {
+  implicit val eqNodeSeq: Eq[NodeSeq] = (x: NodeSeq, y: NodeSeq) =>
+    XmlNormalizer.normalize(x) == XmlNormalizer.normalize(y)
+}
+
+private[std] trait NodeSeqConverterSyntax {
+
+  implicit def nodeSeqToXmlNode(ns: NodeSeq): XmlNode =
+    Xml.fromNodeSeq(ns)
 
   implicit class XmlOps(xml: XmlNode) {
     def toNodeSeq: NodeSeq =
-      NodeSeqInterop.toNodeSeq(xml)
+      NodeSeqConverter.toNodeSeq(xml)
   }
 
   implicit class NodeSeqOps(ns: NodeSeq) {
 
-    implicit def nodeSeqToXmlNode(ns: NodeSeq): XmlNode =
-      Xml.fromNodeSeq(ns)
+    def equals(obj: Any)(implicit eq: Eq[NodeSeq]): Boolean =
+      obj.isInstanceOf[NodeSeq] && eq.eqv(ns, obj.asInstanceOf[NodeSeq])
 
-    def fromNodeSeq: XmlNode =
-      NodeSeqInterop.fromNodeSeq(ns)
+    def ===(that: NodeSeq)(implicit eq: Eq[NodeSeq]): Boolean =
+      eq.eqv(ns, that)
+
+    def !==(that: NodeSeq)(implicit eq: Eq[NodeSeq]): Boolean =
+      !(ns === that)
+
+    def toXmlNode: XmlNode =
+      NodeSeqConverter.fromNodeSeq(ns)
   }
 
   implicit class XmlObjOps(@unused xmlObj: Xml.type) {
 
     def fromNodeSeq(ns: NodeSeq): XmlNode =
-      NodeSeqInterop.fromNodeSeq(ns)
+      NodeSeqConverter.fromNodeSeq(ns)
 
     def toNodeSeq(tree: XmlNode): NodeSeq =
-      NodeSeqInterop.toNodeSeq(tree)
+      NodeSeqConverter.toNodeSeq(tree)
   }
 }

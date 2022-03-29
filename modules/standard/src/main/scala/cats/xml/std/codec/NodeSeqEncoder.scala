@@ -1,7 +1,7 @@
 package cats.xml.std.codec
 
 import cats.xml.codec.{DataEncoder, Encoder}
-import cats.xml.std.NodeSeqInterop
+import cats.xml.std.NodeSeqConverter
 
 import scala.annotation.unused
 import scala.xml.{Atom, NodeSeq}
@@ -9,7 +9,7 @@ import scala.xml.{Atom, NodeSeq}
 private[xml] object NodeSeqEncoder extends NodeSeqEncoderInstances with NodeSeqEncoderSyntax {
 
   def apply[T](f: T => NodeSeq): Encoder[T] =
-    Encoder.of(t => NodeSeqInterop.fromNodeSeq(f(t)))
+    Encoder.of(t => NodeSeqConverter.fromNodeSeq(f(t)))
 }
 private[xml] trait NodeSeqEncoderInstances {
   implicit val encoderStdAtomStr: DataEncoder[Atom[String]] =

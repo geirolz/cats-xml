@@ -5,7 +5,7 @@ import cats.xml.{XmlAttribute, XmlString}
 import scala.annotation.unused
 import scala.xml.{MetaData, Null}
 
-private[xml] object XmlAttributeInterop {
+private[std] object XmlAttributeConverter {
 
   def fromMetaData(metaData: MetaData): List[XmlAttribute] =
     metaData.iterator.map(m => XmlAttribute(m.key, XmlString(m.value.text))).toList
@@ -14,24 +14,24 @@ private[xml] object XmlAttributeInterop {
     new scala.xml.UnprefixedAttribute(attr.key, attr.value.toString, Null)
 }
 
-private[xml] trait XmlAttributeInteropSyntax {
+private[std] trait XmlAttributeConverterSyntax {
 
   implicit class MetaDataOps(metadata: MetaData) {
-    def toXml: List[XmlAttribute] =
-      XmlAttributeInterop.fromMetaData(metadata)
+    def toXmlAttribute: List[XmlAttribute] =
+      XmlAttributeConverter.fromMetaData(metadata)
   }
 
   implicit class XmlAttributeOps(attr: XmlAttribute) {
     def toMetaData: MetaData =
-      XmlAttributeInterop.toMetaData(attr)
+      XmlAttributeConverter.toMetaData(attr)
   }
 
   implicit class XmlAttributeObjOps(@unused obj: XmlAttribute.type) {
 
     def fromMetaData(metaData: MetaData): List[XmlAttribute] =
-      XmlAttributeInterop.fromMetaData(metaData)
+      XmlAttributeConverter.fromMetaData(metaData)
 
     def toMetaData(attr: XmlAttribute): MetaData =
-      XmlAttributeInterop.toMetaData(attr)
+      XmlAttributeConverter.toMetaData(attr)
   }
 }
