@@ -7,7 +7,7 @@ sealed trait XmlData extends Xml with Serializable {
 
   def as[T: Decoder]: Decoder.Result[T] = Decoder[T].decode(this)
 
-  lazy val isNull: Boolean = this match {
+  val isNull: Boolean = this match {
     case XmlNull => true
     case _       => false
   }

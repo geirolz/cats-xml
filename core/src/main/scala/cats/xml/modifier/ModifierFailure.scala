@@ -4,6 +4,8 @@ import cats.Show
 import cats.xml.cursor.CursorFailure
 import cats.xml.modifier.ModifierFailure.ModifierFailureException
 
+/** A coproduct ADT to represent the `Modifier` possible failures.
+  */
 sealed trait ModifierFailure {
 
   def asException: ModifierFailureException = ModifierFailureException(this)

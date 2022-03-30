@@ -5,6 +5,8 @@ import cats.data.NonEmptyList
 import cats.xml.codec.DecoderFailure
 import cats.xml.cursor.CursorFailure.CursorFailureException
 
+/** A coproduct ADT to represent the `Cursor` possible failures.
+  */
 sealed trait CursorFailure {
 
   def asException: CursorFailureException = CursorFailureException(this)

@@ -7,8 +7,27 @@ import cats.xml.cursor.{NodeCursor, TextCursor}
 
 /** Create a modified copy of input [[XmlNode]]
   */
-trait Modifier[T] {
+trait Modifier[T] { $this =>
+
+  /** Apply a transformation to the input value `T`
+    * @param value
+    *   Changes subject
+    * @return
+    *   an `Either[ModifierFailure, T]` that represent the modification result. `Left` failed,
+    *   `Right` succeed
+    */
   def apply(value: T): Modifier.Result[T]
+
+  /** Like `flatMap` but doesn't allow type transformation. Just combines two `Modifier` for the
+    * same type `T`.
+    * @param that
+    *   Modifier instance to combine with this
+    * @return
+    *   A new `Modifier` which apply this changes first and then, if it succeed apply `that`
+    *   Modifier changes.
+    */
+  def combine(that: Modifier[T]): Modifier[T] =
+    (value: T) => $this(value).flatMap(that(_))
 }
 
 object Modifier extends ModifierInstances {
@@ -62,8 +81,7 @@ object Modifier extends ModifierInstances {
 sealed trait ModifierInstances {
 
   implicit def monoidForModifier[T]: Monoid[Modifier[T]] = new Monoid[Modifier[T]] {
-    override def empty: Modifier[T] = Modifier.id[T]
-    override def combine(x: Modifier[T], y: Modifier[T]): Modifier[T] =
-      Modifier[T](node => x.apply(node).flatMap(y(_)))
+    override def empty: Modifier[T]                                   = Modifier.id[T]
+    override def combine(x: Modifier[T], y: Modifier[T]): Modifier[T] = x.combine(y)
   }
 }

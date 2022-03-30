@@ -6,7 +6,12 @@ import cats.xml.Xml
 import java.io.{File, InputStream}
 import scala.annotation.unused
 
-object implicits extends AllSyntax
+object implicits extends AllInstances with AllSyntax
+
+object instances extends AllInstances
+sealed trait AllInstances extends XmlLoaderInstances
+
+object syntax extends AllSyntax
 sealed trait AllSyntax extends XmlObjLoaderEffectSyntax
 
 private[effect] trait XmlObjLoaderEffectSyntax {

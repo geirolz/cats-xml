@@ -9,6 +9,7 @@ object Xml {
   def fromString[F[_]: MonadThrow](xmlString: String)(implicit parser: XmlParser[F]): F[XmlNode] =
     parser.parseString(xmlString)
 
+  // TODO: JAVA support - to separate
   def fromJavaxDocument(doc: JDocument): XmlNode = {
 
     // TODO: NO STACK SAFE

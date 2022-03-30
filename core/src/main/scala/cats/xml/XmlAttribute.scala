@@ -17,6 +17,7 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
   def apply[T: DataEncoder](key: String, value: T): XmlAttribute =
     XmlAttribute(key, DataEncoder[T].encode(value))
 
+  // TODO: JAVA support - to separate
   def fromJavaNodeMap(nMap: NamedNodeMap): List[XmlAttribute] =
     if (nMap == null)
       Nil
