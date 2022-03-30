@@ -9,6 +9,7 @@ import scala.reflect.ClassTag
 class XmlAttributeSuite extends munit.ScalaCheckSuite {
 
   // isomorphism
+  testAttributeDataIso[Unit]
   testAttributeDataIso[Int]
   testAttributeDataIso[Long]
   testAttributeDataIso[Float]
@@ -17,6 +18,7 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeDataIso[BigDecimal]
 
   // equality
+  testAttributeEquality[Unit]
   testAttributeEquality[Int]
   testAttributeEquality[Long]
   testAttributeEquality[Float]
