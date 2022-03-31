@@ -13,10 +13,10 @@ class CodecSuite extends munit.FunSuite {
 
     val codec: Codec[Foo] = Codec.of(
       decoder = Decoder.fromCursor(c =>
-        for {
-          bar <- c.attr("bar").as[String]
-          baz <- c.attr("baz").as[Int]
-        } yield Foo(bar, baz)
+        (
+          c.attr("bar").as[String],
+          c.attr("baz").as[Int]
+        ).mapN(Foo)
       ),
       encoder = Encoder.of(foo => {
         XmlNode("Foo")
@@ -37,10 +37,10 @@ class CodecSuite extends munit.FunSuite {
 
     implicit val codec: Codec[Foo] = Codec.of(
       decoder = Decoder.fromCursor(c =>
-        for {
-          bar <- c.attr("bar").as[String]
-          baz <- c.attr("baz").as[Int]
-        } yield Foo(bar, baz)
+        (
+          c.attr("bar").as[String],
+          c.attr("baz").as[Int]
+        ).mapN(Foo)
       ),
       encoder = Encoder.of(_ => XmlNode(""))
     )

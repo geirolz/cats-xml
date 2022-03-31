@@ -314,13 +314,13 @@ class DecoderCompanionSuite extends munit.FunSuite {
     case class Bar(text: BigDecimal)
 
     val decoder: Decoder[Foo] = Decoder
-      .fromCursor(c => {
-        for {
-          intAttr  <- c.attr("intAttr").as[Int]
-          boolAttr <- c.attr("boolAttr").as[Boolean]
-          bar      <- c.down("Bar").text.as[BigDecimal].map(Bar.apply)
-        } yield Foo(intAttr, boolAttr, bar)
-      })
+      .fromCursor(c =>
+        (
+          c.attr("intAttr").as[Int],
+          c.attr("boolAttr").as[Boolean],
+          c.down("Bar").text.as[BigDecimal].map(Bar.apply)
+        ).mapN(Foo)
+      )
 
     assertEquals(
       obtained = decoder.decode(

@@ -1,34 +1,38 @@
 package cats.xml.cursor
 
-import cats.{Monad, StackSafeMonad}
-import cats.data.NonEmptyList
+import cats.ApplicativeError
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
 import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.{Decoder, DecoderFailure}
 
-trait FreeCursor[I, +O] extends GenericCursor[I, O] with Serializable { $this =>
+trait FreeCursor[I, +O] extends Serializable { $this =>
+
+  def focus(input: I): FreeCursor.Result[O]
 
   def map[U](f: O => U): FreeCursor[I, U] =
     (in: I) => $this.focus(in).map(f)
-
-  def flatMap[U](f: O => FreeCursor[I, U]): FreeCursor[I, U] =
-    (in: I) => $this.focus(in).flatMap(f(_).focus(in))
 }
 object FreeCursor extends FreeCursorInstances {
 
   import cats.implicits.*
 
-  def id[T]: FreeCursor[T, T] =
-    _.asRight
+  type Result[+T] = ValidatedNel[CursorFailure, T]
 
-  def const[I, O](result: Cursor.Result[O]): FreeCursor[I, O] =
+  def id[T]: FreeCursor[T, T] =
+    _.validNel
+
+  def pure[I, O](value: O): FreeCursor[I, O] =
+    const(value.validNel)
+
+  def const[I, O](result: FreeCursor.Result[O]): FreeCursor[I, O] =
     _ => result
 
   def apply[O: Decoder](
     cursor: Cursor[Xml]
   ): FreeCursor[Xml, O] =
     new FreeCursor[Xml, O] { $this =>
-      override def focus(xml: Xml): Cursor.Result[O] = {
+      override def focus(xml: Xml): FreeCursor.Result[O] = {
 
         // TODO this smell
         val cursorResult: Cursor.Result[Xml] = xml match {
@@ -37,9 +41,9 @@ object FreeCursor extends FreeCursorInstances {
         }
 
         Decoder[O].decodeCursorResult(cursorResult) match {
-          case Valid(value) => value.asRight
+          case Valid(value) => value.validNel
           case Invalid(failures: NonEmptyList[DecoderFailure]) =>
-            CursorFailure.DecoderFailed(cursor.path, failures).asLeft
+            CursorFailure.DecoderFailed(cursor.path, failures).invalidNel // TODO:TO CHECK
         }
       }
     }
@@ -47,14 +51,39 @@ object FreeCursor extends FreeCursorInstances {
 
 sealed trait FreeCursorInstances {
 
-  import cats.implicits.*
+  implicit def applicativeErrorForFreeCursor[I]
+    : ApplicativeError[FreeCursor[I, *], NonEmptyList[CursorFailure]] =
+    new ApplicativeError[FreeCursor[I, *], NonEmptyList[CursorFailure]] {
 
-  implicit def monadFreeCursor[T]: Monad[FreeCursor[T, *]] = new StackSafeMonad[FreeCursor[T, *]] {
+      override def map[A, B](fa: FreeCursor[I, A])(f: A => B): FreeCursor[I, B] =
+        fa.map(f)
 
-    override def pure[A](in: A): FreeCursor[T, A] =
-      FreeCursor.const(in.asRight)
+      def pure[A](a: A): FreeCursor[I, A] =
+        FreeCursor.pure(a)
 
-    override def flatMap[A, B](fa: FreeCursor[T, A])(f: A => FreeCursor[T, B]): FreeCursor[T, B] =
-      fa.flatMap(f)
-  }
+      def ap[A, B](ff: FreeCursor[I, A => B])(fa: FreeCursor[I, A]): FreeCursor[I, B] =
+        (input: I) => fa.focus(input).ap(ff.focus(input))
+
+      override def product[A, B](
+        fa: FreeCursor[I, A],
+        fb: FreeCursor[I, B]
+      ): FreeCursor[I, (A, B)] =
+        (input: I) => fa.focus(input).product(fb.focus(input))
+
+      override def unit: FreeCursor[I, Unit] = pure(())
+
+      def handleErrorWith[A](
+        fa: FreeCursor[I, A]
+      )(f: NonEmptyList[CursorFailure] => FreeCursor[I, A]): FreeCursor[I, A] =
+        (input: I) => {
+          fa.focus(input) match {
+            case Validated.Invalid(e)   => f(e).focus(input)
+            case v @ Validated.Valid(_) => v
+          }
+        }
+
+      def raiseError[A](e: NonEmptyList[CursorFailure]): FreeCursor[I, A] =
+        FreeCursor.const(Validated.Invalid(e))
+    }
+
 }

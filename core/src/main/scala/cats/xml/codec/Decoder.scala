@@ -64,12 +64,11 @@ object Decoder extends DecoderInstances {
   def fromCursor[U](
     f: NodeCursor => FreeCursor[Xml, U]
   ): Decoder[U] = Decoder.of {
-    case Left(failure) =>
-      DecoderFailure.CursorFailed(failure).invalidNel
+    case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
     case Right(xml: Xml) =>
       f(Root).focus(xml) match {
-        case Right(value)  => value.validNel
-        case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
+        case Validated.Valid(value) => value.validNel
+        case Validated.Invalid(e)   => e.map(DecoderFailure.CursorFailed(_)).invalid
       }
   }
 
