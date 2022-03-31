@@ -1,15 +1,19 @@
 package cats.xml.codec
 
+import cats.{Alternative, ApplicativeThrow, Eq}
 import cats.data.NonEmptyList
-import cats.laws.discipline.MonadErrorTests
-import cats.xml.{Xml, XmlNode}
-import cats.xml.testing.Samples.dummyNode
-import cats.Eq
 import cats.data.Validated.Valid
+import cats.laws.discipline.MonadErrorTests
+import cats.xml.{Xml, XmlNode, XmlString}
+import cats.xml.cursor.CursorFailure
+import cats.xml.testing.Samples.dummyNode
+import org.scalacheck.Arbitrary
+import org.scalacheck.Prop.forAll
 
-import scala.util.{Failure, Success}
+import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 
-class DecoderSuite extends munit.ScalaCheckSuite {
+class DecoderSuite extends munit.FunSuite {
 
   import cats.implicits.*
 
@@ -198,7 +202,58 @@ class DecoderInstancesSuite extends munit.DisciplineSuite {
   )
 }
 
-class DecoderCompanionSuite extends munit.ScalaCheckSuite {
+class DecoderLifterSuite extends munit.ScalaCheckSuite {
+
+  testDecoderWithAlternative[Option, Int]
+  testDecoderWithApplicativeThrow[Try, Int]
+  testDecoderWithApplicativeThrow[Either[Throwable, *], Int]
+
+  def testDecoderWithApplicativeThrow[F[_], T: Arbitrary: Decoder](implicit
+    F: ApplicativeThrow[F],
+    tag: ClassTag[F[T]]
+  ): Unit = {
+
+    property(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor success") {
+      forAll { (value: T) =>
+        assertEquals(
+          obtained = Decoder[F[T]].decodeCursorResult(Right(XmlString(value.toString))),
+          expected = Valid(F.pure(value))
+        )
+      }
+    }
+
+    test(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor failure") {
+      assertEquals(
+        obtained = Decoder[F[T]].decodeCursorResult(Left(CursorFailure.Custom("BOOM!"))),
+        expected = Valid(F.raiseError[T](CursorFailure.Custom("BOOM!").asException))
+      )
+    }
+  }
+
+  def testDecoderWithAlternative[F[_], T: Arbitrary: Decoder](implicit
+    F: Alternative[F],
+    tag: ClassTag[F[T]]
+  ): Unit = {
+
+    property(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor success") {
+      forAll { (value: T) =>
+        assertEquals(
+          obtained = Decoder[F[T]].decodeCursorResult(Right(XmlString(value.toString))),
+          expected = Valid(F.pure(value))
+        )
+      }
+    }
+
+    test(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor failure") {
+      assertEquals(
+        obtained = Decoder[F[T]].decodeCursorResult(Left(CursorFailure.Custom("BOOM!"))),
+        expected = Valid(F.empty[T])
+      )
+    }
+  }
+}
+
+class DecoderCompanionSuite extends munit.FunSuite {
 
   import cats.implicits.*
   import cats.xml.implicits.*

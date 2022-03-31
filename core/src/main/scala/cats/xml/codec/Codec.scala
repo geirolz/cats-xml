@@ -1,15 +1,17 @@
 package cats.xml.codec
 
 import cats.xml.Xml
+import cats.xml.cursor.Cursor
 
-/** Isomorphism XML ~ T
+/** Isomorphism
   */
 case class Codec[T] private (
-  // XML => T
   decoder: Decoder[T],
-  // T => XML
   encoder: Encoder[T]
 ) {
+
+  def decodeCursorResult(cursorResult: Cursor.Result[Xml]): Decoder.Result[T] =
+    decoder.decodeCursorResult(cursorResult)
 
   def decode(xml: Xml): Decoder.Result[T] =
     decoder.decode(xml)

@@ -24,7 +24,7 @@ object FreeCursor extends FreeCursorInstances {
   def const[I, O](result: Cursor.Result[O]): FreeCursor[I, O] =
     _ => result
 
-  def apply[O: Decoder: CursorResultInterpreter](
+  def apply[O: Decoder](
     cursor: Cursor[Xml]
   ): FreeCursor[Xml, O] =
     new FreeCursor[Xml, O] { $this =>
@@ -36,15 +36,11 @@ object FreeCursor extends FreeCursorInstances {
           case x: Xml        => x.asRight
         }
 
-        CursorResultInterpreter[O].interpret(
-          cursorResult.flatMap { x =>
-            Decoder[O].decode(x) match {
-              case Valid(value) => value.asRight
-              case Invalid(failures: NonEmptyList[DecoderFailure]) =>
-                CursorFailure.DecoderFailed(cursor.path, failures).asLeft
-            }
-          }
-        )
+        Decoder[O].decodeCursorResult(cursorResult) match {
+          case Valid(value) => value.asRight
+          case Invalid(failures: NonEmptyList[DecoderFailure]) =>
+            CursorFailure.DecoderFailed(cursor.path, failures).asLeft
+        }
       }
     }
 }

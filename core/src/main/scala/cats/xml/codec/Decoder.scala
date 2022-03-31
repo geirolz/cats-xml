@@ -1,9 +1,9 @@
 package cats.xml.codec
 
-import cats.{Applicative, MonadError}
+import cats.{Alternative, ApplicativeThrow, MonadError}
 import cats.data.*
 import cats.xml.*
-import cats.xml.cursor.{FreeCursor, NodeCursor}
+import cats.xml.cursor.{Cursor, FreeCursor, NodeCursor}
 import cats.xml.cursor.NodeCursor.Root
 
 import scala.collection.Factory
@@ -13,7 +13,10 @@ trait Decoder[T] {
 
   import cats.implicits.*
 
-  def decode(xml: Xml): Decoder.Result[T]
+  def decodeCursorResult(cursorResult: Cursor.Result[Xml]): Decoder.Result[T]
+
+  def decode(xml: Xml): Decoder.Result[T] =
+    decodeCursorResult(Right(xml))
 
   def map[U](f: T => U): Decoder[U] =
     flatMap(f.andThen(Decoder.pure(_)))
@@ -28,10 +31,10 @@ trait Decoder[T] {
     emap(f.andThen(_.toEither))
 
   def flatMapF[U](f: T => Decoder.Result[U]): Decoder[U] =
-    Decoder.of(ns => decode(ns).andThen(t => f(t)))
+    Decoder.of(ns => decodeCursorResult(ns).andThen(t => f(t)))
 
   def flatMap[U](f: T => Decoder[U]): Decoder[U] =
-    Decoder.of(ns => decode(ns).andThen(t => f(t).decode(ns)))
+    Decoder.of(ns => decodeCursorResult(ns).andThen(t => f(t).decodeCursorResult(ns)))
 }
 
 object Decoder extends DecoderInstances {
@@ -40,11 +43,14 @@ object Decoder extends DecoderInstances {
 
   type Result[T] = ValidatedNel[DecoderFailure, T]
 
-  lazy val id: Decoder[Xml] = of(_.validNel)
+  lazy val id: Decoder[Xml] = of {
+    case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
+    case Right(value)  => value.validNel
+  }
 
   def apply[T: Decoder]: Decoder[T] = implicitly[Decoder[T]]
 
-  def of[T](f: Xml => Decoder.Result[T]): Decoder[T] = (xml: Xml) => f(xml)
+  def of[T](f: Cursor.Result[Xml] => Decoder.Result[T]): Decoder[T] = f(_)
 
   def pure[T](t: => T): Decoder[T] =
     const(t.validNel)
@@ -57,13 +63,15 @@ object Decoder extends DecoderInstances {
 
   def fromCursor[U](
     f: NodeCursor => FreeCursor[Xml, U]
-  ): Decoder[U] =
-    Decoder.of { tree =>
-      f(Root).focus(tree) match {
+  ): Decoder[U] = Decoder.of {
+    case Left(failure) =>
+      DecoderFailure.CursorFailed(failure).invalidNel
+    case Right(xml: Xml) =>
+      f(Root).focus(xml) match {
         case Right(value)  => value.validNel
         case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
       }
-    }
+  }
 
   def fromEither[T](f: Xml => Either[DecoderFailure, T]): Decoder[T] =
     id.emap(f)
@@ -76,10 +84,7 @@ object Decoder extends DecoderInstances {
 }
 
 // ####################### INSTANCES #######################
-private[xml] trait DecoderInstances
-    extends DecoderPrimitivesInstances
-    with DecoderLifterInstances
-    with DecoderCatsDataInstances {
+private[xml] trait DecoderInstances extends DecoderDataInstances with DecoderLifterInstances {
 
   import cats.implicits.*
 
@@ -94,7 +99,12 @@ private[xml] trait DecoderInstances
       override def handleErrorWith[A](fa: Decoder[A])(
         f: NonEmptyList[DecoderFailure] => Decoder[A]
       ): Decoder[A] =
-        Decoder.id.flatMap(ns => fa.decode(ns).fold(f, pure))
+        Decoder.id.flatMap((xml: Xml) => {
+          fa.decode(xml) match {
+            case Validated.Valid(a)   => Decoder.pure(a)
+            case Validated.Invalid(e) => f(e)
+          }
+        })
 
       override def pure[A](x: A): Decoder[A] =
         Decoder.pure(x)
@@ -110,11 +120,11 @@ private[xml] trait DecoderInstances
     }
 }
 
-sealed private[xml] trait DecoderPrimitivesInstances {
+sealed private[xml] trait DecoderDataInstances {
 
   import cats.implicits.*
 
-  implicit val decodeString: Decoder[String] = Decoder.of {
+  implicit val decodeString: Decoder[String] = Decoder.id.flatMapF {
     case XmlAttribute(_, value) => decodeString.decode(value)
     case data: XmlData          =>
       // TODO: TO CHECK EQ TO SHOW
@@ -151,12 +161,25 @@ sealed private[xml] trait DecoderPrimitivesInstances {
     decodeString.emapTry(s => Try(BigDecimal(s)))
 }
 
-sealed private[xml] trait DecoderLifterInstances { this: DecoderPrimitivesInstances =>
+sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
 
   import cats.implicits.*
 
-  implicit def decoderLiftToApplicative[F[_]: Applicative, T: Decoder]: Decoder[F[T]] =
-    Decoder[T].map(Applicative[F].pure)
+  implicit def decoderLiftToApplicativeThrow[F[_], T: Decoder](implicit
+    F: ApplicativeThrow[F]
+  ): Decoder[F[T]] =
+    Decoder.of {
+      case Right(value)  => Decoder[T].decode(value).map(_.pure[F])
+      case Left(failure) => F.raiseError[T](failure.asException).validNel
+    }
+
+  implicit def decoderLiftToAlternative[F[_], T: Decoder](implicit
+    F: Alternative[F]
+  ): Decoder[F[T]] =
+    Decoder.of {
+      case Right(value) => Decoder[T].decode(value).map(_.pure[F])
+      case Left(_)      => F.empty[T].validNel
+    }
 
   implicit def decoderLiftToSeq[F[X] <: Seq[X], T: Decoder](implicit
     f: Factory[T, F[T]]
@@ -170,12 +193,6 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderPrimitivesInstan
           .sequence
           .map(_.to(f))
       })
-}
-
-sealed private[xml] trait DecoderCatsDataInstances {
-  this: DecoderLifterInstances & DecoderPrimitivesInstances =>
-
-  import cats.implicits.*
 
   implicit def decodeCatsNel[T: Decoder]: Decoder[NonEmptyList[T]] =
     decoderLiftToSeq[Vector, T].flatMapF {

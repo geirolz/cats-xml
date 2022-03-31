@@ -45,20 +45,28 @@ object CursorFailure {
   implicit val eqCursorFailureReason: Eq[CursorFailure] =
     Eq.fromUniversalEquals
 
-  implicit def showCursorFailureReason: Show[CursorFailure] = {
-    case MissingAttrByKey(path, key)     => s"Missing attribute '$key' at '$path'"
-    case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index' at '$path'"
-    case MissingAttrHead(path)           => s"Head attribute on empty list at '$path'"
-    case MissingAttrLast(path)           => s"Last attribute on empty list at '$path'"
-    case MissingNode(nodeName, path)     => s"Missing node '$nodeName' at '$path'"
-    case MissingText(path)               => s"Missing text at '$path'"
-    case LeftBoundLimitAttr(path, lastKey) =>
-      s"Reached left bound limit attribute at '$path', last valid key '$lastKey'"
-    case RightBoundLimitAttr(path, lastKey) =>
-      s"Reached right bound limit attribute at '$path', last valid key '$lastKey'"
-    case DecoderFailed(path, failures) =>
-      s"Unable to decode value at '$path'. ${failures.toList.mkString("\n")}"
-    case Custom(message) => message
-    case Error(e)        => e.getMessage
+  implicit def showCursorFailureReason: Show[CursorFailure] = failure => {
+
+    def pathAt(path: String): String = path match {
+      case "" => ""
+      case p  => s" at '$p'"
+    }
+
+    failure match {
+      case MissingAttrByKey(path, key)     => s"Missing attribute '$key'${pathAt(path)}"
+      case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index'${pathAt(path)}"
+      case MissingAttrHead(path)           => s"Head attribute on empty list${pathAt(path)}"
+      case MissingAttrLast(path)           => s"Last attribute on empty list${pathAt(path)}"
+      case MissingNode(nodeName, path)     => s"Missing node '$nodeName'${pathAt(path)}"
+      case MissingText(path)               => s"Missing text${pathAt(path)}'"
+      case LeftBoundLimitAttr(path, lastKey) =>
+        s"Reached left bound limit attribute${pathAt(path)}, last valid key '$lastKey'"
+      case RightBoundLimitAttr(path, lastKey) =>
+        s"Reached right bound limit attribute${pathAt(path)}, last valid key '$lastKey'"
+      case DecoderFailed(path, failures) =>
+        s"Unable to decode value${pathAt(path)}. ${failures.toList.mkString("\n")}"
+      case Custom(message) => message
+      case Error(e)        => e.getMessage
+    }
   }
 }

@@ -8,7 +8,7 @@ sealed trait Cursor[+X <: Xml] extends GenericCursor[XmlNode, X] with Serializab
 
   def path: String
 
-  def as[T: Decoder: CursorResultInterpreter]: FreeCursor[Xml, T] =
+  def as[T: Decoder]: FreeCursor[Xml, T] =
     FreeCursor[T](this)
 }
 

@@ -1,6 +1,6 @@
 import cats.xml.XmlNode
 import cats.xml.codec.{Decoder, Encoder}
-import cats.xml.implicits.*
+import cats.xml.implicits._
 //
 ////############### PARSING from NODESEQ ###############
 //val n1: XmlNode = <root>TEST</root>
@@ -69,10 +69,10 @@ val dec: Decoder[Foo] =
   Decoder.fromCursor(c =>
     for {
       foo <- c.attr("name1").as[Option[String]]
-      bar <- c.attr("age1").as[Int]
-      bar1 <- c.attr("age2").as[Int]
+      bar <- c.attr("age").as[Int]
+//      bar1 <- c.attr("age2").as[Int]
       text <- c.text.as[Boolean]
-    } yield Foo(foo, bar + bar1, text)
+    } yield Foo(foo, bar, text)
   )
 
 val result: Decoder.Result[Foo] = dec.decode(tree) //Valid(Foo(None,10))
