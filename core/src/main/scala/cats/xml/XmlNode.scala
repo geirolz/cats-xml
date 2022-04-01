@@ -143,7 +143,7 @@ class XmlNode private (
       case _             => false
     }
 
-  override final def toString: String =
+  override final lazy val toString: String =
     Show[XmlNode].show(this)
 }
 

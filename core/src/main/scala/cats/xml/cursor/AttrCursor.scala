@@ -12,7 +12,7 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
 
   import cats.implicits.*
 
-  lazy val path: String = vCursor.path
+  lazy val path: String = s"${vCursor.path}$op"
 
   // focus
   override def focus(xml: XmlNode): Cursor.Result[XmlAttribute] = {

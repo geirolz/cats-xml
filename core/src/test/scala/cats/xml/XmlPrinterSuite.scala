@@ -57,3 +57,19 @@ class XmlPrinterSuite extends munit.FunSuite {
     )
   }
 }
+
+//class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
+//
+//  property("XmlPrinter.prettyString with XL document") {
+//
+//    implicit val arbXmlNode: Arbitrary[XmlNode] = Arbitrary(
+//      XmlNodeGen.genXmlNode(DataSize.XL)
+//    )
+//
+//    forAll { (value: XmlNode) =>
+//      assert(
+//        Ops.timed(XmlPrinter.prettyString(value))._1 < 1.seconds
+//      )
+//    }
+//  }
+//}

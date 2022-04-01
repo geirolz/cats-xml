@@ -16,7 +16,9 @@ object Cursor {
 
   type Result[+T] = Either[CursorFailure, T]
 
-  trait CursorOp
+  trait CursorOp {
+    override def toString: String = Show[CursorOp].show(this)
+  }
   object CursorOp {
 
     implicit val showInstanceForCursorOp: Show[CursorOp] = Show.show {

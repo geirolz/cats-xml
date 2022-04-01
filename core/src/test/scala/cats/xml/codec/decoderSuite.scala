@@ -358,43 +358,45 @@ class DecoderCompanionSuite extends munit.FunSuite {
       obtained = decoder.decode(XmlNode("Foo")),
       expected = NonEmptyList
         .of(
-          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_1")),
-          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_2")),
-          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_3"))
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("/@missing_1", "missing_1")),
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("/@missing_2", "missing_2")),
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("/@missing_3", "missing_3"))
         )
         .invalid
     )
   }
 
-  // TODO FIX TEST
-//  test("Decoder.fromCursor accumulating errors - Decofing") {
-//
-//    case class Foo(a: Int, b: Int, c: Int)
-//
-//    val decoder: Decoder[Foo] = Decoder
-//      .fromCursor(c =>
-//        (
-//          c.attr("a").as[Int],
-//          c.attr("b").as[Int],
-//          c.attr("c").as[Int]
-//        ).mapN(Foo)
-//      )
-//
-//    assertEquals(
-//      obtained = decoder.decode(
-//        XmlNode("Foo").withAttributes(
-//          "a" := "INVALID",
-//          "b" := "INVALID",
-//          "c" := "INVALID"
-//        )
-//      ),
-//      expected = NonEmptyList
-//        .one(
-//          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_1"))
-//        )
-//        .invalid
-//    )
-//  }
+  test("Decoder.fromCursor accumulating errors - Decoding") {
+
+    case class Foo(a: Int, b: Int, c: Int)
+
+    val ex = new NumberFormatException("For input string: \"INVALID\"")
+    val decoder: Decoder[Foo] = Decoder
+      .fromCursor(c =>
+        (
+          c.attr("a").as[Int],
+          c.attr("b").as[Int],
+          c.attr("c").as[Int]
+        ).mapN(Foo.apply)
+      )
+
+    assertEquals(
+      obtained = decoder.decode(
+        XmlNode("Foo").withAttributes(
+          "a" := "INVALID",
+          "b" := "INVALID",
+          "c" := "INVALIxD"
+        )
+      ),
+      expected = NonEmptyList
+        .of(
+          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@a", DecoderFailure.Error(ex))),
+          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@b", DecoderFailure.Error(ex))),
+          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@c", DecoderFailure.Error(ex)))
+        )
+        .invalid
+    )
+  }
 
   test("Decoder.fromEither - Right") {
     assertEquals(
