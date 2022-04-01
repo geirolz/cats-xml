@@ -1,7 +1,6 @@
 package cats.xml.cursor
 
 import cats.{Eq, Show}
-import cats.data.NonEmptyList
 import cats.xml.codec.DecoderFailure
 import cats.xml.cursor.CursorFailure.CursorFailureException
 
@@ -16,10 +15,7 @@ sealed trait CursorFailure {
 object CursorFailure {
 
   // decode
-  case class DecoderFailed(
-    path: String,
-    failures: NonEmptyList[DecoderFailure]
-  ) extends CursorFailure
+  case class DecoderFailed(path: String, failure: DecoderFailure) extends CursorFailure
 
   // node
   sealed trait Missing extends CursorFailure {
@@ -63,8 +59,8 @@ object CursorFailure {
         s"Reached left bound limit attribute${pathAt(path)}, last valid key '$lastKey'"
       case RightBoundLimitAttr(path, lastKey) =>
         s"Reached right bound limit attribute${pathAt(path)}, last valid key '$lastKey'"
-      case DecoderFailed(path, failures) =>
-        s"Unable to decode value${pathAt(path)}. ${failures.toList.mkString("\n")}"
+      case DecoderFailed(path, failure) =>
+        s"Unable to decode value${pathAt(path)}. $failure"
       case Custom(message) => message
       case Error(e)        => e.getMessage
     }

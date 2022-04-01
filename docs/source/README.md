@@ -34,14 +34,15 @@ case class Foo(
 
 import cats.xml.codec.Decoder
 import cats.xml.implicits.*
+import cats.implicits.*
 
 val decoder: Decoder[Foo] =
   Decoder.fromCursor(c =>
-    for {
-      foo <- c.attr("name").as[Option[String]]
-      bar <- c.attr("bar").as[Int]
-      text <- c.text.as[Boolean]
-    } yield Foo(foo, bar, text)
+    (
+      c.attr("name").as[Option[String]],
+      c.attr("bar").as[Int],
+      c.text.as[Boolean]
+    ).mapN(Foo.apply)
   )
 ```
 

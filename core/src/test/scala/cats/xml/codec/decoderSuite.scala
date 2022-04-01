@@ -319,7 +319,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           c.attr("intAttr").as[Int],
           c.attr("boolAttr").as[Boolean],
           c.down("Bar").text.as[BigDecimal].map(Bar.apply)
-        ).mapN(Foo)
+        ).mapN(Foo.apply)
       )
 
     assertEquals(
@@ -340,6 +340,61 @@ class DecoderCompanionSuite extends munit.FunSuite {
       ).validNel
     )
   }
+
+  test("Decoder.fromCursor accumulating errors - CursorFailure") {
+
+    case class Foo(a: Int, b: Int, c: Int)
+
+    val decoder: Decoder[Foo] = Decoder
+      .fromCursor(c =>
+        (
+          c.attr("missing_1").as[Int],
+          c.attr("missing_2").as[Int],
+          c.attr("missing_3").as[Int]
+        ).mapN(Foo.apply)
+      )
+
+    assertEquals(
+      obtained = decoder.decode(XmlNode("Foo")),
+      expected = NonEmptyList
+        .of(
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_1")),
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_2")),
+          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_3"))
+        )
+        .invalid
+    )
+  }
+
+  // TODO FIX TEST
+//  test("Decoder.fromCursor accumulating errors - Decofing") {
+//
+//    case class Foo(a: Int, b: Int, c: Int)
+//
+//    val decoder: Decoder[Foo] = Decoder
+//      .fromCursor(c =>
+//        (
+//          c.attr("a").as[Int],
+//          c.attr("b").as[Int],
+//          c.attr("c").as[Int]
+//        ).mapN(Foo)
+//      )
+//
+//    assertEquals(
+//      obtained = decoder.decode(
+//        XmlNode("Foo").withAttributes(
+//          "a" := "INVALID",
+//          "b" := "INVALID",
+//          "c" := "INVALID"
+//        )
+//      ),
+//      expected = NonEmptyList
+//        .one(
+//          DecoderFailure.CursorFailed(CursorFailure.MissingAttrByKey("", "missing_1"))
+//        )
+//        .invalid
+//    )
+//  }
 
   test("Decoder.fromEither - Right") {
     assertEquals(

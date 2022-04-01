@@ -16,7 +16,7 @@ class CodecSuite extends munit.FunSuite {
         (
           c.attr("bar").as[String],
           c.attr("baz").as[Int]
-        ).mapN(Foo)
+        ).mapN(Foo.apply)
       ),
       encoder = Encoder.of(foo => {
         XmlNode("Foo")
@@ -40,7 +40,7 @@ class CodecSuite extends munit.FunSuite {
         (
           c.attr("bar").as[String],
           c.attr("baz").as[Int]
-        ).mapN(Foo)
+        ).mapN(Foo.apply)
       ),
       encoder = Encoder.of(_ => XmlNode(""))
     )

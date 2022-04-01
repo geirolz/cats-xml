@@ -42,8 +42,33 @@ object FreeCursor extends FreeCursorInstances {
 
         Decoder[O].decodeCursorResult(cursorResult) match {
           case Valid(value) => value.validNel
-          case Invalid(failures: NonEmptyList[DecoderFailure]) =>
-            CursorFailure.DecoderFailed(cursor.path, failures).invalidNel // TODO:TO CHECK
+          case Invalid(failures: NonEmptyList[DecoderFailure]) => {
+
+            val cursorFailures: NonEmptyList[CursorFailure] = failures.toList
+              .partitionEither {
+                case DecoderFailure.CursorFailed(failure) => Left(failure)
+                case other                                => Right(other)
+              }
+              .bimap(
+                NonEmptyList.fromList,
+                NonEmptyList
+                  .fromList(_)
+                  .nested
+                  .map(CursorFailure.DecoderFailed(cursor.path, _))
+                  .value
+              ) match {
+              case (Some(cursorFailsNel), None)   => cursorFailsNel
+              case (None, Some(otherDecFailsNel)) => otherDecFailsNel
+              case (Some(cursorFailsNel), Some(otherDecFailsNel)) =>
+                cursorFailsNel ::: otherDecFailsNel
+
+              // paradox
+              case (None, None) =>
+                NonEmptyList.of(CursorFailure.Custom("Empty decoding failures unexpected."))
+            }
+
+            cursorFailures.invalid
+          }
         }
       }
     }
