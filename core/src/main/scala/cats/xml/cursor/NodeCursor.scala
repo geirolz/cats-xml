@@ -96,7 +96,11 @@ object NodeCursor {
         }
       }
 
-      rec(this.history, Nil, ns)
+      rec(
+        history     = this.history,
+        currentPath = Nil,
+        current     = ns
+      )
     }
 
     def history: List[Op] = {

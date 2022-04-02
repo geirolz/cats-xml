@@ -1,9 +1,10 @@
 package cats.xml.cursor
 
 import cats.{Eq, Show}
+import cats.data.NonEmptyList
 import cats.xml.codec.DecoderFailure
 import cats.xml.cursor.CursorFailure.CursorFailureException
-import cats.xml.utils.WeakThrowableEq
+import cats.xml.utils.ThrowableKeeper
 
 /** A coproduct ADT to represent the `Cursor` possible failures.
   */
@@ -17,6 +18,9 @@ object CursorFailure {
 
   // decode
   case class DecoderFailed(path: String, failure: DecoderFailure) extends CursorFailure
+
+  // validation
+  case class ValidationsFailed(path: String, errors: NonEmptyList[String]) extends FailedNode
 
   // node
   sealed trait Missing extends CursorFailure {
@@ -34,7 +38,7 @@ object CursorFailure {
   case class LeftBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
   case class RightBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
   case class Custom(message: String) extends CursorFailure
-  case class Error(ex: Throwable) extends CursorFailure with WeakThrowableEq[CursorFailure.Error]
+  case class Error(ex: Throwable) extends CursorFailure with ThrowableKeeper
 
   case class CursorFailureException(failure: CursorFailure)
       extends RuntimeException(s"Cursor failure: $failure")
@@ -56,6 +60,8 @@ object CursorFailure {
       case MissingAttrLast(path)           => s"Last attribute on empty list${pathAt(path)}"
       case MissingNode(nodeName, path)     => s"Missing node '$nodeName'${pathAt(path)}"
       case MissingText(path)               => s"Missing text${pathAt(path)}'"
+      case ValidationsFailed(path, eNel) =>
+        s"Validations (${eNel.size}) failed${pathAt(path)}. ${eNel.toList.mkString("\n- ", "\n- ", "")}"
       case LeftBoundLimitAttr(path, lastKey) =>
         s"Reached left bound limit attribute${pathAt(path)}, last valid key '$lastKey'"
       case RightBoundLimitAttr(path, lastKey) =>
