@@ -2,7 +2,6 @@ package cats.xml
 
 import cats.{Eq, Show}
 import cats.xml.codec.DataEncoder
-import org.w3c.dom.{Attr, NamedNodeMap}
 
 case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
 
