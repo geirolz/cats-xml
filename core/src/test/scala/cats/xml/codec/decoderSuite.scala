@@ -385,7 +385,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
         XmlNode("Foo").withAttributes(
           "a" := "INVALID",
           "b" := "INVALID",
-          "c" := "INVALIxD"
+          "c" := "INVALID"
         )
       ),
       expected = NonEmptyList

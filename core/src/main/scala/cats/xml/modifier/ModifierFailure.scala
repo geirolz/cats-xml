@@ -3,7 +3,7 @@ package cats.xml.modifier
 import cats.Show
 import cats.xml.cursor.CursorFailure
 import cats.xml.modifier.ModifierFailure.ModifierFailureException
-import cats.xml.utils.ThrowableKeeper
+import cats.xml.utils.ErrorKeeper
 
 /** A coproduct ADT to represent the `Modifier` possible failures.
   */
@@ -18,7 +18,7 @@ object ModifierFailure {
   case class InvalidData[D](message: String, data: D) extends ModifierFailure
   case class CursorFailed(cursorFailure: CursorFailure) extends ModifierFailure
   case class Custom(message: String) extends ModifierFailure
-  case class Error(ex: Throwable) extends ModifierFailure with ThrowableKeeper
+  case class Error(error: Throwable) extends ModifierFailure with ErrorKeeper
 
   case class ModifierFailureException(failure: ModifierFailure)
       extends RuntimeException(s"Modifier failure: $failure")
