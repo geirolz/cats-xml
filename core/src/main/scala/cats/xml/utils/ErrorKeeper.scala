@@ -17,7 +17,7 @@ object ErrorKeeper {
     (x: ErrorKeeper, y: ErrorKeeper) =>
       x.error == y.error || (
         x.error.getClass.isAssignableFrom(y.error.getClass) &&
-        x.error.getCause == y.error.getCause &&
-        x.error.getMessage == y.error.getMessage
+          x.error.getCause == y.error.getCause &&
+          x.error.getMessage == y.error.getMessage
       )
 }
