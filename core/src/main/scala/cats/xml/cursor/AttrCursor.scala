@@ -17,7 +17,6 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
   // focus
   override def focus(xml: XmlNode): Cursor.Result[XmlAttribute] = {
 
-    // TODO: tail rec
     def applyFocus(node: XmlNode, op: Op): Cursor.Result[XmlAttribute] =
       op match {
         case Op.SelectAttr(key) =>
@@ -39,8 +38,8 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
             .toRight(CursorFailure.MissingAttrLast(path))
 
         // nested
-        case Op.Left(leftOp) =>
-          applyFocus(node, leftOp)
+        case Op.Left(currentOp) =>
+          applyFocus(node, currentOp)
             .flatMap(attr =>
               node.children.headOption
                 .flatMap(
@@ -51,8 +50,8 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
                 .toRight(CursorFailure.LeftBoundLimitAttr(path, attr.key))
             )
 
-        case Op.Right(rightOp) =>
-          applyFocus(node, rightOp)
+        case Op.Right(currentOp) =>
+          applyFocus(node, currentOp)
             .flatMap(attr =>
               node.children.headOption
                 .flatMap(n => {
@@ -92,8 +91,8 @@ object AttrCursor {
     case class SelectAttrByIndex(index: Long) extends Op
     case object Head extends Op
     case object Last extends Op
-    case class Left(op: Op) extends Op
-    case class Right(op: Op) extends Op
+    case class Left(currentOp: Op) extends Op
+    case class Right(currentOp: Op) extends Op
 
     implicit final val showCursorOp: Show[Op] = Show.show {
       case SelectAttr(key)          => s"/@$key"

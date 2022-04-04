@@ -17,21 +17,6 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
   def apply[T: DataEncoder](key: String, value: T): XmlAttribute =
     XmlAttribute(key, DataEncoder[T].encode(value))
 
-  // TODO: JAVA support - to separate
-  def fromJavaNodeMap(nMap: NamedNodeMap): List[XmlAttribute] =
-    if (nMap == null)
-      Nil
-    else {
-      val len: Int                    = nMap.getLength
-      val result: Array[XmlAttribute] = new Array[XmlAttribute](len)
-      for (i <- 0 until nMap.getLength) {
-        val item = nMap.item(i).asInstanceOf[Attr]
-        result(i) = XmlAttribute(item.getName, item.getValue)
-      }
-
-      result.toList
-    }
-
   def fromMap(values: Map[String, String]): List[XmlAttribute] =
     values.map { case (k, v) =>
       XmlAttribute(k, v)
