@@ -19,6 +19,7 @@ This library is not production ready yet. There is a lot of work to do to comple
 - Reach a good code coverage with the tests (using munit)
 - Improve documentation
 
+Contributions are more than welcome! 💪
 
 Given `Foo` class 
 ```scala
