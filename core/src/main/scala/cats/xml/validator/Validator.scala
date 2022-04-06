@@ -3,7 +3,7 @@ package cats.xml.validator
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
 import cats.kernel.Monoid
-import cats.{Contravariant, Show}
+import cats.{Contravariant, Eq, Show}
 import cats.xml.validator.Validator.must
 
 trait Validator[T] { $this =>
@@ -70,6 +70,13 @@ private[validator] sealed trait ValidatorBuilders {
 
   import cats.implicits.*
 
+  // ------------- generic -------------
+  def eqvTo[T: Eq](that: T): Validator[T] =
+    must[T](tis => s"Value '$tis' is NOT equivalent to '$that'.")(Eq[T].eqv(_, that))
+
+  def notEqvTo[T: Eq](that: T): Validator[T] =
+    must[T](tis => s"Value '$tis' expected to be NOT equivalent to '$that'.")(Eq[T].neqv(_, that))
+
   // ------------- numeric -------------
   def min[N](min: N, exclusive: Boolean = false)(implicit N: Numeric[N]): Validator[N] =
     exclusive match {
@@ -101,10 +108,10 @@ private[validator] sealed trait ValidatorBuilders {
         s"Value '$t' is NOT in range [$min $minSymbol x $maxSymbol $max]"
       })
 
-  def positive[N](implicit N: Numeric[N]): Validator[N]       = min(N.one)
+  def positive[N](implicit N: Numeric[N]): Validator[N]       = min(N.zero, exclusive = true)
   def positiveOrZero[N](implicit N: Numeric[N]): Validator[N] = min(N.zero)
 
-  def negative[N](implicit N: Numeric[N]): Validator[N]       = max(N.negate(N.one))
+  def negative[N](implicit N: Numeric[N]): Validator[N]       = max(N.zero, exclusive = true)
   def negativeOrZero[N](implicit N: Numeric[N]): Validator[N] = max(N.zero)
 
   // ------------- string -------------
@@ -116,10 +123,17 @@ private[validator] sealed trait ValidatorBuilders {
     must[String](str => s"Value '$str', expected to be NON empty.")(
       _.nonEmpty
     )
-  def length(expected: Long): Validator[String] =
-    must[String](str => s"Length of '$str', expected $expected but got ${str.length}.")(
-      _.length == expected
-    )
+
+  def exactLength(expected: Int): Validator[String] =
+    eqvTo[Int](expected)
+      .contramap[String](_.length)
+      .rewordError(str => s"Length of '$str', expected $expected but is ${str.length}.")
+
+  def length(expected: Int): Validator[String] =
+    max[Int](expected)
+      .contramap[String](_.length)
+      .rewordError(str => s"Length of '$str', expected $expected but is ${str.length}.")
+
   def regex(regex: String): Validator[String] =
     must[String](str => s"String '$str' doesn't match regex `$regex`.")(
       _.matches(regex)

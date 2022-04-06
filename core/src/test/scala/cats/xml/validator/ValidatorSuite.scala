@@ -128,6 +128,7 @@ class ValidatorSuite extends munit.ScalaCheckSuite {
 
 class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
 
+  // number
   test("Validator.min") {
 
     val minInclusive: Validator[Int] = Validator.min(1)
@@ -226,6 +227,130 @@ class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
     assertEquals(
       obtained = rangeExclusive(4),
       expected = Invalid(NonEmptyList.one("Value '4' is NOT in range [5 < x < 10]"))
+    )
+  }
+
+  test("Validator.positive") {
+
+    val validator = Validator.positive[Int]
+    assertEquals(
+      obtained = validator.apply(1),
+      expected = Valid(1)
+    )
+
+    assertEquals(
+      obtained = validator.apply(0),
+      expected = Invalid(NonEmptyList.one("Value '0' is NOT > '0'"))
+    )
+
+    assertEquals(
+      obtained = validator.apply(-1),
+      expected = Invalid(NonEmptyList.one("Value '-1' is NOT > '0'"))
+    )
+  }
+
+  test("Validator.positiveOrZero") {
+
+    val validator = Validator.positiveOrZero[Int]
+    assertEquals(
+      obtained = validator.apply(1),
+      expected = Valid(1)
+    )
+
+    assertEquals(
+      obtained = validator.apply(0),
+      expected = Valid(0)
+    )
+
+    assertEquals(
+      obtained = validator.apply(-1),
+      expected = Invalid(NonEmptyList.one("Value '-1' is NOT >= '0'"))
+    )
+  }
+
+  test("Validator.negative") {
+
+    val validator = Validator.negative[Int]
+    assertEquals(
+      obtained = validator.apply(-1),
+      expected = Valid(-1)
+    )
+
+    assertEquals(
+      obtained = validator.apply(0),
+      expected = Invalid(NonEmptyList.one("Value '0' is NOT < '0'"))
+    )
+
+    assertEquals(
+      obtained = validator.apply(1),
+      expected = Invalid(NonEmptyList.one("Value '1' is NOT < '0'"))
+    )
+  }
+
+  test("Validator.negativeOrZero") {
+
+    val validator = Validator.negativeOrZero[Int]
+    assertEquals(
+      obtained = validator.apply(-1),
+      expected = Valid(-1)
+    )
+
+    assertEquals(
+      obtained = validator.apply(0),
+      expected = Valid(0)
+    )
+
+    assertEquals(
+      obtained = validator.apply(1),
+      expected = Invalid(NonEmptyList.one("Value '1' is NOT <= '0'"))
+    )
+  }
+
+  // string
+  test("Validator.emptyString") {
+
+    val validator = Validator.emptyString
+    assertEquals(
+      obtained = validator.apply(""),
+      expected = Valid("")
+    )
+
+    assertEquals(
+      obtained = validator.apply("non_empty"),
+      expected = Invalid(NonEmptyList.one("Value 'non_empty', expected to be empty."))
+    )
+  }
+
+  test("Validator.nonEmptyString") {
+
+    val validator = Validator.nonEmptyString
+    assertEquals(
+      obtained = validator.apply("non_empty"),
+      expected = Valid("non_empty")
+    )
+
+    assertEquals(
+      obtained = validator.apply(""),
+      expected = Invalid(NonEmptyList.one("Value '', expected to be NON empty."))
+    )
+  }
+
+  test("Validator.exactLength") {
+
+    val validator = Validator.exactLength(5)
+    assertEquals(
+      obtained = validator.apply("12345"),
+      expected = Valid("12345")
+    )
+
+    assertEquals(
+      obtained = validator.apply("1234"),
+      expected = Invalid(NonEmptyList.one("Length of '1234', expected 5 but is 4."))
+    )
+
+    assertEquals(
+      obtained = validator.apply("123456"),
+      expected = Invalid(NonEmptyList.one("Length of '123456', expected 5 but is 6."))
     )
   }
 }
