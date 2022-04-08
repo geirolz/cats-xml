@@ -353,4 +353,153 @@ class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
       expected = Invalid(NonEmptyList.one("Length of '123456', expected 5 but is 6."))
     )
   }
+
+  test("Validator.maxLength") {
+
+    val validator = Validator.maxLength(5)
+    assertEquals(
+      obtained = validator.apply("12345"),
+      expected = Valid("12345")
+    )
+
+    assertEquals(
+      obtained = validator.apply("1234"),
+      expected = Valid("1234")
+    )
+
+    assertEquals(
+      obtained = validator.apply("123456"),
+      expected = Invalid(NonEmptyList.one("Length of '123456' expected to be <= 5 but is 6."))
+    )
+  }
+
+  test("Validator.minLength") {
+
+    val validator = Validator.minLength(5)
+    assertEquals(
+      obtained = validator.apply("12345"),
+      expected = Valid("12345")
+    )
+
+    assertEquals(
+      obtained = validator.apply("123456"),
+      expected = Valid("123456")
+    )
+
+    assertEquals(
+      obtained = validator.apply("1234"),
+      expected = Invalid(NonEmptyList.one("Length of '1234' expected to be >= 5 but is 4."))
+    )
+  }
+
+  test("Validator.regex") {
+
+    val validator = Validator.regex("""(\w+)@([\w\.]+)""".r)
+    assertEquals(
+      obtained = validator.apply("mimmo@gmail.com"),
+      expected = Valid("mimmo@gmail.com")
+    )
+
+    assertEquals(
+      obtained = validator.apply("mimmo_gmail.com"),
+      expected = Invalid(
+        NonEmptyList.one("String 'mimmo_gmail.com' doesn't match regex `(\\w+)@([\\w\\.]+)`.")
+      )
+    )
+  }
+
+  // collections
+  test("Validator.isEmpty") {
+    val validatorSeq: Validator[Seq[Any]]       = Validator.isEmpty[Seq]
+    val validatorOption: Validator[Option[Any]] = Validator.isEmpty[Option]
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(Nil),
+      expected = Valid(Nil)
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2, 3)),
+      expected = Invalid(NonEmptyList.one("[1, 2, 3] is not empty."))
+    )
+
+    // option
+    assertEquals(
+      obtained = validatorOption.apply(None),
+      expected = Valid(None)
+    )
+
+    assertEquals(
+      obtained = validatorOption.apply(Some(1)),
+      expected = Invalid(NonEmptyList.one("[1] is not empty."))
+    )
+  }
+
+  test("Validator.nonEmpty") {
+    val validatorSeq: Validator[Seq[Any]]       = Validator.nonEmpty[Seq]
+    val validatorOption: Validator[Option[Any]] = Validator.nonEmpty[Option]
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2, 3)),
+      expected = Valid(Seq(1, 2, 3))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Nil),
+      expected = Invalid(NonEmptyList.one("[] is empty."))
+    )
+
+    // option
+    assertEquals(
+      obtained = validatorOption.apply(Some(1)),
+      expected = Valid(Some(1))
+    )
+
+    assertEquals(
+      obtained = validatorOption.apply(None),
+      expected = Invalid(NonEmptyList.one("[] is empty."))
+    )
+  }
+
+  test("Validator.maxSize") {
+    val validatorSeq: Validator[Seq[Any]] = Validator.maxSize(2)
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2)),
+      expected = Valid(Seq(1, 2))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Nil),
+      expected = Valid(Nil)
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2, 3)),
+      expected = Invalid(NonEmptyList.one("[1, 2, 3] size must be <= 2"))
+    )
+  }
+
+  test("Validator.minSize") {
+    val validatorSeq: Validator[Seq[Any]] = Validator.minSize(2)
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2)),
+      expected = Valid(Seq(1, 2))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Seq(1, 2, 3)),
+      expected = Valid(Seq(1, 2, 3))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(Nil),
+      expected = Invalid(NonEmptyList.one("[] size must be >= 2"))
+    )
+  }
 }

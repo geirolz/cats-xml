@@ -6,6 +6,8 @@ import cats.kernel.Monoid
 import cats.{Contravariant, Eq, Show}
 import cats.xml.validator.Validator.must
 
+import scala.util.matching.Regex
+
 trait Validator[T] { $this =>
 
   def apply(t: T): Validator.Result[T]
@@ -129,55 +131,65 @@ private[validator] sealed trait ValidatorBuilders {
       .contramap[String](_.length)
       .rewordError(str => s"Length of '$str', expected $expected but is ${str.length}.")
 
-  def length(expected: Int): Validator[String] =
-    max[Int](expected)
+  def maxLength(maxLen: Int): Validator[String] =
+    max[Int](maxLen)
       .contramap[String](_.length)
-      .rewordError(str => s"Length of '$str', expected $expected but is ${str.length}.")
+      .rewordError(str => s"Length of '$str' expected to be <= $maxLen but is ${str.length}.")
 
-  def regex(regex: String): Validator[String] =
+  def minLength(minLen: Int): Validator[String] =
+    min[Int](minLen)
+      .contramap[String](_.length)
+      .rewordError(str => s"Length of '$str' expected to be >= $minLen but is ${str.length}.")
+
+  def regex(regex: Regex): Validator[String] =
     must[String](str => s"String '$str' doesn't match regex `$regex`.")(
-      _.matches(regex)
+      regex.matches(_)
     )
 
   // ------------- collections -------------
-  def isEmpty[T]: Validator[Seq[T]] =
-    must[Seq[T]](seq => s"Seq${seqToStr(seq)} is not empty.")(
-      _.isEmpty
+  def isEmpty[F[X] <: IterableOnce[X]]: Validator[F[Any]] =
+    must[F[Any]](seq => s"${iterableToStr(seq)} is not empty.")(
+      _.iterator.isEmpty
     )
 
-  def nonEmpty[T]: Validator[Seq[T]] =
-    must[Seq[T]](seq => s"Seq${seqToStr(seq)} is empty.")(
-      _.nonEmpty
+  def nonEmpty[F[X] <: IterableOnce[X]]: Validator[F[Any]] =
+    must[F[Any]](seq => s"${iterableToStr(seq)} is empty.")(
+      _.iterator.nonEmpty
     )
 
-  def maxSize[T](maxSize: Int): Validator[Seq[T]] =
-    must[Seq[T]](seq => s"Seq${seqToStr(seq)} size must be <= $maxSize")(
-      _.size <= maxSize
+  def maxSize[F[X] <: IterableOnce[X]](maxSize: Int): Validator[F[Any]] =
+    must[F[Any]](seq => s"${iterableToStr(seq)} size must be <= $maxSize")(
+      _.iterator.size <= maxSize
     )
 
-  def minSize[T](minSize: Int): Validator[Seq[T]] =
-    must[Seq[T]](seq => s"Seq${seqToStr(seq)} size must be >= $minSize")(
-      _.size >= minSize
+  def minSize[F[X] <: IterableOnce[X]](minSize: Int): Validator[F[Any]] =
+    must[F[Any]](seq => s"${iterableToStr(seq)} size must be >= $minSize")(
+      _.iterator.size >= minSize
     )
 
   // ------------- cats-collections -------------
   def maxSizeNel[T: Show](maxSize: Int): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq => s"NonEmptyList${seqToStr(seq.toList)} size must be <= $maxSize")(
+    must[NonEmptyList[T]](seq =>
+      s"NonEmptyList${iterableToStr(seq.toList)} size must be <= $maxSize"
+    )(
       _.size <= maxSize
     )
 
   def minSizeNel[T: Show](minSize: Int): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq => s"NonEmptyList${seqToStr(seq.toList)} size must be >= $minSize")(
+    must[NonEmptyList[T]](seq =>
+      s"NonEmptyList${iterableToStr(seq.toList)} size must be >= $minSize"
+    )(
       _.size >= minSize
     )
 
-  private def seqToStr[T](seq: Seq[T], limit: Int = 10)(implicit
-    s: Show[T]                                    = Show.fromToString[T]
-  ): String =
-    if (seq.size >= limit)
-      seq.mkString_("[", ", ", "]")
+  private def iterableToStr[T](itOnce: IterableOnce[T], limit: Int = 10)(implicit
+    s: Show[T]                                                     = Show.fromToString[T]
+  ): String = {
+    if (itOnce.iterator.size <= limit)
+      itOnce.iterator.map(_.show).mkString("[", ", ", "]")
     else
-      seq.take(limit).mkString_("[", ", ", "...]")
+      itOnce.iterator.take(limit).map(_.show).mkString("[", ", ", ",...]")
+  }
 }
 
 private[xml] trait ValidatorInstances {
