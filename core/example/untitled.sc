@@ -1,52 +1,73 @@
 import cats.xml.codec.Decoder
 import cats.xml.XmlNode
+import cats.xml.cursor.NodeCursor.Root
 import cats.xml.implicits._
+import cats.xml.modifier.Modifier
 
 ////
 //////############### PARSING from NODESEQ ###############
 ////val n1: XmlNode = <root>TEST</root>
 ////
 //////############### CURSOR ###############
-////val node: XmlNode =
-////  <root>
-////    <foo>
-////      <bar>
-////        <root>
-////          <foo>
-////            <bar>
-////              <root>
-////                <foo>
-////                  <bar>
-////                    <roar a="1" b="2" c="3">
-////                      LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA
-////                    </roar>
-////                  </bar>
-////                </foo>
-////              </root>
-////            </bar>
-////          </foo>
-////        </root>
-////      </bar>
-////    </foo>
-////  </root>
+val node: XmlNode =
+  xml"""<root>
+         <foo>
+           <bar>
+             <root>
+               <foo>
+                 <bar>
+                   <root>
+                     <foo>
+                       <bar>
+                         <roar a="1" b="2" c="3">
+                           LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA
+                         </roar>
+                       </bar>
+                     </foo>
+                   </root>
+                 </bar>
+               </foo>
+             </root>
+           </bar>
+         </foo>
+       </root>""".get
+
+
+
 ////
 ////node.findDeepChild("roar")
 ////Xml.toNodeSeq(node)
 ////
-////val result1: CursorResult[Int] =
-////  Root
-////    .down("foo")
-////    .down("bar")
-////    .down("root")
-////    .down("foo")
-////    .down("bar")
-////    .down("root")
-////    .down("foo")
-////    .down("bar")
-////    .down("roar")
-////    .attr("a")
-////    .as[Int]
-////    .focus(node)
+//val result1: FreeCursor.Result[Int] =
+//  Root
+//    .down("foo")
+//    .down("bar")
+//    .down("root")
+//    .down("foo")
+//    .down("bar")
+//    .down("root")
+//    .down("foo")
+//    .down("bar")
+//    .down("roar")
+//    .attr("a")
+//    .as[Int]
+//    .focus(node)
+
+val result1: Modifier.Result[XmlNode] =
+  Root
+    .down("foo")
+    .down("bar")
+    .down("root")
+    .down("foo")
+    .down("bar")
+    .down("root")
+    .down("foo")
+    .down("bar")
+    .down("roar")
+    .attr("a")
+    .modify(_ => "TEST")
+    .apply(node)
+
 ////
 ////
 ////val result1: CursorResult[Int] =

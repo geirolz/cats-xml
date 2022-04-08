@@ -49,8 +49,9 @@ object DataEncoder extends DataEncoderPrimitivesInstances {
 }
 
 private[xml] trait DataEncoderPrimitivesInstances {
-  implicit val encoderUnit: DataEncoder[Unit]     = DataEncoder.of(_ => XmlNull)
-  implicit val encoderString: DataEncoder[String] = DataEncoder.of(XmlString(_))
+  implicit val encoderXmlData: DataEncoder[XmlData] = DataEncoder.of(identity)
+  implicit val encoderUnit: DataEncoder[Unit]       = DataEncoder.of(_ => XmlNull)
+  implicit val encoderString: DataEncoder[String]   = DataEncoder.of(XmlString(_))
   implicit val encoderBoolean: DataEncoder[Boolean] = encoderString.contramap {
     case true  => "true"
     case false => "false"

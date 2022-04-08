@@ -3,7 +3,7 @@ package cats.xml.cursor
 import cats.{Endo, Show}
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor.CursorOp
-import cats.xml.modifier.Modifier
+import cats.xml.modifier.{Modifier, ModifierFailure}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -17,7 +17,16 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
   override lazy val path: String = CursorOp.buildOpsPath(history)
 
   def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
-    Modifier.fromNodeCursor(this, modifier)
+    Modifier(node => {
+      val nodeClone = node.copy()
+      focus(nodeClone) match {
+        case Right(focus) =>
+          focus.mute(modifier)
+          Right(focus)
+        case Left(failure) =>
+          Left(ModifierFailure.CursorFailed(failure))
+      }
+    })
 
   // node
   def selectDynamic(nodeName: String): NodeCursor =

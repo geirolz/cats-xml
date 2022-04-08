@@ -19,7 +19,6 @@ This library is not production ready yet. There is a lot of work to do to comple
 - Reach a good code coverage with the tests (using munit)
 - Improve documentation
 
-Contributions are more than welcome! 💪
 
 Given `Foo` class 
 ```scala
@@ -79,7 +78,7 @@ val node: XmlNode = XmlNode("Foo")
 val result: Modifier.Result[XmlNode] = Root
   .modify(_.withText("NEW"))
   .apply(node)  
-// result: Either[ModifierFailure, XmlNode] = Right(
+// result: Modifier.Result[XmlNode] = Right(
 //   value = <Foo name="Foo" age="10">NEW</Foo>
 // )
 ```

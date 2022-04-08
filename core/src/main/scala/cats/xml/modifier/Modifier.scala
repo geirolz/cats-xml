@@ -1,11 +1,8 @@
 package cats.xml.modifier
 
-import cats.{Endo, Monoid}
-import cats.xml.{XmlData, XmlNode}
-import cats.xml.codec.DataEncoder
-import cats.xml.cursor.{NodeCursor, TextCursor}
+import cats.Monoid
 
-/** Create a modified copy of input [[XmlNode]]
+/** Create a modified copy of input 'XmlNode'
   */
 trait Modifier[T] { $this =>
 
@@ -35,27 +32,6 @@ object Modifier extends ModifierInstances {
   import cats.implicits.*
 
   type Result[+T] = Either[ModifierFailure, T]
-
-  def fromNodeCursor(
-    cursor: NodeCursor,
-    modifier: Endo[XmlNode]
-  ): Modifier[XmlNode] =
-    Modifier(node => {
-      val nodeClone = node.copy()
-      cursor.focus(nodeClone) match {
-        case Right(focus) =>
-          focus.mute(modifier)
-          focus.asRight
-        case Left(failure) =>
-          ModifierFailure.CursorFailed(failure).asLeft
-      }
-    })
-
-  def fromTextCursor[T: DataEncoder](
-    cursor: TextCursor,
-    modifier: Option[XmlData] => T
-  ): Modifier[XmlNode] =
-    cursor.lastCursor.modify(n => n.withText(modifier(n.text)))
 
   def apply[T](
     f: T => Modifier.Result[T]

@@ -1,18 +1,31 @@
 package cats.xml.cursor
 
 import cats.Show
-import cats.xml.{XmlAttribute, XmlNode}
+import cats.xml.{XmlAttribute, XmlData, XmlNode}
+import cats.xml.codec.DataEncoder
 import cats.xml.cursor.AttrCursor.Op
 import cats.xml.cursor.Cursor.CursorOp
+import cats.xml.modifier.{Modifier, ModifierFailure}
 
 /** Horizontal cursor for node attributes
   */
 class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
-    extends HCursor[XmlAttribute, NodeCursor, AttrCursor] {
+    extends HCursor[XmlAttribute, NodeCursor, AttrCursor] { $this =>
 
   import cats.implicits.*
 
   lazy val path: String = s"${vCursor.path}$op"
+
+  // modify
+  def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =
+    Modifier(node =>
+      $this.focus(node) match {
+        case Right(attr) =>
+          vCursor.modify(_.updateAttr(attr.key)(_ => attr.map(f)))(node)
+        case Left(failure) =>
+          ModifierFailure.CursorFailed(failure).asLeft
+      }
+    )
 
   // focus
   override def focus(xml: XmlNode): Cursor.Result[XmlAttribute] = {

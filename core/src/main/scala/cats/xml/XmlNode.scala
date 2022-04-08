@@ -35,9 +35,6 @@ class XmlNode private (
   def withAttributes(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode =
     updateAttrs(_ => attr +: attrs)
 
-  def withAttributesMap(values: Map[String, String]): XmlNode =
-    updateAttrs(_ => XmlAttribute.fromMap(values))
-
   def prependAttr(newAttr: XmlAttribute): XmlNode =
     updateAttrs(ls => newAttr +: ls)
 
@@ -49,6 +46,9 @@ class XmlNode private (
 
   def updateAttrs(f: Endo[Seq[XmlAttribute]]): XmlNode =
     copy(attributes = f(attributes))
+
+  def updateAttr(key: String)(f: Endo[XmlAttribute]): XmlNode =
+    updateAttrs(_.map(attr => if (attr.key == key) f(attr) else attr))
 
   // ------ CONTENT ------
   val hasChildren: Boolean = children.nonEmpty
@@ -107,18 +107,18 @@ class XmlNode private (
   def findDeepChild(thatLabel: String): Option[XmlNode] =
     deepSubNodes.find(_.label == thatLabel)
 
-  def deepSubNodes: List[XmlNode] = {
+  def deepSubNodes: LazyList[XmlNode] = {
 
     @tailrec
-    def rec(left: List[XmlNode], acc: List[XmlNode]): List[XmlNode] =
+    def rec(left: List[XmlNode], acc: LazyList[XmlNode]): LazyList[XmlNode] =
       left match {
         case Nil          => acc
         case head :: tail => rec(tail, acc ++ head.deepSubNodes)
       }
 
     content.children match {
-      case Nil                 => Nil
-      case currentNodeChildren => rec(currentNodeChildren, Nil)
+      case Nil                 => LazyList.empty
+      case currentNodeChildren => rec(currentNodeChildren, LazyList.empty)
     }
   }
 

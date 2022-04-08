@@ -1,9 +1,15 @@
 package cats.xml
 
-import cats.{Eq, Show}
+import cats.{Endo, Eq, Show}
 import cats.xml.codec.DataEncoder
 
 case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
+
+  def map[T: DataEncoder](f: XmlData => T): XmlAttribute =
+    map(value => DataEncoder[T].encode(f(value)))
+
+  def map(f: Endo[XmlData]): XmlAttribute =
+    XmlAttribute(key, f(value))
 
   override def toString: String = XmlAttribute.stringify(this)
 

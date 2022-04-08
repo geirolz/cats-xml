@@ -210,4 +210,4 @@ def scalacSettings(scalaVersion: String): Seq[String] =
   }
 
 //=============================== ALIASES ===============================
-addCommandAlias("check", ";clean;test")
+addCommandAlias("check", "scalafmtAll;clean;coverage;test;coverageAggregate")
