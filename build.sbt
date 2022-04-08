@@ -55,7 +55,7 @@ lazy val docs: Project =
       mdocIn  := file("docs/source"),
       mdocOut := file("docs/compiled"),
       mdocVariables := Map(
-        "VERSION" -> version.value,
+        "VERSION" -> previousStableVersion.value.getOrElse("<version>"),
         "DOC_OUT" -> mdocOut.value.getPath
       )
     )

@@ -10,15 +10,20 @@
 
 A functional library to work with XML in Scala using cats core.
 
+```sbt
+libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.2"
+```
+
 This library is not production ready yet. There is a lot of work to do to complete it:
-- There are some performance issues loading xml from strings or files due the fact that there is a double
-  conversion, We need to parse bytes directly into `cats-xml` classes.
+- ~~There are some performance issues loading xml from strings or files due the fact that there is a double
+  conversion, We need to parse bytes directly into `cats-xml` classes.~~
 - Creates macro to derive `Decoder` and `Encoder`. This is not straightforward, distinguish between a Node and an Attribute ca
   can be done in some way thinking about attributes with primitives and value classes BUT distinguish between a Node/Attribute and Text 
   is hard, probably an annotation or a custom Decoder/Encoder is required. 
 - Reach a good code coverage with the tests (using munit)
 - Improve documentation
 
+Contributions are more than welcome 💪
 
 Given `Foo` class 
 ```scala
