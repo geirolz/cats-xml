@@ -1,6 +1,7 @@
 package cats.xml.testing.codec
 
 import cats.xml.codec.{Decoder, DecoderFailure}
+import cats.xml.cursor.CursorFailure
 import org.scalacheck.{Arbitrary, Cogen, Gen}
 
 object arbitrary {
@@ -17,6 +18,14 @@ object arbitrary {
         egen.arbitrary.map(e => Decoder.failure[A](e))
       )
     }
+
+  implicit val arbCustomCursorFailure: Arbitrary[CursorFailure] =
+    Arbitrary {
+      Gen.asciiPrintableStr.map(CursorFailure.Custom(_))
+    }
+
+  implicit val cogenCursorFailure: Cogen[CursorFailure] =
+    Cogen.cogenString.contramap(_.toString)
 
   implicit val arbCustomDecodingFailure: Arbitrary[DecoderFailure] =
     Arbitrary {

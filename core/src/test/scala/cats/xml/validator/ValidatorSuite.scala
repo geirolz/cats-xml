@@ -502,4 +502,44 @@ class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
       expected = Invalid(NonEmptyList.one("[] size must be >= 2"))
     )
   }
+
+  test("Validator.maxSizeNel") {
+    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.maxSizeNel(2)
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.of(1, 2)),
+      expected = Valid(NonEmptyList.of(1, 2))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.one(1)),
+      expected = Valid(NonEmptyList.one(1))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.of(1, 2, 3)),
+      expected = Invalid(NonEmptyList.one("[1, 2, 3] size must be <= 2"))
+    )
+  }
+
+  test("Validator.minSizeNel") {
+    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.minSizeNel(2)
+
+    // seq
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.of(1, 2)),
+      expected = Valid(NonEmptyList.of(1, 2))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.of(1, 2, 3)),
+      expected = Valid(NonEmptyList.of(1, 2, 3))
+    )
+
+    assertEquals(
+      obtained = validatorSeq.apply(NonEmptyList.one(1)),
+      expected = Invalid(NonEmptyList.one("[1] size must be >= 2"))
+    )
+  }
 }

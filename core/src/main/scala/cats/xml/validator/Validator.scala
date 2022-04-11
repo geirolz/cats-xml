@@ -168,17 +168,17 @@ private[validator] sealed trait ValidatorBuilders {
     )
 
   // ------------- cats-collections -------------
-  def maxSizeNel[T: Show](maxSize: Int): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq =>
-      s"NonEmptyList${iterableToStr(seq.toList)} size must be <= $maxSize"
-    )(
+  def maxSizeNel[T](
+    maxSize: Int
+  )(implicit s: Show[T] = Show.fromToString[T]): Validator[NonEmptyList[T]] =
+    must[NonEmptyList[T]](seq => s"${iterableToStr(seq.toList)} size must be <= $maxSize")(
       _.size <= maxSize
     )
 
-  def minSizeNel[T: Show](minSize: Int): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq =>
-      s"NonEmptyList${iterableToStr(seq.toList)} size must be >= $minSize"
-    )(
+  def minSizeNel[T](
+    minSize: Int
+  )(implicit s: Show[T] = Show.fromToString[T]): Validator[NonEmptyList[T]] =
+    must[NonEmptyList[T]](seq => s"${iterableToStr(seq.toList)} size must be >= $minSize")(
       _.size >= minSize
     )
 
