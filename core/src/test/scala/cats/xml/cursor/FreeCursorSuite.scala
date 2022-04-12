@@ -33,7 +33,7 @@ class FreeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = cursor.focus(incompleteNode),
-      expected = Invalid(NonEmptyList.of(CursorFailure.MissingNode("test", "/bar")))
+      expected = Invalid(NonEmptyList.of(CursorFailure.MissingNode("/bar", "test")))
     )
   }
 

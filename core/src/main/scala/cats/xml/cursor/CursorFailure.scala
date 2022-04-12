@@ -27,7 +27,7 @@ object CursorFailure {
     val path: String
   }
   sealed trait FailedNode extends CursorFailure
-  case class MissingNode(nodeName: String, path: String) extends FailedNode with Missing
+  case class MissingNode(path: String, nodeName: String) extends FailedNode with Missing
   case class MissingText(path: String) extends FailedNode with Missing
 
   sealed trait FailedAttribute extends CursorFailure
@@ -58,7 +58,7 @@ object CursorFailure {
       case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index'${pathAt(path)}"
       case MissingAttrHead(path)           => s"Head attribute on empty list${pathAt(path)}"
       case MissingAttrLast(path)           => s"Last attribute on empty list${pathAt(path)}"
-      case MissingNode(nodeName, path)     => s"Missing node '$nodeName'${pathAt(path)}"
+      case MissingNode(path, nodeName)     => s"Missing node '$nodeName'${pathAt(path)}"
       case MissingText(path)               => s"Missing text${pathAt(path)}'"
       case ValidationsFailed(path, eNel) =>
         s"Validations (${eNel.size}) failed${pathAt(path)}. ${eNel.toList.mkString("\n- ", "\n- ", "")}"

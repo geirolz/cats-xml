@@ -36,7 +36,7 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
     down(nodeName)
 
   def downPath(path: String): NodeCursor =
-    path.split("\\\\").foldLeft(this)(_.down(_))
+    path.split("/").foldLeft(this)(_.down(_))
 
   def down(nodeName: String): NodeCursor =
     new NodeCursor.Simple(this, NodeCursor.Op.Down(nodeName))
@@ -44,6 +44,9 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
   // content
   def attr(key: String): AttrCursor =
     new AttrCursor(this, AttrCursor.Op.SelectAttr(key))
+
+  def attrAt(index: Long): AttrCursor =
+    new AttrCursor(this, AttrCursor.Op.SelectAttrByIndex(index))
 
   def attrHead: AttrCursor =
     new AttrCursor(this, AttrCursor.Op.Head)
@@ -94,7 +97,7 @@ object NodeCursor {
                 current
                   .findChild(nodeName)
                   .toRight(
-                    CursorFailure.MissingNode(nodeName, CursorOp.buildOpsPath(currentPath))
+                    CursorFailure.MissingNode(CursorOp.buildOpsPath(currentPath), nodeName)
                   )
             }
 

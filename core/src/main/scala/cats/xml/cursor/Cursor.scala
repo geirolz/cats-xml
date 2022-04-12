@@ -4,9 +4,11 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.Decoder
 import cats.Show
 
-sealed trait Cursor[+X <: Xml] extends GenericCursor[XmlNode, X] with Serializable {
+sealed trait Cursor[+X <: Xml] extends Serializable {
 
   def path: String
+
+  def focus(input: XmlNode): Cursor.Result[X]
 
   def as[T: Decoder]: FreeCursor[Xml, T] =
     FreeCursor[T](this)
