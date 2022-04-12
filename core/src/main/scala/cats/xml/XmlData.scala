@@ -12,7 +12,9 @@ sealed trait XmlData extends Xml with Serializable {
     case _       => false
   }
 
-  override def toString: String = Show[XmlData].show(this)
+  def asString: String = Show[XmlData].show(this)
+
+  override def toString: String = asString
 }
 object XmlData {
 

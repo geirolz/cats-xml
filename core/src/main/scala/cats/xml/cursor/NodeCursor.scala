@@ -41,6 +41,21 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
   def down(nodeName: String): NodeCursor =
     new NodeCursor.Simple(this, NodeCursor.Op.Down(nodeName))
 
+  def applyDynamic(nodeName: String)(index: Int): NodeCursor =
+    down(nodeName)(index)
+
+  def apply(index: Int): NodeCursor =
+    new NodeCursor.Simple(this, NodeCursor.Op.SelectNodeByIndex(index))
+
+  def head: NodeCursor =
+    new NodeCursor.Simple(this, NodeCursor.Op.Head)
+
+  def last: NodeCursor =
+    new NodeCursor.Simple(this, NodeCursor.Op.Last)
+
+  def find(p: XmlNode => Boolean): NodeCursor =
+    new NodeCursor.Simple(this, NodeCursor.Op.FindChild(p))
+
   // content
   def attr(key: String): AttrCursor =
     new AttrCursor(this, AttrCursor.Op.SelectAttr(key))
@@ -64,9 +79,17 @@ object NodeCursor {
   object Op {
 
     case class Down(nodeName: String) extends Op
+    case class SelectNodeByIndex(index: Int) extends Op
+    case class FindChild(p: XmlNode => Boolean) extends Op
+    case object Head extends Op
+    case object Last extends Op
 
-    implicit final val showCursorOp: Show[Op] = Show.show { case Down(nodeName) =>
-      s"/$nodeName"
+    implicit final val showCursorOp: Show[Op] = Show.show {
+      case Down(nodeName)           => s"/$nodeName"
+      case SelectNodeByIndex(index) => s"/[$index]"
+      case FindChild(_)             => s"/[find]"
+      case Head                     => s"/head"
+      case Last                     => s"/last"
     }
   }
 
@@ -98,6 +121,28 @@ object NodeCursor {
                   .findChild(nodeName)
                   .toRight(
                     CursorFailure.MissingNode(CursorOp.buildOpsPath(currentPath), nodeName)
+                  )
+              case NodeCursor.Op.SelectNodeByIndex(index) =>
+                current.children
+                  .lift(index)
+                  .toRight(
+                    CursorFailure.MissingNodeAtIndex(CursorOp.buildOpsPath(currentPath), index)
+                  )
+              case NodeCursor.Op.FindChild(p) =>
+                current.children
+                  .find(p)
+                  .toRight(
+                    CursorFailure.MissingNodeFind(CursorOp.buildOpsPath(currentPath), p)
+                  )
+              case NodeCursor.Op.Head =>
+                current.children.headOption
+                  .toRight(
+                    CursorFailure.MissingNodeHead(CursorOp.buildOpsPath(currentPath))
+                  )
+              case NodeCursor.Op.Last =>
+                current.children.lastOption
+                  .toRight(
+                    CursorFailure.MissingNodeLast(CursorOp.buildOpsPath(currentPath))
                   )
             }
 

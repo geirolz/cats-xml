@@ -87,6 +87,109 @@ class NodeCursorSuite extends munit.FunSuite {
     )
   }
 
+  test("NodeCursor.applyDynamic") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("foo").withChild(
+          XmlNode("bar0"),
+          XmlNode("bar1"),
+          XmlNode("bar2")
+        )
+      )
+
+    assertEquals(
+      obtained = Root.foo(2).focus(node),
+      expected = Right(XmlNode("bar2"))
+    )
+
+    assertEquals(
+      obtained = Root.foo(10).focus(node),
+      expected = Left(CursorFailure.MissingNodeAtIndex("/foo", 10))
+    )
+  }
+
+  test("NodeCursor.apply with index") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("foo").withChild(
+          XmlNode("bar0"),
+          XmlNode("bar1"),
+          XmlNode("bar2")
+        )
+      )
+
+    assertEquals(
+      obtained = Root.foo.apply(2).focus(node),
+      expected = Right(XmlNode("bar2"))
+    )
+
+    assertEquals(
+      obtained = Root.foo.apply(10).focus(node),
+      expected = Left(CursorFailure.MissingNodeAtIndex("/foo", 10))
+    )
+  }
+
+  test("NodeCursor.find") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("foo").withChild(
+          XmlNode("bar0").withAttributes("a" := "1"),
+          XmlNode("bar1").withAttributes("a" := "2"),
+          XmlNode("bar2").withAttributes("a" := "3")
+        )
+      )
+
+    assertEquals(
+      obtained = Root.foo.find(_.findAttr("a").exists(_.value.asString == "3")).focus(node),
+      expected = Right(XmlNode("bar2").withAttributes("a" := "3"))
+    )
+  }
+
+  test("NodeCursor.head") {
+
+    assertEquals(
+      obtained = Root.foo.head.focus(
+        XmlNode("root").withChild(
+          XmlNode("foo").withChild(
+            XmlNode("bar0"),
+            XmlNode("bar1"),
+            XmlNode("bar2")
+          )
+        )
+      ),
+      expected = Right(XmlNode("bar0"))
+    )
+
+    assertEquals(
+      obtained = Root.foo.head.focus(XmlNode("root").withChild(XmlNode("foo"))),
+      expected = Left(CursorFailure.MissingNodeHead("/foo"))
+    )
+  }
+
+  test("NodeCursor.last") {
+
+    assertEquals(
+      obtained = Root.foo.last.focus(
+        XmlNode("root").withChild(
+          XmlNode("foo").withChild(
+            XmlNode("bar0"),
+            XmlNode("bar1"),
+            XmlNode("bar2")
+          )
+        )
+      ),
+      expected = Right(XmlNode("bar2"))
+    )
+
+    assertEquals(
+      obtained = Root.foo.last.focus(XmlNode("root").withChild(XmlNode("foo"))),
+      expected = Left(CursorFailure.MissingNodeLast("/foo"))
+    )
+  }
+
   test("NodeCursor.attr") {
 
     val node: XmlNode =

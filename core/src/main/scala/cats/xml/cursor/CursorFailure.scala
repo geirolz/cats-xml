@@ -5,6 +5,7 @@ import cats.data.NonEmptyList
 import cats.xml.codec.DecoderFailure
 import cats.xml.cursor.CursorFailure.CursorFailureException
 import cats.xml.utils.ErrorKeeper
+import cats.xml.XmlNode
 
 /** A coproduct ADT to represent the `Cursor` possible failures.
   */
@@ -28,6 +29,12 @@ object CursorFailure {
   }
   sealed trait FailedNode extends CursorFailure
   case class MissingNode(path: String, nodeName: String) extends FailedNode with Missing
+  case class MissingNodeAtIndex(path: String, index: Int) extends FailedNode with Missing
+  case class MissingNodeFind(path: String, predicate: XmlNode => Boolean)
+      extends FailedNode
+      with Missing
+  case class MissingNodeHead(path: String) extends FailedNode with Missing
+  case class MissingNodeLast(path: String) extends FailedNode with Missing
   case class MissingText(path: String) extends FailedNode with Missing
 
   sealed trait FailedAttribute extends CursorFailure
@@ -59,6 +66,10 @@ object CursorFailure {
       case MissingAttrHead(path)           => s"Head attribute on empty list${pathAt(path)}"
       case MissingAttrLast(path)           => s"Last attribute on empty list${pathAt(path)}"
       case MissingNode(path, nodeName)     => s"Missing node '$nodeName'${pathAt(path)}"
+      case MissingNodeAtIndex(path, index) => s"Missing node at index '$index'${pathAt(path)}"
+      case MissingNodeFind(path, _)        => s"Missing node find${pathAt(path)}"
+      case MissingNodeHead(path)           => s"Missing head node${pathAt(path)}"
+      case MissingNodeLast(path)           => s"Missing last node${pathAt(path)}"
       case MissingText(path)               => s"Missing text${pathAt(path)}'"
       case ValidationsFailed(path, eNel) =>
         s"Validations (${eNel.size}) failed${pathAt(path)}. ${eNel.toList.mkString("\n- ", "\n- ", "")}"
