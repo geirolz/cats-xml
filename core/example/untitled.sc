@@ -32,8 +32,6 @@ val node: XmlNode =
          </foo>
        </root>""".get
 
-
-
 ////
 ////node.findDeepChild("roar")
 ////Xml.toNodeSeq(node)
@@ -122,7 +120,6 @@ result.toString
 //    .withText(t.text)
 //)
 
-
 //val res1 = dec.decode(tree).toOption.map(encoder.encode).get
 //
 
@@ -140,6 +137,3 @@ result.toString
 //
 //
 //ORIGINAL
-
-
-
