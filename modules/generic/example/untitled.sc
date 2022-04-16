@@ -16,7 +16,6 @@ implicit val decBar: Decoder[Bar] = deriveDecoder[Bar]
 val decFoo: Decoder[Foo]          = deriveDecoder[Foo]
 //val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
 
-
 //val a: CursorResultInterpreter[Option[Int]] = CursorResultInterpreterMacro.deriveCursorResultInterpreter[Option[Int]]
 //a.interpret(Left(CursorFailure.Custom("")))
 //
