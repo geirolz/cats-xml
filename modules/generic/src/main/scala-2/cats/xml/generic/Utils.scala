@@ -8,7 +8,7 @@ object Utils {
     tpe <:< typeOf[AnyVal]
 
   def isValueClassOf(tpe: Type)(f: Type => Boolean): Boolean =
-    isValueClass(tpe) && f(classAccessors(tpe).values.head)
+    isValueClass(tpe) && f(classAccessors(tpe).values.head.tpe)
 
   def hasArgsTypePrimitive(tpe: Type): Boolean = {
     val typeArgs = tpe.typeArgs
@@ -23,14 +23,15 @@ object Utils {
   def isClassOf[T: TypeTag](tpe: Type): Boolean =
     tpe.typeSymbol.asClass.equals(typeOf[T].typeSymbol.asClass)
 
-  def isPrimitive[T: TypeTag](tpe: Type): Boolean =
+  def isPrimitive(tpe: Type): Boolean =
     tpe.typeSymbol.asClass.isPrimitive
 
-  def classAccessors[T: TypeTag]: Map[String, Type] =
+  def classAccessors[T: TypeTag]: Map[String, TypeInfo] =
     classAccessors(typeOf[T])
 
-  def classAccessors(tpe: Type): Map[String, Type] =
+  def classAccessors(tpe: Type): Map[String, TypeInfo] =
     tpe.members.collect {
-      case m: MethodSymbol if m.isGetter && m.isPublic => (m.name.toTermName.toString, m.returnType)
+      case m: MethodSymbol if m.isGetter && m.isPublic =>
+        (m.name.toTermName.toString, TypeInfo.eval(m.returnType))
     }.toMap
 }
