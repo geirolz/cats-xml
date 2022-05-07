@@ -13,6 +13,11 @@ sealed trait CursorFailure {
 
   def asException: CursorFailureException = CursorFailureException(this)
 
+  final val isMissing: Boolean = this match {
+    case _: CursorFailure.Missing => true
+    case _                        => false
+  }
+
   override def toString: String = Show[CursorFailure].show(this)
 }
 object CursorFailure {

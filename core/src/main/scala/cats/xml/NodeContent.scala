@@ -7,27 +7,27 @@ import cats.xml.codec.DataEncoder
   */
 sealed trait NodeContent {
 
-  lazy val isEmpty: Boolean = this match {
+  final lazy val isEmpty: Boolean = this match {
     case NodeContent.Empty => true
     case _                 => false
   }
 
-  lazy val nonEmpty: Boolean = !isEmpty
+  final lazy val nonEmpty: Boolean = !isEmpty
 
-  lazy val text: Option[XmlData] =
+  final lazy val text: Option[XmlData] =
     this match {
       case NodeContent.Text(data) => Some(data)
       case _                      => None
     }
 
-  lazy val children: List[XmlNode] = this match {
+  final lazy val children: List[XmlNode] = this match {
     case NodeContent.Children(children) => children.toList
     case _                              => Nil
   }
 }
 object NodeContent {
 
-  val empty: NodeContent = Empty
+  final val empty: NodeContent = Empty
 
   def text[T: DataEncoder](data: T): NodeContent =
     Text(DataEncoder[T].encode(data))

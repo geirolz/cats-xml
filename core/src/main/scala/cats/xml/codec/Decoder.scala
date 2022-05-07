@@ -5,6 +5,8 @@ import cats.data.*
 import cats.xml.*
 import cats.xml.cursor.{Cursor, FreeCursor, NodeCursor}
 import cats.xml.cursor.NodeCursor.Root
+import cats.xml.Xml.XmlNull
+import cats.xml.XmlData.*
 
 import scala.collection.Factory
 import scala.util.Try

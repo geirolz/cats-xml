@@ -14,7 +14,7 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
 
   def history: List[NodeCursor.Op]
 
-  override lazy val path: String = CursorOp.buildOpsPath(history)
+  override final lazy val path: String = CursorOp.buildOpsPath(history)
 
   def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
     Modifier(node => {

@@ -1,7 +1,8 @@
 package cats.xml.cursor
 
-import cats.xml.{XmlAttribute, XmlNode, XmlString}
+import cats.xml.{XmlAttribute, XmlNode}
 import cats.xml.cursor.NodeCursor.Root
+import cats.xml.XmlData.XmlString
 
 class NodeCursorSuite extends munit.FunSuite {
 

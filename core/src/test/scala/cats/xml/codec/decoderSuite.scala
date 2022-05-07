@@ -4,7 +4,8 @@ import cats.{Alternative, ApplicativeThrow, Eq}
 import cats.data.NonEmptyList
 import cats.data.Validated.Valid
 import cats.laws.discipline.MonadErrorTests
-import cats.xml.{Xml, XmlNode, XmlString}
+import cats.xml.{Xml, XmlNode}
+import cats.xml.XmlData.*
 import cats.xml.cursor.CursorFailure
 import cats.xml.testing.Samples.dummyNode
 import org.scalacheck.Arbitrary

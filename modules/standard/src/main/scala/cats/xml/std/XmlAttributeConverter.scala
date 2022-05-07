@@ -1,6 +1,7 @@
 package cats.xml.std
 
-import cats.xml.{XmlAttribute, XmlString}
+import cats.xml.XmlAttribute
+import cats.xml.XmlData.*
 
 import scala.annotation.unused
 import scala.xml.{MetaData, Null}

@@ -2,6 +2,7 @@ package cats.xml.std
 
 import cats.xml.*
 import cats.Eq
+import cats.xml.XmlData.*
 
 import scala.annotation.{tailrec, unused}
 import scala.xml.*

@@ -14,7 +14,7 @@ class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
 
   import cats.implicits.*
 
-  lazy val path: String = s"${vCursor.path}$op"
+  final lazy val path: String = s"${vCursor.path}$op"
 
   // modify
   def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =

@@ -1,7 +1,8 @@
 package cats.xml.codec
 
-import cats.xml.{Xml, XmlData, XmlNull, XmlString}
+import cats.xml.{Xml, XmlData}
 import cats.Contravariant
+import cats.xml.XmlData.XmlString
 
 // T => XML
 trait Encoder[-T] {
@@ -33,7 +34,14 @@ private[xml] trait EncoderInstances extends EncoderPrimitivesInstances {
     }
 }
 private[xml] trait EncoderPrimitivesInstances {
+
   implicit val encoderXml: Encoder[Xml] = Encoder.id
+
+  implicit def encoderOption[T: Encoder]: Encoder[Option[T]] =
+    Encoder.of[Option[T]] {
+      case Some(value) => Encoder[T].encode(value)
+      case None        => Xml.Null
+    }
 }
 
 // data encoder
@@ -50,7 +58,7 @@ object DataEncoder extends DataEncoderPrimitivesInstances {
 
 private[xml] trait DataEncoderPrimitivesInstances {
   implicit val encoderXmlData: DataEncoder[XmlData] = DataEncoder.of(identity)
-  implicit val encoderUnit: DataEncoder[Unit]       = DataEncoder.of(_ => XmlNull)
+  implicit val encoderUnit: DataEncoder[Unit]       = DataEncoder.of(_ => Xml.Null)
   implicit val encoderString: DataEncoder[String]   = DataEncoder.of(XmlString(_))
   implicit val encoderBoolean: DataEncoder[Boolean] = encoderString.contramap {
     case true  => "true"

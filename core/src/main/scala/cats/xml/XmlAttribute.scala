@@ -29,8 +29,8 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 
   def stringify(ls: XmlAttribute)(implicit showData: Show[XmlData]): String =
     ls.value match {
-      case XmlNull => ""
-      case _       => s"${ls.key}=\"${showData.show(ls.value)}\""
+      case Xml.Null => ""
+      case _        => s"${ls.key}=\"${showData.show(ls.value)}\""
     }
 }
 private[xml] trait XmlAttributeSyntax {

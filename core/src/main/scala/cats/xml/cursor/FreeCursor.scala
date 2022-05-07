@@ -34,6 +34,9 @@ object FreeCursor extends FreeCursorInstances {
   def pure[I, O](value: O): FreeCursor[I, O] =
     const(value.validNel)
 
+  def failure[I, O](value: NonEmptyList[CursorFailure]): FreeCursor[I, O] =
+    const(value.invalid)
+
   def const[I, O](result: FreeCursor.Result[O]): FreeCursor[I, O] =
     FreeCursor.of(_ => result)
 

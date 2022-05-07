@@ -11,7 +11,7 @@ class TextCursor(protected[xml] val lastCursor: NodeCursor) extends VCursor[XmlD
 
   import cats.implicits.*
 
-  override lazy val path: String = lastCursor.path
+  override final lazy val path: String = lastCursor.path
 
   // modify
   def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =

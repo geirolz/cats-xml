@@ -26,7 +26,7 @@ implicit val ii: XmlTypeInterpreter[Bar] =
 
 implicit val decBar: Decoder[Bar] = deriveDecoder[Bar]
 val decFoo: Decoder[Foo]          = deriveDecoder[Foo]
-val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
+//val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
 
 
 //val a: CursorResultInterpreter[Option[Int]] = CursorResultInterpreterMacro.deriveCursorResultInterpreter[Option[Int]]
@@ -39,6 +39,6 @@ val fooNode =   XmlNode("Foo")
   .withChild(barNode)
 
 decFoo.decode(fooNode)
-  .map(encFoo.encode)
+//  .map(encFoo.encode)
 
 //encFoo.encode(Foo(None, "TEST", None, Bar("100")))
