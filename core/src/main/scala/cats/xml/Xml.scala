@@ -83,7 +83,7 @@ object XmlData {
 
   // TODO: TO CHECK EQ TO DECODE STRING
   implicit val showXmlData: Show[XmlData] = {
-    case XmlNull          => "null"
+    case XmlNull          => ""
     case XmlByte(value)   => value.toString
     case XmlNumber(value) => value.toString
     case XmlArray(value)  => value.mkString(",")

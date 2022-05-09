@@ -4,9 +4,42 @@ class XmlPrinterSuite extends munit.FunSuite {
 
   import cats.xml.implicits.*
 
-  test("XmlPrinter.prettyString convert xml tree to well formatted XML string") {
+  test("XmlPrinter.prettyString convert XmlData to string") {
 
-    val tree: XmlNode = XmlNode("Foo").withChild(
+    val tree: Xml = XmlData.fromString("VALUE")
+
+    // assert
+    assertEquals(
+      obtained = XmlPrinter.prettyString(tree),
+      expected = "VALUE"
+    )
+  }
+
+  test("XmlPrinter.prettyString convert XmlAttribute to string") {
+
+    val xml: Xml = XmlAttribute("KEY", "VALUE")
+
+    // assert
+    assertEquals(
+      obtained = XmlPrinter.prettyString(xml),
+      expected = "KEY=\"VALUE\""
+    )
+  }
+
+  test("XmlPrinter.prettyString convert XmlNull to string") {
+
+    val xml: Xml = Xml.Null
+
+    // assert
+    assertEquals(
+      obtained = XmlPrinter.prettyString(xml),
+      expected = ""
+    )
+  }
+
+  test("XmlPrinter.prettyString convert XmlNode to well formatted XML string") {
+
+    val xml: XmlNode = XmlNode("Foo").withChild(
       XmlNode("Bar")
         .withAttributes("F" := 'A')
         .withChild(
@@ -22,7 +55,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(tree),
+      obtained = XmlPrinter.prettyString(xml),
       expected = """|<Foo>
                     | <Bar F="A">
                     |  <Test G="100">

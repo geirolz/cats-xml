@@ -1,5 +1,7 @@
 package cats.xml
 
+import cats.xml.Xml.XmlNull
+
 import scala.collection.mutable
 
 object XmlPrinter {
@@ -13,8 +15,8 @@ object XmlPrinter {
     implicit val default: Config = Config()
   }
 
-  def stringify(tree: XmlNode): String =
-    prettyString(tree = tree)(
+  def stringify(xml: Xml): String =
+    prettyString(xml = xml)(
       Config(
         returnOnNode = false,
         indentChar   = None,
@@ -22,9 +24,9 @@ object XmlPrinter {
       )
     )
 
-  def prettyString(tree: XmlNode)(implicit config: Config): String = {
+  def prettyString(xml: Xml)(implicit config: Config): String = {
 
-    def build(
+    def buildNode(
       tree: XmlNode,
       contentOpt: Option[String],
       deep: Int,
@@ -32,7 +34,7 @@ object XmlPrinter {
     ): String = {
 
       val nodeName  = tree.label
-      val nodeAttrs = tree.attributes.map(XmlAttribute.stringify).mkString(" ")
+      val nodeAttrs = tree.attributes.map(prettyString).mkString(" ")
       val nodeInfo  = s"$nodeName${if (nodeAttrs.isEmpty) "" else " "}$nodeAttrs"
       val tabs = config.indentChar match {
         case Some(indentCharValue) => (0 until deep).map(_ => indentCharValue).mkString("")
@@ -54,25 +56,25 @@ object XmlPrinter {
       }
     }
 
-    def rec(t: XmlNode, stringBuilder: mutable.StringBuilder, deep: Int): String =
+    def recNode(t: XmlNode, stringBuilder: mutable.StringBuilder, deep: Int): String =
       t.content match {
         case NodeContent.Empty =>
           stringBuilder
-            .append(build(tree = t, contentOpt = None, deep = deep, isText = false))
+            .append(buildNode(tree = t, contentOpt = None, deep = deep, isText = false))
             .toString()
         case NodeContent.Text(data) =>
           stringBuilder
             .append(
-              build(tree = t, contentOpt = Some(data.toString), deep = deep, isText = true)
+              buildNode(tree = t, contentOpt = Some(prettyString(data)), deep = deep, isText = true)
             )
             .toString()
         case NodeContent.Children(childrenNel) =>
-          build(
+          buildNode(
             tree = t,
             contentOpt = Some(
               childrenNel
                 .map(n => {
-                  rec(n, new mutable.StringBuilder, deep + 1)
+                  recNode(n, new mutable.StringBuilder, deep + 1)
                 })
                 .toList
                 .mkString("")
@@ -82,10 +84,17 @@ object XmlPrinter {
           )
       }
 
-    rec(
-      t             = tree,
-      stringBuilder = new mutable.StringBuilder(),
-      deep          = 0
-    )
+    xml match {
+      case XmlNull            => ""
+      case attr: XmlAttribute => attr.asString
+      case data: XmlData      => data.asString
+      case node: XmlNode =>
+        recNode(
+          t             = node,
+          stringBuilder = new mutable.StringBuilder(),
+          deep          = 0
+        )
+    }
+
   }
 }

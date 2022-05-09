@@ -127,8 +127,7 @@ sealed private[xml] trait DecoderDataInstances {
 
   implicit val decodeString: Decoder[String] = Decoder.id.flatMapF {
     case XmlAttribute(_, value) => decodeString.decode(value)
-    case data: XmlData          =>
-      // TODO: TO CHECK EQ TO SHOW
+    case data: XmlData =>
       def rec(d: XmlData): String = d match {
         case XmlNull          => "null" // should never happen
         case XmlString(value) => value
