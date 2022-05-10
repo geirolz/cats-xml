@@ -51,10 +51,9 @@ object FreeCursor extends FreeCursorInstances {
     new FreeCursor[Xml, O] { $this =>
       override def focus(xml: Xml): FreeCursor.Result[O] = {
 
-        // TODO this smell
         val cursorResult: Cursor.Result[Xml] = xml match {
-          case tree: XmlNode => cursor.focus(tree)
-          case x: Xml        => x.asRight
+          case node: XmlNode => cursor.focus(node)
+          case element => Left(CursorFailure.InvalidTargetType(XmlNode.getClass, element.getClass))
         }
 
         Decoder[O].decodeCursorResult(cursorResult) match {
