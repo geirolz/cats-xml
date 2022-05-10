@@ -39,7 +39,7 @@ trait Xml {
 }
 object Xml {
 
-  final case object XmlNull extends Xml with XmlData
+  case object XmlNull extends Xml with XmlData
 
   final val Null: Xml & XmlData = XmlNull
 
