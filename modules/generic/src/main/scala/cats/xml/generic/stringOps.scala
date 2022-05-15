@@ -2,7 +2,7 @@ package cats.xml.generic
 
 import cats.xml.generic.StringMapper.*
 
-sealed trait StringMapper extends (String => String) {
+sealed trait StringMapper extends String => String {
 
   import StringOps.*
 
