@@ -33,7 +33,7 @@ lazy val catsxml: Project = project
 
     // docs
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
-    (Compile / compile) := (Compile / compile)
+    Compile / compile := (Compile / compile)
       .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
       .value
   )
@@ -97,9 +97,9 @@ lazy val generic: Project =
       noPublishSettings, // TODO ENABLE ONCE READY
       libraryDependencies ++= {
         CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, _)) => ProjectDependencies.Generic.scala2
-          case Some((3, _)) => ProjectDependencies.Generic.scala3
-          case _            => Nil
+          case Some(2, _) => ProjectDependencies.Generic.scala2
+          case Some(3, _) => ProjectDependencies.Generic.scala3
+          case _          => Nil
         }
       }
     )
@@ -139,9 +139,9 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   resolvers ++= ProjectResolvers.all,
   libraryDependencies ++= ProjectDependencies.common ++ {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) => ProjectDependencies.Plugins.compilerPluginsFor2_13
-      case Some((3, _))  => ProjectDependencies.Plugins.compilerPluginsFor3
-      case _             => Nil
+      case Some(2, 13) => ProjectDependencies.Plugins.compilerPluginsFor2_13
+      case Some(3, _)  => ProjectDependencies.Plugins.compilerPluginsFor3
+      case _           => Nil
     }
   },
   // fmt
@@ -162,13 +162,13 @@ def scalacSettings(scalaVersion: String): Seq[String] =
     "-language:dynamics"
   ) ++ {
     CrossVersion.partialVersion(scalaVersion) match {
-      case Some((3, _)) =>
+      case Some(3, _) =>
         Seq(
           "-Ykind-projector",
           "-explain-types", // Explain type errors in more detail.
           "-Xfatal-warnings" // Fail the compilation if there are any warnings.
         )
-      case Some((2, 13)) =>
+      case Some(2, 13) =>
         Seq(
           "-explaintypes", // Explain type errors in more detail.
           "-unchecked", // Enable additional warnings where generated code depends on assumptions.

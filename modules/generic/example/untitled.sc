@@ -4,8 +4,6 @@ import cats.xml.generic.decoder.auto._
 import cats.xml.XmlNode
 import cats.xml.implicits._
 
-
-
 case class Stringa(value1: String) extends AnyVal
 
 case class Bar(wow: String)
@@ -15,8 +13,6 @@ case class Foo(
   missingNode: Option[Bar],
   bar: Bar
 )
-
-
 
 implicit val ii: XmlTypeInterpreter[Bar] =
   XmlTypeInterpreter
@@ -29,13 +25,12 @@ implicit val decBar: Decoder[Bar] = deriveDecoder[Bar]
 val decFoo: Decoder[Foo]          = deriveDecoder[Foo]
 //val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
 
-
 //val a: CursorResultInterpreter[Option[Int]] = CursorResultInterpreterMacro.deriveCursorResultInterpreter[Option[Int]]
 //a.interpret(Left(CursorFailure.Custom("")))
 //
 
 val barNode = XmlNode("bar").withText(100)
-val fooNode =   XmlNode("Foo")
+val fooNode = XmlNode("Foo")
   .withAttributes("test" := "TEST")
   .withChild(barNode)
 

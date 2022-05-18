@@ -91,7 +91,7 @@ object XmlPrinter {
       case node: XmlNode =>
         recNode(
           t             = node,
-          stringBuilder = new mutable.StringBuilder(),
+          stringBuilder = new mutable.StringBuilder,
           deep          = 0
         )
     }

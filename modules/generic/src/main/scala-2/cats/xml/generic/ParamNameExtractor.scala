@@ -5,7 +5,7 @@ import cats.xml.generic.ParamNameExtractor.Macros
 import scala.annotation.{tailrec, unused}
 import scala.reflect.macros.blackbox
 
-class ParamNameExtractor[T] private () {
+class ParamNameExtractor[T] private {
   def param[U](@unused path: T => U): ParamName[T] =
     macro Macros.extract[T, U]
 }
