@@ -1,7 +1,6 @@
-import cats.xml.codec.{Decoder, Encoder}
+import cats.xml.codec.Decoder
 import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 import cats.xml.generic.decoder.auto._
-import cats.xml.generic.encoder.semiauto._
 import cats.xml.XmlNode
 import cats.xml.implicits._
 
@@ -17,12 +16,14 @@ case class Foo(
   bar: Bar
 )
 
+
+
 implicit val ii: XmlTypeInterpreter[Bar] =
   XmlTypeInterpreter
     .withoutText[Bar]
-    .overrideType {
-      case "wow" => XmlElemType.Text
-    }
+    .overrideType(
+      _.param(_.wow) -> XmlElemType.Text
+    )
 
 implicit val decBar: Decoder[Bar] = deriveDecoder[Bar]
 val decFoo: Decoder[Foo]          = deriveDecoder[Foo]

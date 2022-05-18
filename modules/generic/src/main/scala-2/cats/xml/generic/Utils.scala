@@ -26,12 +26,12 @@ object Utils {
   def isPrimitive(tpe: Type): Boolean =
     tpe.typeSymbol.asClass.isPrimitive
 
-  def classAccessors[T: TypeTag]: Map[String, TypeInfo] =
+  def classAccessors[T: TypeTag]: Map[ParamName[T], TypeInfo] =
     classAccessors(typeOf[T])
 
-  def classAccessors(tpe: Type): Map[String, TypeInfo] =
+  def classAccessors[T](tpe: Type): Map[ParamName[T], TypeInfo] =
     tpe.members.collect {
       case m: MethodSymbol if m.isGetter && m.isPublic =>
-        (m.name.toTermName.toString, TypeInfo.eval(m.returnType))
+        (ParamName[T](m.name.toTermName.toString), TypeInfo.eval(m.returnType))
     }.toMap
 }
