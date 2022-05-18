@@ -22,6 +22,8 @@ sealed trait CursorFailure {
 }
 object CursorFailure {
 
+  case class InvalidTargetType(required: Class[?], actual: Class[?]) extends CursorFailure
+
   // decode
   case class DecoderFailed(path: String, failure: DecoderFailure) extends CursorFailure
 
@@ -66,6 +68,8 @@ object CursorFailure {
     }
 
     failure match {
+      case InvalidTargetType(required, actual) =>
+        s"Wrong XML element type, '$required' required but got '$actual'"
       case MissingAttrByKey(path, key)     => s"Missing attribute '$key'${pathAt(path)}"
       case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index'${pathAt(path)}"
       case MissingAttrHead(path)           => s"Head attribute on empty list${pathAt(path)}"
