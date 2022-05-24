@@ -42,21 +42,7 @@ private[xml] trait EncoderPrimitivesInstances {
       case Some(value) => Encoder[T].encode(value)
       case None        => Xml.Null
     }
-}
 
-// data encoder
-trait DataEncoder[-T] extends Encoder[T] {
-  override def encode(t: T): XmlData
-  override def contramap[U](f: U => T): DataEncoder[U] =
-    DataEncoder.of(f.andThen(encode))
-}
-object DataEncoder extends DataEncoderPrimitivesInstances {
-  def apply[T: DataEncoder]: DataEncoder[T] = implicitly[DataEncoder[T]]
-
-  def of[T](f: T => XmlData): DataEncoder[T] = (t: T) => f(t)
-}
-
-private[xml] trait DataEncoderPrimitivesInstances {
   implicit val encoderXmlData: DataEncoder[XmlData] = DataEncoder.of(identity)
   implicit val encoderUnit: DataEncoder[Unit]       = DataEncoder.of(_ => Xml.Null)
   implicit val encoderString: DataEncoder[String]   = DataEncoder.of(XmlString(_))
@@ -70,4 +56,16 @@ private[xml] trait DataEncoderPrimitivesInstances {
   implicit val encoderFloat: DataEncoder[Float]           = encoderString.contramap(_.toString)
   implicit val encoderDouble: DataEncoder[Double]         = encoderString.contramap(_.toString)
   implicit val encoderBigDecimal: DataEncoder[BigDecimal] = encoderString.contramap(_.toString)
+}
+
+// #################### DATA ENCODER ####################
+trait DataEncoder[-T] extends Encoder[T] {
+  override def encode(t: T): XmlData
+  override def contramap[U](f: U => T): DataEncoder[U] =
+    DataEncoder.of(f.andThen(encode))
+}
+object DataEncoder {
+  def apply[T: DataEncoder]: DataEncoder[T] = implicitly[DataEncoder[T]]
+
+  def of[T](f: T => XmlData): DataEncoder[T] = (t: T) => f(t)
 }

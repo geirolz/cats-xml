@@ -2,7 +2,7 @@ package cats.xml.generic.decoder
 
 import cats.xml.codec.Decoder
 import cats.xml.cursor.FreeCursor
-import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
+import cats.xml.generic.{ParamName, XmlElemType, XmlTypeInterpreter}
 import cats.xml.Xml
 import magnolia1.{CaseClass, Param}
 
@@ -24,7 +24,7 @@ object DecoderDerivation {
               implicit val pdec: Decoder[param.PType] = param.typeclass
 
               interpreter
-                .evalParam(param.label)
+                .evalParam(ParamName[T](param.label))
                 .mapFilter(paramInfo => {
 
                   // normalize element label
@@ -52,18 +52,4 @@ object DecoderDerivation {
             .map(ctx.rawConstruct)
         })
     }
-
-  // Internal error: unable to find the outer accessor symbol of class $read
-//  private def useDefaultParameterIfPresentToRecoverMissing[F[_], T, PT](
-//    param: Param[F, T]
-//  ): PartialFunction[NonEmptyList[CursorFailure], FreeCursor[Xml, PT]] = { failures =>
-//    if (failures.forall(_.isMissing))
-//      param.default match {
-//        case Some(value) =>
-//          FreeCursor.const[Xml, PT](value.asInstanceOf[PT].validNel[CursorFailure])
-//        case None => FreeCursor.failure(failures)
-//      }
-//    else
-//      FreeCursor.failure(failures)
-//  }
 }

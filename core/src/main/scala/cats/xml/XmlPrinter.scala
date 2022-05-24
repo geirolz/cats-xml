@@ -24,6 +24,7 @@ object XmlPrinter {
       )
     )
 
+  // TODO: Return Option instead ?
   def prettyString(xml: Xml)(implicit config: Config): String = {
 
     def buildNode(
@@ -34,7 +35,7 @@ object XmlPrinter {
     ): String = {
 
       val nodeName  = tree.label
-      val nodeAttrs = tree.attributes.map(prettyString).mkString(" ")
+      val nodeAttrs = tree.attributes.map(prettyString).filterNot(_.isEmpty).mkString(" ")
       val nodeInfo  = s"$nodeName${if (nodeAttrs.isEmpty) "" else " "}$nodeAttrs"
       val tabs = config.indentChar match {
         case Some(indentCharValue) => (0 until deep).map(_ => indentCharValue).mkString("")
