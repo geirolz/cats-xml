@@ -14,14 +14,14 @@ object EncoderDerivation {
     } else {
       val interpreter: XmlTypeInterpreter[T] = XmlTypeInterpreter[T]
       Encoder.of(t => {
-        val node = XmlNode(ctx.typeName.short)
+        val nodeBuild = XmlNode(ctx.typeName.short)
         ctx.parameters.foreach(p =>
           interpreter
             .evalParam(ParamName(p.label))
             .foreach(paramInfo => {
               p.typeclass.encode(p.dereference(t)) match {
                 case data: XmlData if paramInfo.elemType == XmlElemType.Attribute =>
-                  node.mute(
+                  nodeBuild.mute(
                     _.appendAttr(
                       XmlAttribute(
                         key   = paramInfo.labelMapper(p.label),
@@ -30,14 +30,14 @@ object EncoderDerivation {
                     )
                   )
                 case data: XmlData if paramInfo.elemType == XmlElemType.Text =>
-                  node.mute(_.withText(data))
-                case node: XmlNode => node.mute(_.appendChild(node))
+                  nodeBuild.mute(_.withText(data))
+                case node: XmlNode => nodeBuild.mute(_.appendChild(node))
                 case _             => ()
               }
             })
         )
 
-        node
+        nodeBuild
       })
     }
   }
