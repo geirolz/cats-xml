@@ -13,7 +13,7 @@ private[xml] object NodeSeqEncoder extends NodeSeqEncoderInstances with NodeSeqE
 }
 private[xml] trait NodeSeqEncoderInstances {
   implicit val encoderStdAtomStr: DataEncoder[Atom[String]] =
-    DataEncoder.encoderString.contramap(_.data.trim)
+    Encoder.encoderString.contramap(_.data.trim)
 }
 
 private[xml] trait NodeSeqEncoderSyntax {
