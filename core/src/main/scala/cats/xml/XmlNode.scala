@@ -8,13 +8,13 @@ import scala.annotation.tailrec
 
 class XmlNode private (
   private var mLabel: String,
-  private var mAttributes: Seq[XmlAttribute],
+  private var mAttributes: List[XmlAttribute],
   private var mContent: NodeContent
 ) extends Xml {
 
   def label: String = mLabel
 
-  def attributes: Seq[XmlAttribute] = mAttributes
+  def attributes: List[XmlAttribute] = mAttributes
 
   def content: NodeContent = mContent
 
@@ -30,10 +30,10 @@ class XmlNode private (
     attributes.find(_.key == key)
 
   def withAttributes(attrs: Seq[XmlAttribute]): XmlNode =
-    updateAttrs(_ => attrs)
+    updateAttrs(_ => attrs.toList)
 
   def withAttributes(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode =
-    updateAttrs(_ => attr +: attrs)
+    updateAttrs(_ => (attr +: attrs).toList)
 
   def prependAttr(newAttr: XmlAttribute): XmlNode =
     updateAttrs(ls => newAttr +: ls)
@@ -44,7 +44,7 @@ class XmlNode private (
   def removeAttr(key: String): XmlNode =
     updateAttrs(_.filterNot(_.key == key))
 
-  def updateAttrs(f: Endo[Seq[XmlAttribute]]): XmlNode =
+  def updateAttrs(f: Endo[List[XmlAttribute]]): XmlNode =
     copy(attributes = f(attributes))
 
   def updateAttr(key: String)(f: Endo[XmlAttribute]): XmlNode =
@@ -124,9 +124,9 @@ class XmlNode private (
 
   // -----------------------------//
   def copy(
-    label: String                 = this.label,
-    attributes: Seq[XmlAttribute] = this.attributes,
-    content: NodeContent          = this.content
+    label: String                  = this.label,
+    attributes: List[XmlAttribute] = this.attributes,
+    content: NodeContent           = this.content
   ): XmlNode = new XmlNode(label, attributes, content)
 
   /** ##### BE CAREFUL! ##### */
@@ -143,16 +143,22 @@ class XmlNode private (
       case _             => false
     }
 
-  override final lazy val toString: String =
-    Show[XmlNode].show(this)
+  override final lazy val toString: String = {
+
+//    Show[XmlNode].show(this)
+    s"""
+       |Label: $mLabel
+       |Attrs: $mAttributes
+       |Content: $mContent""".stripMargin
+  }
 }
 
 object XmlNode extends XmlTreeInstances {
 
   def apply(
     label: String,
-    attributes: Seq[XmlAttribute] = Nil,
-    content: NodeContent          = NodeContent.empty
+    attributes: List[XmlAttribute] = Nil,
+    content: NodeContent           = NodeContent.empty
   ): XmlNode = new XmlNode(label, attributes, content)
 }
 

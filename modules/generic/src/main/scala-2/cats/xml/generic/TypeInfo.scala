@@ -7,6 +7,7 @@ import scala.reflect.runtime.universe.*
 case class TypeInfo(
   tpe: Type,
   isString: Boolean,
+  isPrimitiveWrapper: Boolean,
   isPrimitive: Boolean,
   hasArgsTypePrimitive: Boolean,
   hasArgsTypeOfString: Boolean,
@@ -20,6 +21,7 @@ object TypeInfo {
     TypeInfo(
       tpe                  = tpe,
       isString             = Utils.isClassOf[String](tpe),
+      isPrimitiveWrapper   = Utils.isClassOf[BigDecimal](tpe),
       isPrimitive          = Utils.isPrimitive(tpe),
       hasArgsTypePrimitive = Utils.hasArgsTypePrimitive(tpe),
       hasArgsTypeOfString  = Utils.hasArgsTypeOf[String](tpe),

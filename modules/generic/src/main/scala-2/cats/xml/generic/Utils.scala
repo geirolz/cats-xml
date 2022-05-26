@@ -8,7 +8,7 @@ object Utils {
     tpe <:< typeOf[AnyVal]
 
   def isValueClassOf(tpe: Type)(f: Type => Boolean): Boolean =
-    isValueClass(tpe) && f(classAccessors(tpe).values.head.tpe)
+    isValueClass(tpe) && classAccessors(tpe).values.headOption.exists(a => f(a.tpe))
 
   def hasArgsTypePrimitive(tpe: Type): Boolean = {
     val typeArgs = tpe.typeArgs

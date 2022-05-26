@@ -12,7 +12,7 @@ trait Encoder[-T] {
   def contramap[U](f: U => T): Encoder[U] =
     Encoder.of(f.andThen(encode))
 }
-object Encoder extends EncoderInstances {
+object Encoder extends EncoderInstances with EncoderSyntax {
 
   // lazy due circular dependencies with instances
   lazy val id: Encoder[Xml] = Encoder.of(identity)
@@ -24,6 +24,16 @@ object Encoder extends EncoderInstances {
   def pure[T](ns: => Xml): Encoder[T] = Encoder(_ => ns)
 }
 
+// #################### SYNTAX ####################
+private[xml] trait EncoderSyntax {
+
+  implicit class EncoderOps[T](t: T) {
+    def toXml(implicit e: Encoder[T]): Xml =
+      e.encode(t)
+  }
+}
+
+// #################### INSTANCES ####################
 private[xml] trait EncoderInstances extends EncoderPrimitivesInstances {
 
   implicit def codecToEncoder[T: Codec]: Encoder[T] = Codec[T].encoder

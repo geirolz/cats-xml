@@ -115,6 +115,7 @@ private[xml] trait XmlParserSyntax {
   )(implicit
     parserTry: XmlParser[Try]
   ) {
-    def xml(args: Any*): Try[XmlNode] = parserTry.parseString(ctx.s(args*))
+    // TODO: use macro
+    def xml(args: Any*): XmlNode = parserTry.parseString(ctx.s(args*)).get
   }
 }

@@ -16,11 +16,17 @@ case class Codec[T] private (
     encoder.encode(t)
 }
 
-object Codec {
+object Codec extends DecoderSyntax with EncoderSyntax {
 
   def apply[T: Codec]: Codec[T] =
     implicitly[Codec[T]]
 
   def of[T](decoder: Decoder[T], encoder: Encoder[T]): Codec[T] =
     new Codec[T](decoder, encoder)
+
+  implicit def codecToDecoder[T: Codec]: Decoder[T] =
+    Codec[T].decoder
+
+  implicit def codecToEncoder[T: Codec]: Encoder[T] =
+    Codec[T].encoder
 }

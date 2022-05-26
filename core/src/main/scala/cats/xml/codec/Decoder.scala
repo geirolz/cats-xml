@@ -39,7 +39,7 @@ trait Decoder[T] {
     Decoder.of(ns => decodeCursorResult(ns).andThen(t => f(t).decodeCursorResult(ns)))
 }
 
-object Decoder extends DecoderInstances {
+object Decoder extends DecoderInstances with DecoderSyntax {
 
   import cats.implicits.*
 
@@ -82,6 +82,15 @@ object Decoder extends DecoderInstances {
 
   def fromTry[T](f: Xml => Try[T]): Decoder[T] =
     id.emapTry(f)
+}
+
+// #################### SYNTAX ####################
+private[xml] trait DecoderSyntax {
+
+  implicit class DecoderOps(xml: Xml) {
+    def as[T](implicit d: Decoder[T]): Decoder.Result[T] =
+      d.decode(xml)
+  }
 }
 
 // ####################### INSTANCES #######################

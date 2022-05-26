@@ -30,7 +30,7 @@ val node: XmlNode =
              </root>
            </bar>
          </foo>
-       </root>""".get
+       </root>"""
 
 ////
 ////node.findDeepChild("roar")

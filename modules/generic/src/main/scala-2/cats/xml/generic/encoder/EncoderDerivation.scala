@@ -3,6 +3,7 @@ package cats.xml.generic.encoder
 import cats.xml.{XmlAttribute, XmlData, XmlNode}
 import cats.xml.codec.Encoder
 import cats.xml.generic.{ParamName, XmlElemType, XmlTypeInterpreter}
+import cats.xml.Xml.XmlNull
 import magnolia1.{CaseClass, Param}
 
 object EncoderDerivation {
@@ -20,6 +21,7 @@ object EncoderDerivation {
             .evalParam(ParamName(p.label))
             .foreach(paramInfo => {
               p.typeclass.encode(p.dereference(t)) match {
+                case XmlNull => ()
                 case data: XmlData if paramInfo.elemType == XmlElemType.Attribute =>
                   nodeBuild.mute(
                     _.appendAttr(

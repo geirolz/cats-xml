@@ -91,6 +91,7 @@ object XmlTypeInterpreter {
       (_: ParamName[T], tpeInfo: TypeInfo) =>
         tpeInfo.isString
           || tpeInfo.isPrimitive
+          || tpeInfo.isPrimitiveWrapper
           || tpeInfo.hasArgsTypePrimitive
           || tpeInfo.hasArgsTypeOfString
           || tpeInfo.isValueClassOfPrimitivesOrString

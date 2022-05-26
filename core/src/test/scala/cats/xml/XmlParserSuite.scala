@@ -44,23 +44,21 @@ class XmlParserSuite extends munit.FunSuite {
                   <Baz>100</Baz>
               </Bar>
           </Foo>""",
-      expected = Success(
-        XmlNode("Foo")
-          .withAttributes(
-            "intAttr"  := 1,
-            "boolAttr" := true
-          )
-          .withChild(
-            XmlNode("Bar")
-              .withAttributes(
-                "intAttr"   := 2,
-                "emptyAttr" := ""
-              )
-              .withChild(
-                XmlNode("Baz").withText(100)
-              )
-          )
-      )
+      expected = XmlNode("Foo")
+        .withAttributes(
+          "intAttr"  := 1,
+          "boolAttr" := true
+        )
+        .withChild(
+          XmlNode("Bar")
+            .withAttributes(
+              "intAttr"   := 2,
+              "emptyAttr" := ""
+            )
+            .withChild(
+              XmlNode("Baz").withText(100)
+            )
+        )
     )
   }
 
