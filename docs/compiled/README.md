@@ -78,12 +78,18 @@ val node: XmlNode = XmlNode("Foo")
     "age"  := 10
   )
   .withText("ORIGINAL")
-// node: XmlNode = <Foo name="Foo" age="10">ORIGINAL</Foo>
+// node: XmlNode = 
+// Label: Foo
+// Attrs: List(name="Foo", age="10")
+// Content: Text(ORIGINAL)
   
 val result: Modifier.Result[XmlNode] = Root
   .modify(_.withText("NEW"))
   .apply(node)  
 // result: Modifier.Result[XmlNode] = Right(
-//   value = <Foo name="Foo" age="10">NEW</Foo>
+//   value = 
+// Label: Foo
+// Attrs: List(name="Foo", age="10")
+// Content: Text(NEW)
 // )
 ```

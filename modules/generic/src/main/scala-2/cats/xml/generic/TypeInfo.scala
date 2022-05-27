@@ -2,6 +2,7 @@ package cats.xml.generic
 
 import cats.Show
 
+import scala.reflect.macros.blackbox
 import scala.reflect.runtime.universe.*
 
 case class TypeInfo(
@@ -39,4 +40,31 @@ object TypeInfo {
        |hasArgsTypeOfString: ${t.hasArgsTypeOfString}
        |isValueClassOfPrimitivesOrString: ${t.isValueClassOfPrimitivesOrString}
        |""".stripMargin
+
+  object Macros {
+
+    def deriveTypeInfoImpl[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[TypeInfo] = {
+      import c.universe.*
+
+      val tpe: c.Type = weakTypeOf[T].finalResultType
+
+      def isValueClass: Boolean =
+        tpe <:< typeOf[AnyVal]
+
+      reify(
+        TypeInfo(
+          tpe                  = tpe,
+          isString             = isClassOf[String](tpe),
+          isPrimitiveWrapper   = isClassOf[BigDecimal](tpe),
+          isPrimitive          = isPrimitive(tpe),
+          hasArgsTypePrimitive = Utils.hasArgsTypePrimitive(tpe),
+          hasArgsTypeOfString  = Utils.hasArgsTypeOf[String](tpe),
+          isValueClassOfPrimitivesOrString = Utils.isValueClassOf(tpe)(fieldType =>
+            Utils.isClassOf[String](fieldType) || Utils.isPrimitive(tpe)
+          )
+        )
+      )
+    }
+
+  }
 }
