@@ -35,26 +35,41 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
   def \(nodeName: String): NodeCursor =
     down(nodeName)
 
+  def \\(nodeName: String): NodeCursor =
+    deepDown(nodeName)
+
   def downPath(path: String): NodeCursor =
     path.split("/").foldLeft(this)(_.down(_))
 
   def down(nodeName: String): NodeCursor =
-    new NodeCursor.Simple(this, NodeCursor.Op.Down(nodeName))
+    move(NodeCursor.Op.Down(nodeName))
+
+  def deepDown(nodeName: String): NodeCursor =
+    move(NodeCursor.Op.DeepDown(nodeName))
 
   def applyDynamic(nodeName: String)(index: Int): NodeCursor =
     down(nodeName)(index)
 
   def apply(index: Int): NodeCursor =
-    new NodeCursor.Simple(this, NodeCursor.Op.SelectNodeByIndex(index))
+    move(NodeCursor.Op.SelectNodeByIndex(index))
+
+  def |(p: XmlNode => Boolean): NodeCursor =
+    filter(p)
+
+  def filter(p: XmlNode => Boolean): NodeCursor =
+    move(NodeCursor.Op.FilterChildren(p))
 
   def head: NodeCursor =
-    new NodeCursor.Simple(this, NodeCursor.Op.Head)
+    move(NodeCursor.Op.Head)
 
   def last: NodeCursor =
-    new NodeCursor.Simple(this, NodeCursor.Op.Last)
+    move(NodeCursor.Op.Last)
 
   def find(p: XmlNode => Boolean): NodeCursor =
-    new NodeCursor.Simple(this, NodeCursor.Op.FindChild(p))
+    move(NodeCursor.Op.FindChild(p))
+
+  private def move(op: NodeCursor.Op) =
+    new NodeCursor.Simple(this, op)
 
   // content
   def attr(key: String): AttrCursor =
@@ -77,16 +92,19 @@ object NodeCursor {
 
   sealed trait Op extends CursorOp
   object Op {
-
     case class Down(nodeName: String) extends Op
+    case class DeepDown(nodeName: String) extends Op
     case class SelectNodeByIndex(index: Int) extends Op
+    case class FilterChildren(p: XmlNode => Boolean) extends Op
     case class FindChild(p: XmlNode => Boolean) extends Op
     case object Head extends Op
     case object Last extends Op
 
     implicit final val showCursorOp: Show[Op] = Show.show {
       case Down(nodeName)           => s"/$nodeName"
+      case DeepDown(nodeName)       => s"//$nodeName"
       case SelectNodeByIndex(index) => s"/[$index]"
+      case FilterChildren(_)        => s"/[filter]"
       case FindChild(_)             => s"/[find]"
       case Head                     => s"/head"
       case Last                     => s"/last"
@@ -105,6 +123,8 @@ object NodeCursor {
 
   class Simple(protected val lastCursor: NodeCursor, protected val lastOp: Op) extends NodeCursor {
 
+    import cats.implicits.*
+
     override def focus(ns: XmlNode): Cursor.Result[XmlNode] = {
       @tailrec
       def rec(
@@ -122,12 +142,27 @@ object NodeCursor {
                   .toRight(
                     CursorFailure.MissingNode(CursorOp.buildOpsPath(currentPath), nodeName)
                   )
+              case NodeCursor.Op.DeepDown(nodeName) =>
+                XmlNode
+                  .group(
+                    current
+                      .filterDeepChildren(nodeName)
+                      .toList
+                  )
+                  .asRight[CursorFailure]
               case NodeCursor.Op.SelectNodeByIndex(index) =>
                 current.children
                   .lift(index)
                   .toRight(
                     CursorFailure.MissingNodeAtIndex(CursorOp.buildOpsPath(currentPath), index)
                   )
+              case NodeCursor.Op.FilterChildren(predicate) =>
+                XmlNode
+                  .group(
+                    current
+                      .filterChildrenBy(predicate)
+                  )
+                  .asRight[CursorFailure]
               case NodeCursor.Op.FindChild(p) =>
                 current.children
                   .find(p)

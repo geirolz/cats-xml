@@ -53,7 +53,8 @@ object FreeCursor extends FreeCursorInstances {
 
         val cursorResult: Cursor.Result[Xml] = xml match {
           case node: XmlNode => cursor.focus(node)
-          case element => Left(CursorFailure.InvalidTargetType(XmlNode.getClass, element.getClass))
+          case element =>
+            Left(CursorFailure.InvalidTargetType(XmlNode.getClass, element.getClass))
         }
 
         Decoder[O].decodeCursorResult(cursorResult) match {

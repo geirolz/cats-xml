@@ -23,12 +23,10 @@ object XmlLoader extends XmlLoaderInstances {
   def apply[F[_]](implicit loader: XmlLoader[F]): XmlLoader[F] = loader
 
   def withParser[F[_]](parser: XmlParser[F])(implicit F: Sync[F]): XmlLoader[F] =
-    new XmlLoader[F] {
-      override def loadInputStreamResource(inputStream: => InputStream): Resource[F, XmlNode] =
-        Resource
-          .fromAutoCloseable(F.delay(inputStream))
-          .evalMap(is => F.defer(parser.parseInputStream(is)))
-    }
+    (inputStream: InputStream) =>
+      Resource
+        .fromAutoCloseable(F.delay(inputStream))
+        .evalMap(is => F.defer(parser.parseInputStream(is)))
 }
 private[effect] trait XmlLoaderInstances {
 
