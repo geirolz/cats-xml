@@ -41,6 +41,9 @@ object NodeContent {
   def children(childrenNel: NonEmptyList[XmlNode]): NodeContent =
     Children(childrenNel)
 
+  def childrenOrEmpty(childrenLs: Seq[XmlNode]): NodeContent =
+    childrenSeq(childrenLs).getOrElse(NodeContent.empty)
+
   case object Empty extends NodeContent
   case class Text(data: XmlData) extends NodeContent
   case class Children(childrenNel: NonEmptyList[XmlNode]) extends NodeContent

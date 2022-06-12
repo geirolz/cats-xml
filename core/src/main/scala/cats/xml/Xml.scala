@@ -43,7 +43,9 @@ object Xml {
 
   final val Null: Xml & XmlData = XmlNull
 
-  def fromString[F[_]: MonadThrow](xmlString: String)(implicit parser: XmlParser[F]): F[XmlNode] =
+  def fromString[F[_]: MonadThrow](xmlString: String)(implicit
+    parser: XmlParser[F]
+  ): F[XmlNode] =
     parser.parseString(xmlString)
 }
 

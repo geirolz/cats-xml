@@ -68,6 +68,34 @@ class NodeCursorSuite extends munit.FunSuite {
     )
   }
 
+  test("NodeCursor deepDown \\\\") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("foo").withChild(
+          XmlNode("bar").withAttributes("attr" := 1),
+          XmlNode("bar").withAttributes("attr" := 2),
+          XmlNode("bar").withAttributes("attr" := 3)
+        )
+      )
+
+    assertEquals(
+      obtained = (Root \\ "bar").focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("bar").withAttributes("attr" := 1),
+          XmlNode("bar").withAttributes("attr" := 2),
+          XmlNode("bar").withAttributes("attr" := 3)
+        )
+      )
+    )
+
+    assertEquals(
+      obtained = (Root \\ "missing").focus(node),
+      expected = Right(XmlNode.emptyGroup)
+    )
+  }
+
   test("NodeCursor.downPath") {
 
     val node: XmlNode =
@@ -129,6 +157,59 @@ class NodeCursorSuite extends munit.FunSuite {
     assertEquals(
       obtained = Root.foo.apply(10).focus(node),
       expected = Left(CursorFailure.MissingNodeAtIndex("/foo", 10))
+    )
+  }
+
+  test("NodeCursor.filter") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("bar").withAttributes("attr" := 1),
+        XmlNode("bar").withAttributes("attr" := 2),
+        XmlNode("bar").withAttributes("attr" := 3)
+      )
+
+    assertEquals(
+      obtained = Root
+        .filter(_.findAttrValue[Int]("attr").contains(1))
+        .focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("bar").withAttributes("attr" := 1)
+        )
+      )
+    )
+
+    assertEquals(
+      obtained = Root.filter(_.findAttrValue[Int]("attr").contains(100)).focus(node),
+      expected = Right(XmlNode.emptyGroup)
+    )
+  }
+
+  test("NodeCursor.|") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("bar").withAttributes("attr" := 1),
+        XmlNode("bar").withAttributes("attr" := 2),
+        XmlNode("bar").withAttributes("attr" := 3)
+      )
+
+    def withAttrEqTo(value: Int): XmlNode => Boolean =
+      _.findAttrValue[Int]("attr").contains(value)
+
+    assertEquals(
+      obtained = (Root | withAttrEqTo(1)).focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("bar").withAttributes("attr" := 1)
+        )
+      )
+    )
+
+    assertEquals(
+      obtained = (Root | withAttrEqTo(100)).focus(node),
+      expected = Right(XmlNode.emptyGroup)
     )
   }
 
