@@ -11,9 +11,7 @@ case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializab
   def map(f: Endo[XmlData]): XmlAttribute =
     XmlAttribute(key, f(value))
 
-  def asString: String = XmlAttribute.stringify(this)
-
-  override def toString: String = asString
+  override def toString: String = XmlAttribute.stringify(this)
 
   override def equals(obj: Any): Boolean =
     obj != null && obj

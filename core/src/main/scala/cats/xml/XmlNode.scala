@@ -10,11 +10,13 @@ import scala.annotation.tailrec
 
 sealed trait AbstractXmlNode extends Xml {
 
+  // must be 'def' due it's mutable
   def content: NodeContent
 
+  // must be 'def' due it's mutable
   def isEmpty: Boolean = content.isEmpty
 
-  val isGroup: Boolean = this match {
+  lazy val isGroup: Boolean = this match {
     case _: XmlNodeGroup => true
     case _: XmlNode      => false
   }
@@ -97,6 +99,9 @@ sealed class XmlNode private (
     attributes
       .find(_.key == key)
       .flatMap(_.value.as[T].toOption)
+
+  def existsAttrValue[T: Decoder](key: String, p: T => Boolean): Boolean =
+    findAttrValue[T](key).exists(p)
 
   def withAttributes(attrs: Seq[XmlAttribute]): XmlNode =
     updateAttrs(_ => attrs.toList)
@@ -189,7 +194,7 @@ sealed class XmlNode private (
 
 object XmlNode extends XmlNodeInstances {
 
-  val emptyGroup: XmlNodeGroup = group(Nil)
+  lazy val emptyGroup: XmlNodeGroup = group(Nil)
 
   def apply(
     label: String,

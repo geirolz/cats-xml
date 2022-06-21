@@ -60,11 +60,11 @@ import cats.xml.codec.Encoder
 
 val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
-          .withAttributes(
-            "foo" := t.foo.getOrElse("ERROR"),
-            "bar" := t.bar,
-          )
-          .withText(t.text)
+    .withAttributes(
+      "foo"  := t.foo.getOrElse("ERROR"),
+      "bar"  := t.bar
+    )
+    .withText(t.text)
 )
 ```
 

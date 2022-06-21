@@ -12,7 +12,14 @@ sealed trait NodeContent {
     case _                 => false
   }
 
+  final lazy val isText: Boolean = text.isDefined
+
   final lazy val nonEmpty: Boolean = !isEmpty
+
+  final lazy val isChildren: Boolean = this match {
+    case NodeContent.Children(_) => true
+    case _                       => false
+  }
 
   final lazy val text: Option[XmlData] =
     this match {
