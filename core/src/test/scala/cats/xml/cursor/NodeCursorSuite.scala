@@ -96,6 +96,33 @@ class NodeCursorSuite extends munit.FunSuite {
     )
   }
 
+  test("NodeCursor deepDown and filter") {
+
+    val node: XmlNode =
+      XmlNode("root").withChild(
+        XmlNode("foo").withChild(
+          XmlNode("bar").withAttributes("attr" := 1),
+          XmlNode("bar").withAttributes("attr" := 2),
+          XmlNode("bar").withAttributes("attr" := 3)
+        )
+      )
+
+    assertEquals(
+      obtained = (Root \\ "bar").filter(_.existsAttrValue[Int]("attr", _ % 2 != 0)).focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("bar").withAttributes("attr" := 1),
+          XmlNode("bar").withAttributes("attr" := 3)
+        )
+      )
+    )
+
+    assertEquals(
+      obtained = (Root \\ "missing").focus(node),
+      expected = Right(XmlNode.emptyGroup)
+    )
+  }
+
   test("NodeCursor.downPath") {
 
     val node: XmlNode =

@@ -8,18 +8,18 @@ import scala.reflect.ClassTag
 
 trait Xml {
 
-  final val isNull: Boolean = this match {
+  final lazy val isNull: Boolean = this match {
     case XmlNull => true
     case _       => false
   }
 
-  final val isData: Boolean =
+  final lazy val isData: Boolean =
     asData.isDefined
 
-  final val isAttribute: Boolean =
+  final lazy val isAttribute: Boolean =
     asAttribute.isDefined
 
-  final val isNode: Boolean =
+  final lazy val isNode: Boolean =
     asNode.isDefined
 
   final def asData: Option[XmlData] = this match {
@@ -41,7 +41,7 @@ object Xml {
 
   case object XmlNull extends Xml with XmlData
 
-  final val Null: Xml & XmlData = XmlNull
+  final lazy val Null: Xml & XmlData = XmlNull
 
   def fromString[F[_]: MonadThrow](xmlString: String)(implicit
     parser: XmlParser[F]
@@ -71,9 +71,9 @@ object XmlData {
   case class XmlByte(value: Byte) extends XmlData
   case class XmlBool(value: Boolean) extends XmlData
 
-  val True: XmlData  = fromBoolean(true)
-  val False: XmlData = fromBoolean(false)
-  val empty: XmlData = fromString("")
+  lazy val True: XmlData  = fromBoolean(true)
+  lazy val False: XmlData = fromBoolean(false)
+  lazy val empty: XmlData = fromString("")
 
   def fromString(value: String): XmlData                      = XmlString(value)
   def fromNumber[N <: Number](value: N): XmlData              = XmlNumber(value)
