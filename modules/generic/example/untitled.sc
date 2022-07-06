@@ -6,7 +6,6 @@ import cats.xml.XmlNode
 import cats.xml.codec.Decoder.Result
 import cats.xml.implicits._
 
-
 case class Stringa(value1: String) extends AnyVal
 
 case class Bar(wow: String)
@@ -16,8 +15,6 @@ case class Foo(
   missingNode: Option[Bar],
   bar: Bar
 )
-
-
 
 implicit val ii: XmlTypeInterpreter[Bar] =
   XmlTypeInterpreter
@@ -29,17 +26,16 @@ implicit val ii: XmlTypeInterpreter[Bar] =
 implicit val decBar: Decoder[Bar] = deriveDecoder[Bar]
 val decFoo: Decoder[Foo]          = deriveDecoder[Foo]
 
-
 implicit val encBar: Encoder[Bar] = deriveEncoder[Bar]
 val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
 
 val barNode = XmlNode("bar").withText(100)
-val fooNode =   XmlNode("Foo")
+val fooNode = XmlNode("Foo")
   .withAttributes("test" := "TEST")
   .withChild(barNode)
 
 val decoderResult: Decoder.Result[Foo] = decFoo.decode(fooNode)
-val encoderResult = encFoo.encode(decFoo.decode(fooNode).toOption.get)
+val encoderResult                      = encFoo.encode(decFoo.decode(fooNode).toOption.get)
 //  .map(encFoo.encode)
 
 //encFoo.encode(Foo(None, "TEST", None, Bar("100")))
