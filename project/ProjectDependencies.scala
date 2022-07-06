@@ -9,13 +9,13 @@ object ProjectDependencies {
 
   lazy val common: Seq[ModuleID] = Seq(
     // SCALA
-    "org.typelevel" %% "cats-core" % "2.7.0" cross CrossVersion.binary,
+    "org.typelevel" %% "cats-core" % "2.8.0" cross CrossVersion.binary,
 //    "org.typelevel" %% "mouse"     % "1.0.10",
 //    "org.scala-lang" % "scala-compiler" % "2.13.8",
     // TEST
     "org.scalameta"  %% "munit"            % "0.7.29" % Test,
     "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
-    "org.typelevel"  %% "cats-laws"        % "2.7.0"  % Test,
+    "org.typelevel"  %% "cats-laws"        % "2.8.0"  % Test,
     "org.typelevel"  %% "discipline-munit" % "1.0.9"  % Test,
     "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test cross CrossVersion.binary
   )
