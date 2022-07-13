@@ -37,7 +37,7 @@ object ProjectDependencies {
 
   object Effect {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.typelevel" %% "cats-effect"         % "3.3.13" cross CrossVersion.binary,
+      "org.typelevel" %% "cats-effect"         % "3.3.14" cross CrossVersion.binary,
       "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
     )
   }
