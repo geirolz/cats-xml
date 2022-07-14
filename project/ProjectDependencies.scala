@@ -24,6 +24,10 @@ object ProjectDependencies {
     val dedicated: Seq[ModuleID] = Nil
   }
 
+  object Metrics {
+    val dedicated: Seq[ModuleID] = Nil
+  }
+
   object Generic {
     val scala2: Seq[ModuleID] = Seq(
       "com.softwaremill.magnolia1_2" %% "magnolia"      % "1.1.2",
