@@ -1,71 +1,20 @@
 package cats.xml.utils.generic
 
-import cats.Show
-
 import scala.reflect.macros.blackbox
 
-case class TypeInfo[T] private (
-  isString: Boolean,
-  isPrimitiveWrapper: Boolean,
-  isPrimitive: Boolean,
-  hasArgsTypePrimitive: Boolean,
-  hasArgsTypeOfString: Boolean,
-  isValueClass: Boolean,
-  isValueClassOfPrimitivesOrString: Boolean,
-  accessorsInfo: Map[ParamName[T], TypeInfo[?]]
-) {
-  override def toString: String = Show[TypeInfo[T]].show(this)
+trait TypeInfoInstances {
+  implicit def deriveTypeInfo[T]: TypeInfo[T] =
+    macro TypeInfoMacros.deriveTypeInfoImpl[T]
+
+  implicit def deriveFieldsTypeInfo[T]: Map[ParamName[T], TypeInfo[?]] =
+    macro TypeInfoMacros.deriveFieldsTypeInfoImpl[T]
 }
-object TypeInfo {
-
-  def apply[T: TypeInfo]: TypeInfo[T] = implicitly[TypeInfo[T]]
-
-  def of[T](
-    isString: Boolean,
-    isPrimitiveWrapper: Boolean,
-    isPrimitive: Boolean,
-    hasArgsTypePrimitive: Boolean,
-    hasArgsTypeOfString: Boolean,
-    isValueClass: Boolean,
-    isValueClassOfPrimitivesOrString: Boolean,
-    accessorsInfo: Map[ParamName[T], TypeInfo[?]]
-  ): TypeInfo[T] = new TypeInfo[T](
-    isString,
-    isPrimitiveWrapper,
-    isPrimitive,
-    hasArgsTypePrimitive,
-    hasArgsTypeOfString,
-    isValueClass,
-    isValueClassOfPrimitivesOrString,
-    accessorsInfo
-  )
-
-  object auto {
-    implicit def deriveTypeInfo[T]: TypeInfo[T] =
-      macro TypeInfoMacros.deriveTypeInfoImpl[T]
-
-    implicit def deriveFieldsTypeInfo[T]: Map[ParamName[T], TypeInfo[?]] =
-      macro TypeInfoMacros.deriveFieldsTypeInfoImpl[T]
-  }
-
-  implicit def showTypeInfo[T]: Show[TypeInfo[T]] =
-    (t: TypeInfo[T]) => s"""
-       |isString:  ${t.isString}
-       |isPrimitive: ${t.isPrimitive}
-       |hasArgsTypePrimitive: ${t.hasArgsTypePrimitive}
-       |hasArgsTypeOfString: ${t.hasArgsTypeOfString}
-       |isValueClass: ${t.isValueClass}
-       |isValueClassOfPrimitivesOrString: ${t.isValueClassOfPrimitivesOrString}
-       |accessorsInfo: ${t.accessorsInfo}
-       |""".stripMargin
-}
-
 object TypeInfoMacros {
 
   def deriveTypeInfoImpl[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[TypeInfo[T]] = {
     import c.universe.*
 
-    val wtpe = weakTypeOf[T]
+    val wtpe: c.universe.Type = weakTypeOf[T].finalResultType
 
     // primitive
     def isPrimitive(tpe: c.universe.Type) =
@@ -122,14 +71,15 @@ object TypeInfoMacros {
   ): c.Expr[Map[ParamName[T], TypeInfo[?]]] = {
     import c.universe.*
 
-    val wtpe = weakTypeOf[T]
+    val wtpe = weakTypeOf[T].finalResultType
+
     val tuples: List[Tree] = wtpe.members.collect {
       case mSymbol: MethodSymbol if mSymbol.isGetter && mSymbol.isPublic =>
         val name = mSymbol.name.toString
         q"""
            import cats.xml.utils.generic.TypeInfo
            import cats.xml.utils.generic.* 
-           (ParamName[${wtpe.typeSymbol}]($name), TypeInfo.auto.deriveTypeInfo[${mSymbol.returnType.typeSymbol}])
+           (ParamName[${wtpe.typeSymbol}]($name), TypeInfo.deriveTypeInfo[${mSymbol.returnType.resultType.typeSymbol}])
          """
     }.toList
 
@@ -137,5 +87,4 @@ object TypeInfoMacros {
       q"""List(..$tuples).toMap"""
     )
   }
-
 }

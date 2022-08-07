@@ -22,8 +22,8 @@ class GenericEncoderSuite extends munit.FunSuite {
 
     import cats.xml.generic.encoder.auto.*
 
-    implicit val t1: TypeInfo[Bar] = TypeInfo.auto.deriveTypeInfo[Bar]
-    implicit val t2: TypeInfo[Foo] = TypeInfo.auto.deriveTypeInfo[Foo]
+    implicit val t1: TypeInfo[Bar] = TypeInfo.deriveTypeInfo[Bar]
+    implicit val t2: TypeInfo[Foo] = TypeInfo.deriveTypeInfo[Foo]
 
     implicit val encoderBar: Encoder[Bar] = deriveEncoder[Bar]
     implicit val encoderFoo: Encoder[Foo] = deriveEncoder[Foo]

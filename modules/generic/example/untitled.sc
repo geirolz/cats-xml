@@ -46,11 +46,9 @@ import cats.xml.utils.generic.TypeInfo
 
 
 
-//TypeInfo.deriveTypeInfo[String]
+TypeInfo.deriveTypeInfo[String]
 //TypeInfo.deriveTypeInfo[Int]
-import TypeInfo.auto._
 
-TypeInfo.auto.deriveTypeInfo[String]
 
 
 
