@@ -2,8 +2,9 @@ package cats.xml.generic.encoder
 
 import cats.xml.{XmlAttribute, XmlData, XmlNode}
 import cats.xml.codec.Encoder
-import cats.xml.generic.{ParamName, XmlElemType, XmlTypeInterpreter}
+import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 import cats.xml.Xml.XmlNull
+import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param}
 
 object EncoderDerivation {

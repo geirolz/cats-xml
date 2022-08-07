@@ -2,8 +2,9 @@ package cats.xml.generic.decoder
 
 import cats.xml.codec.Decoder
 import cats.xml.cursor.FreeCursor
-import cats.xml.generic.{ParamName, XmlElemType, XmlTypeInterpreter}
+import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 import cats.xml.Xml
+import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param}
 
 object DecoderDerivation {

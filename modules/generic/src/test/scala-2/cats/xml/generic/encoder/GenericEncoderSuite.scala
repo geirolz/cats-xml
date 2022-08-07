@@ -2,6 +2,7 @@ package cats.xml.generic.encoder
 
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
+import cats.xml.utils.generic.TypeInfo
 
 case class ValueClass(value: String) extends AnyVal
 case class Bar(field1: String, field2: BigDecimal)
@@ -20,6 +21,9 @@ class GenericEncoderSuite extends munit.FunSuite {
   test("auto") {
 
     import cats.xml.generic.encoder.auto.*
+
+    implicit val t1: TypeInfo[Bar] = TypeInfo.auto.deriveTypeInfo[Bar]
+    implicit val t2: TypeInfo[Foo] = TypeInfo.auto.deriveTypeInfo[Foo]
 
     implicit val encoderBar: Encoder[Bar] = deriveEncoder[Bar]
     implicit val encoderFoo: Encoder[Foo] = deriveEncoder[Foo]

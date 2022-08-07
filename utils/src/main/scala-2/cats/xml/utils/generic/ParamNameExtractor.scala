@@ -1,17 +1,15 @@
-package cats.xml.generic
-
-import cats.xml.generic.ParamNameExtractor.Macros
+package cats.xml.utils.generic
 
 import scala.annotation.{tailrec, unused}
 import scala.reflect.macros.blackbox
 
 class ParamNameExtractor[T] private () {
   def param[U](@unused path: T => U): ParamName[T] =
-    macro Macros.extract[T, U]
+    macro ParamNameExtractor.Macros.extract[T, U]
 }
 object ParamNameExtractor {
 
-  private[generic] def of[T]: ParamNameExtractor[T] = new ParamNameExtractor[T]
+  def of[T]: ParamNameExtractor[T] = new ParamNameExtractor[T]
 
   object Macros {
 
@@ -44,7 +42,7 @@ object ParamNameExtractor {
           collectPathElements(pathBody, Nil).headOption
             .collect { case TermPathElement(el) =>
               c.Expr[ParamName[T]](
-                q"cats.xml.generic.ParamName[${weakTypeTag[T]}](${el.decodedName.toString})"
+                q"cats.xml.utils.generic.ParamName[${weakTypeTag[T]}](${el.decodedName.toString})"
               )
             }
             .getOrElse(c.abort(c.enclosingPosition, s"$expectedShapeInfo, got: ${path.tree}"))

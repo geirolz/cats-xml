@@ -1,8 +1,7 @@
 package cats.xml.generic
 
 import cats.Endo
-
-import scala.reflect.runtime.universe.TypeTag
+import cats.xml.utils.generic.{ParamName, ParamNameExtractor, TypeInfo}
 
 case class XmlElemTypeParamInfo(
   elemType: XmlElemType,
@@ -26,16 +25,17 @@ abstract class XmlTypeInterpreter[T] { $this =>
 object XmlTypeInterpreter {
 
   import cats.implicits.*
+  import scala.reflect.runtime.universe.*
 
-  def apply[T](implicit i: XmlTypeInterpreter[T]): XmlTypeInterpreter[T] = i
+  def apply[T: WeakTypeTag](implicit i: XmlTypeInterpreter[T]): XmlTypeInterpreter[T] = i
 
-  def fullOf[T: TypeTag](
-    f: (ParamName[T], TypeInfo) => (XmlElemType, Endo[String])
+  def fullOf[T: TypeInfo](
+    f: (ParamName[T], TypeInfo[?]) => (XmlElemType, Endo[String])
   ): XmlTypeInterpreter[T] =
     new XmlTypeInterpreter[T] {
 
-      val classFieldsInfo: Map[ParamName[T], TypeInfo] = Utils.classAccessors[T]
-      val classInfoExtractor: ParamNameExtractor[T]    = ParamNameExtractor.of[T]
+      val classFieldsInfo: Map[ParamName[T], TypeInfo[?]] = TypeInfo[T].accessorsInfo
+      val classInfoExtractor: ParamNameExtractor[T]       = ParamNameExtractor.of[T]
 
       override def evalParam(paramName: ParamName[T]): Option[XmlElemTypeParamInfo] =
         classFieldsInfo
@@ -79,16 +79,16 @@ object XmlTypeInterpreter {
         })
     }
 
-  def of[T: TypeTag](
-    f: (ParamName[T], TypeInfo) => XmlElemType,
+  def of[T: TypeInfo](
+    f: (ParamName[T], TypeInfo[?]) => XmlElemType,
     labelMapper: Endo[String] = identity
   ): XmlTypeInterpreter[T] =
     XmlTypeInterpreter.fullOf[T]((label, tpe) => f.tupled.andThen(_ -> labelMapper)((label, tpe)))
 
-  def auto[T: TypeTag](
-    textDiscriminator: (ParamName[T], TypeInfo) => Boolean,
-    attrsDiscriminator: (ParamName[T], TypeInfo) => Boolean =
-      (_: ParamName[T], tpeInfo: TypeInfo) =>
+  def auto[T: TypeInfo](
+    textDiscriminator: (ParamName[T], TypeInfo[?]) => Boolean,
+    attrsDiscriminator: (ParamName[T], TypeInfo[?]) => Boolean =
+      (_: ParamName[T], tpeInfo: TypeInfo[?]) =>
         tpeInfo.isString
           || tpeInfo.isPrimitive
           || tpeInfo.isPrimitiveWrapper
@@ -105,10 +105,10 @@ object XmlTypeInterpreter {
         XmlElemType.Child
     }
 
-  def withoutText[T: TypeTag]: XmlTypeInterpreter[T] =
+  def withoutText[T: TypeInfo]: XmlTypeInterpreter[T] =
     XmlTypeInterpreter.auto[T](textDiscriminator = (_, _) => false)
 
-  def withTextFields[T: TypeTag](
+  def withTextFields[T: TypeInfo](
     textField: ParamNameExtractor[T] => ParamName[T],
     otherTextFields: ParamNameExtractor[T] => ParamName[T]*
   ): XmlTypeInterpreter[T] =
@@ -119,6 +119,6 @@ object XmlTypeInterpreter {
           .contains(paramName)
     )
 
-  implicit def defaultWithoutText[T: TypeTag]: XmlTypeInterpreter[T] =
+  implicit def defaultWithoutText[T: TypeInfo]: XmlTypeInterpreter[T] =
     XmlTypeInterpreter.withoutText[T]
 }

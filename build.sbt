@@ -37,7 +37,7 @@ lazy val catsxml: Project = project
       .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
       .value
   )
-  .aggregate(docs, core, metrics, effect, scalaxml)
+  .aggregate(docs, core, metrics, utils, effect, scalaxml)
 
 lazy val docs: Project =
   project
@@ -77,6 +77,15 @@ lazy val metrics: Project =
       libraryDependencies ++= ProjectDependencies.Metrics.dedicated
     )
 
+lazy val utils: Project =
+  buildModule(
+    prjModuleName = "utils",
+    toPublish     = false,
+    folder        = "."
+  ).settings(
+    libraryDependencies ++= ProjectDependencies.Utils.dedicated
+  )
+
 // modules
 lazy val effect: Project =
   buildModule(
@@ -103,7 +112,7 @@ lazy val generic: Project =
     prjModuleName = "generic",
     toPublish     = false, // TODO ENABLE ONCE READY
     folder        = "modules"
-  ).dependsOn(core)
+  ).dependsOn(core, utils)
     .settings(
       noPublishSettings, // TODO ENABLE ONCE READY
       libraryDependencies ++= {
