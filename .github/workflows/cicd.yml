@@ -36,7 +36,7 @@ jobs:
             test-tasks: test # scoverage doesn’t support Scala 3
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       #----------- JDK -----------
       - name: Set up JDK 11
@@ -46,7 +46,7 @@ jobs:
 
       #----------- CACHE -----------
       - name: Cache SBT
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v3.0.6
         with:
           # A list of files, directories, and wildcard patterns to cache and restore
           path: |
@@ -68,7 +68,7 @@ jobs:
     needs: [build]
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       #----------- JDK -----------
       - name: Set up JDK 11
@@ -78,7 +78,7 @@ jobs:
 
       #----------- CACHE -----------
       - name: Cache SBT
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v3.0.6
         with:
           # A list of files, directories, and wildcard patterns to cache and restore
           path: |
