@@ -10,7 +10,7 @@ pull_request_rules:
       - label!=work-in-progress
     actions:
       merge:
-        method: merge
+        method: rebase
         priority: high
   - name: automatic merge for master when CI passes and author is steward
     conditions:
@@ -22,7 +22,7 @@ pull_request_rules:
       - base=main
     actions:
       merge:
-        method: merge
+        method: rebase
         priority: medium
    - name: automatic merge for master when CI passes and author is dependabot
     conditions:
@@ -34,5 +34,5 @@ pull_request_rules:
       - base=main
     actions:
       merge:
-        method: merge
+        method: rebase
         priority: medium     
