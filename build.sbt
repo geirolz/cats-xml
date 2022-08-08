@@ -60,23 +60,6 @@ lazy val docs: Project =
       )
     )
 
-lazy val core: Project =
-  buildModule(
-    prjModuleName = "core",
-    toPublish     = true,
-    folder        = "."
-  )
-
-lazy val metrics: Project =
-  buildModule(
-    prjModuleName = "metrics",
-    toPublish     = false,
-    folder        = "."
-  ).dependsOn(core, effect, scalaxml, generic)
-    .settings(
-      libraryDependencies ++= ProjectDependencies.Metrics.dedicated
-    )
-
 lazy val utils: Project =
   buildModule(
     prjModuleName = "utils",
@@ -86,13 +69,30 @@ lazy val utils: Project =
     libraryDependencies ++= ProjectDependencies.Utils.dedicated
   )
 
+lazy val core: Project =
+  buildModule(
+    prjModuleName = "core",
+    toPublish     = true,
+    folder        = "."
+  ).dependsOn(utils)
+
+lazy val metrics: Project =
+  buildModule(
+    prjModuleName = "metrics",
+    toPublish     = false,
+    folder        = "."
+  ).dependsOn(core, utils, effect, scalaxml, generic)
+    .settings(
+      libraryDependencies ++= ProjectDependencies.Metrics.dedicated
+    )
+
 // modules
 lazy val effect: Project =
   buildModule(
     prjModuleName = "effect",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core)
+  ).dependsOn(core, utils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Effect.dedicated
     )
@@ -102,7 +102,7 @@ lazy val scalaxml: Project =
     prjModuleName = "standard",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core)
+  ).dependsOn(core, utils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
