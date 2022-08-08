@@ -2,7 +2,6 @@ package cats.xml.std
 
 import cats.xml.*
 import cats.Eq
-import cats.xml.XmlData.*
 
 import scala.annotation.{tailrec, unused}
 import scala.xml.*
@@ -19,7 +18,7 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
         XmlNode(
           label      = e.label,
           attributes = XmlAttribute.fromMetaData(e.attributes),
-          content    = NodeContent.Text(XmlString(e.text.trim))
+          content    = NodeContent.Text(Xml.Data.fromString(e.text.trim))
         )
       case e: Elem =>
         val tree = XmlNode(

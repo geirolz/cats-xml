@@ -22,6 +22,7 @@ This library is not production ready yet. There is a lot of work to do to comple
   is hard, probably an annotation or a custom Decoder/Encoder is required. 
 - Reach a good code coverage with the tests (using munit)
 - Improve documentation
+- Literal macros to check XML strings at compile time
 
 Contributions are more than welcome 💪
 
@@ -53,6 +54,7 @@ val decoder: Decoder[Foo] =
 
 
 ### Encoder
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
@@ -61,7 +63,7 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
     .withAttributes(
       "foo"  := t.foo.getOrElse("ERROR"),
-      "bar"  := t.bar,
+      "bar"  := t.bar
     )
     .withText(t.text)
 )

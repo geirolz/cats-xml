@@ -52,7 +52,7 @@ object TypeInfoMacros {
           import cats.xml.utils.generic.*
           import scala.reflect.runtime.universe.*
 
-          TypeInfo.of[${wtpe.typeSymbol}](
+          TypeInfo.of[$wtpe](
             isString                         = ${wtpe <:< weakTypeOf[String]},
             isPrimitiveWrapper               = ${isPrimitiveWrapper(wtpe)},
             isPrimitive                      = ${isPrimitive(wtpe)},
@@ -77,14 +77,17 @@ object TypeInfoMacros {
       case mSymbol: MethodSymbol if mSymbol.isGetter && mSymbol.isPublic =>
         val name = mSymbol.name.toString
         q"""
-           import cats.xml.utils.generic.TypeInfo
-           import cats.xml.utils.generic.* 
-           (ParamName[${wtpe.typeSymbol}]($name), TypeInfo.deriveTypeInfo[${mSymbol.returnType.resultType.typeSymbol}])
+           (ParamName[$wtpe]($name), TypeInfo.deriveTypeInfo[${mSymbol.returnType}])
          """
     }.toList
 
     c.Expr[Map[ParamName[T], TypeInfo[?]]](
-      q"""List(..$tuples).toMap"""
+      q"""
+         import cats.xml.utils.generic.TypeInfo
+         import cats.xml.utils.generic.*
+
+         List(..$tuples).toMap
+      """
     )
   }
 }

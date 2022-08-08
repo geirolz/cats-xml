@@ -11,7 +11,7 @@
 A functional library to work with XML in Scala using cats core.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.2"
+libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.3"
 ```
 
 This library is not production ready yet. There is a lot of work to do to complete it:
@@ -22,6 +22,7 @@ This library is not production ready yet. There is a lot of work to do to comple
   is hard, probably an annotation or a custom Decoder/Encoder is required. 
 - Reach a good code coverage with the tests (using munit)
 - Improve documentation
+- Literal macros to check XML strings at compile time
 
 Contributions are more than welcome 💪
 

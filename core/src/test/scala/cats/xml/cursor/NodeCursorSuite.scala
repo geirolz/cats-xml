@@ -1,8 +1,7 @@
 package cats.xml.cursor
 
-import cats.xml.{XmlAttribute, XmlNode}
+import cats.xml.{Xml, XmlAttribute, XmlNode}
 import cats.xml.cursor.NodeCursor.Root
-import cats.xml.XmlData.XmlString
 
 class NodeCursorSuite extends munit.FunSuite {
 
@@ -376,7 +375,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root.foo.text.focus(node),
-      expected = Right(XmlString("TEST"))
+      expected = Right(Xml.Data.fromString("TEST"))
     )
 
     assertEquals(

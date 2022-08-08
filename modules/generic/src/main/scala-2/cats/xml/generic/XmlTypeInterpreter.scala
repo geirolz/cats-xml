@@ -25,9 +25,8 @@ abstract class XmlTypeInterpreter[T] { $this =>
 object XmlTypeInterpreter {
 
   import cats.implicits.*
-  import scala.reflect.runtime.universe.*
 
-  def apply[T: WeakTypeTag](implicit i: XmlTypeInterpreter[T]): XmlTypeInterpreter[T] = i
+  def apply[T](implicit i: XmlTypeInterpreter[T]): XmlTypeInterpreter[T] = i
 
   def fullOf[T: TypeInfo](
     f: (ParamName[T], TypeInfo[?]) => (XmlElemType, Endo[String])
@@ -119,6 +118,6 @@ object XmlTypeInterpreter {
           .contains(paramName)
     )
 
-  implicit def defaultWithoutText[T: TypeInfo]: XmlTypeInterpreter[T] =
+  implicit def default[T: TypeInfo]: XmlTypeInterpreter[T] =
     XmlTypeInterpreter.withoutText[T]
 }

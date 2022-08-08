@@ -2,7 +2,6 @@ package cats.xml.codec
 
 import cats.xml.{Xml, XmlData}
 import cats.Contravariant
-import cats.xml.XmlData.XmlString
 
 // T => XML
 trait Encoder[-T] {
@@ -55,7 +54,7 @@ private[xml] trait EncoderPrimitivesInstances {
 
   implicit val encoderXmlData: DataEncoder[XmlData] = DataEncoder.of(identity)
   implicit val encoderUnit: DataEncoder[Unit]       = DataEncoder.of(_ => Xml.Null)
-  implicit val encoderString: DataEncoder[String]   = DataEncoder.of(XmlString(_))
+  implicit val encoderString: DataEncoder[String]   = DataEncoder.of(Xml.Data.fromString(_))
   implicit val encoderBoolean: DataEncoder[Boolean] = encoderString.contramap {
     case true  => "true"
     case false => "false"
@@ -66,6 +65,7 @@ private[xml] trait EncoderPrimitivesInstances {
   implicit val encoderFloat: DataEncoder[Float]           = encoderString.contramap(_.toString)
   implicit val encoderDouble: DataEncoder[Double]         = encoderString.contramap(_.toString)
   implicit val encoderBigDecimal: DataEncoder[BigDecimal] = encoderString.contramap(_.toString)
+  implicit val encoderBigInt: DataEncoder[BigInt]         = encoderString.contramap(_.toString)
 }
 
 // #################### DATA ENCODER ####################
