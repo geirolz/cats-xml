@@ -5,7 +5,7 @@ import cats.data.NonEmptyList
 import cats.xml.Xml
 import cats.xml.codec.DecoderFailure.DecoderFailureException
 import cats.xml.cursor.CursorFailure
-import cats.xml.utils.ErrorKeeper
+import cats.xml.utils.UnderlyingThrowable
 
 sealed trait DecoderFailure {
 
@@ -17,7 +17,7 @@ object DecoderFailure extends DecoderFailureSyntax {
   case class NoTextAvailable(subject: Xml) extends DecoderFailure
   case class CursorFailed(failure: CursorFailure) extends DecoderFailure
   case class CoproductNoMatch[+T](actual: Any, coproductValues: Seq[T]) extends DecoderFailure
-  case class Error(error: Throwable) extends DecoderFailure with ErrorKeeper
+  case class Error(error: Throwable) extends DecoderFailure with UnderlyingThrowable
   case class Custom(message: String) extends DecoderFailure
 
   case class DecoderFailureException(failures: NonEmptyList[DecoderFailure])
