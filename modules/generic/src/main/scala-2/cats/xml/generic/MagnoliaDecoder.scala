@@ -1,18 +1,21 @@
-package cats.xml.generic.decoder
+package cats.xml.generic
 
 import cats.xml.codec.Decoder
 import cats.xml.cursor.FreeCursor
-import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
-import cats.xml.Xml
 import cats.xml.utils.generic.ParamName
+import cats.xml.Xml
 import magnolia1.{CaseClass, Param}
 
-object DecoderDerivation {
+import scala.annotation.unused
+
+object MagnoliaDecoder {
 
   import cats.implicits.*
 
-  // product
-  def join[T: XmlTypeInterpreter](ctx: CaseClass[Decoder, T]): Decoder[T] =
+  private[generic] def join[T: XmlTypeInterpreter](
+    ctx: CaseClass[Decoder, T],
+    @unused config: Configuration
+  ): Decoder[T] =
     if (ctx.isValueClass) {
       ctx.parameters.head.typeclass.map(v => ctx.rawConstruct(Seq(v)))
     } else {

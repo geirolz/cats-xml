@@ -1,15 +1,19 @@
-package cats.xml.generic.encoder
+package cats.xml.generic
 
 import cats.xml.{Xml, XmlAttribute, XmlData, XmlNode}
 import cats.xml.codec.Encoder
-import cats.xml.generic.{XmlElemType, XmlElemTypeParamInfo, XmlTypeInterpreter}
-import cats.xml.Xml.XmlNull
 import cats.xml.utils.generic.ParamName
+import cats.xml.Xml.XmlNull
 import magnolia1.{CaseClass, Param, SealedTrait}
 
-object EncoderDerivation {
+import scala.annotation.unused
 
-  private[generic] def join[T: XmlTypeInterpreter](ctx: CaseClass[Encoder, T]): Encoder[T] = {
+object MagnoliaEncoder {
+
+  private[generic] def join[T: XmlTypeInterpreter](
+    ctx: CaseClass[Encoder, T],
+    @unused config: Configuration
+  ): Encoder[T] = {
     if (ctx.isValueClass) {
       val valueParam: Param[Encoder, T] = ctx.parameters.head
       valueParam.typeclass.contramap[T](valueParam.dereference(_))
@@ -61,7 +65,8 @@ object EncoderDerivation {
   }
 
   private[generic] def split[T: XmlTypeInterpreter](
-    sealedTrait: SealedTrait[Encoder, T]
+    sealedTrait: SealedTrait[Encoder, T],
+    @unused config: Configuration
   ): Encoder[T] = { (a: T) =>
     {
       sealedTrait.split(a) { subtype =>
