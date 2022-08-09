@@ -1,7 +1,8 @@
 package cats.xml.generic
 
+import cats.data.NonEmptyList
 import cats.xml.codec.Decoder
-import cats.xml.cursor.FreeCursor
+import cats.xml.cursor.{CursorFailure, FreeCursor}
 import cats.xml.utils.generic.ParamName
 import cats.xml.Xml
 import magnolia1.{CaseClass, Param}
@@ -42,13 +43,15 @@ object MagnoliaDecoder {
                     case XmlElemType.Null      => None
                   }
 
-                  result
-//                  // use fault parameter in case of missing element
-//                  result.map(
-//                    _.recoverWith(
-//                      useDefaultParameterIfPresentToRecoverMissing[Decoder, T, param.PType](param)
-//                    )
-//                  )
+                  // use fault parameter in case of missing element
+                  if (config.useDefaults)
+                    result.map(
+                      _.recoverWith(
+                        useDefaultParameterIfPresentToRecoverMissing[Decoder, T, param.PType](param)
+                      )
+                    )
+                  else
+                    result
                 })
             }
             .toList
@@ -56,4 +59,18 @@ object MagnoliaDecoder {
             .map(ctx.rawConstruct)
         })
     }
+
+  // Internal error: unable to find the outer accessor symbol of class $read
+  private def useDefaultParameterIfPresentToRecoverMissing[F[_], T, PT](
+    param: Param[F, T]
+  ): PartialFunction[NonEmptyList[CursorFailure], FreeCursor[Xml, PT]] = { failures =>
+    if (failures.forall(_.isMissing))
+      param.default match {
+        case Some(value) =>
+          FreeCursor.const[Xml, PT](value.asInstanceOf[PT].validNel[CursorFailure])
+        case None => FreeCursor.failure(failures)
+      }
+    else
+      FreeCursor.failure(failures)
+  }
 }

@@ -4,19 +4,10 @@ import cats.xml.XmlNode
 import cats.xml.codec.Encoder
 import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 
-case class ValueClass(value: String) extends AnyVal
-case class Bar(field1: String, field2: BigDecimal)
-case class Foo(
-  primitiveField: Double,
-  valueClass: ValueClass,
-  bar: Bar,
-  missingField: Option[String],
-  missingNode: Option[Bar]
-)
-
 class EncoderSuite extends munit.FunSuite {
 
   import cats.xml.syntax.*
+  import cats.xml.generic.Samples.*
 
   test("auto") {
 

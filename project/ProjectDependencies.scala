@@ -42,7 +42,7 @@ object ProjectDependencies {
       "com.chuusai"                  %% "shapeless"     % "2.3.9"
     )
     val scala3: Seq[ModuleID] = Seq(
-      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.1.1"
+      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.1.4"
     )
   }
 
