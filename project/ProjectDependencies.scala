@@ -9,15 +9,13 @@ object ProjectDependencies {
 
   lazy val common: Seq[ModuleID] = Seq(
     // SCALA
-    "org.typelevel" %% "cats-core" % "2.8.0" cross CrossVersion.binary,
-//    "org.typelevel" %% "mouse"     % "1.0.10",
-//    "org.scala-lang" % "scala-compiler" % "2.13.8",
+    "org.typelevel" %% "cats-core" % "2.8.0",
     // TEST
     "org.scalameta"  %% "munit"            % "0.7.29" % Test,
     "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
     "org.typelevel"  %% "cats-laws"        % "2.8.0"  % Test,
     "org.typelevel"  %% "discipline-munit" % "1.0.9"  % Test,
-    "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test cross CrossVersion.binary
+    "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test
   )
 
   object Docs {
@@ -47,14 +45,14 @@ object ProjectDependencies {
 
   object Effect {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.typelevel" %% "cats-effect"         % "3.3.14" cross CrossVersion.binary,
+      "org.typelevel" %% "cats-effect"         % "3.3.14",
       "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
     )
   }
 
   object Standard {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "2.1.0" cross CrossVersion.binary
+      "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
     )
   }
 

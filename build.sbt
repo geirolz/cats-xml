@@ -30,9 +30,10 @@ lazy val `cats-xml`: Project = project
   .settings(baseSettings)
   .settings(noPublishSettings)
   .settings(
-    name         := prjName,
-    description  := "A purely functional XML library",
-    organization := org
+    name               := prjName,
+    description        := "A purely functional XML library",
+    organization       := org,
+    crossScalaVersions := Nil
   )
   .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
@@ -145,8 +146,7 @@ def buildModule(prjModuleName: String, toPublish: Boolean, folder: String): Proj
       moduleName     := s"$prjName-$prjModuleName",
       name           := s"$prjName $docName",
       publish / skip := !toPublish,
-      baseSettings,
-      crossScalaVersions := supportedScalaVersions
+      baseSettings
     )
 }
 
@@ -160,7 +160,7 @@ lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   // scala
-  crossScalaVersions := Nil, // to avoid double publication
+  crossScalaVersions := supportedScalaVersions,
   scalaVersion       := supportedScalaVersions.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
   // dependencies
