@@ -84,6 +84,18 @@ object XmlTypeInterpreter {
   ): XmlTypeInterpreter[T] =
     XmlTypeInterpreter.fullOf[T]((label, tpe) => f.tupled.andThen(_ -> labelMapper)((label, tpe)))
 
+  /** By default a field is treated as Attributes if:
+    *   - type is primitive
+    *   - type is a primitive wrapper (BigInt, BigDecimal)
+    *   - type is a value class
+    *
+    * @param textDiscriminator
+    *   function to map fields as to be treated as Text
+    * @param attrsDiscriminator
+    *   function to map fields as to be treated as Attribute
+    * @tparam T
+    * @return
+    */
   def auto[T: TypeInfo](
     textDiscriminator: (ParamName[T], TypeInfo[?]) => Boolean,
     attrsDiscriminator: (ParamName[T], TypeInfo[?]) => Boolean =
@@ -91,9 +103,7 @@ object XmlTypeInterpreter {
         tpeInfo.isString
           || tpeInfo.isPrimitive
           || tpeInfo.isPrimitiveWrapper
-          || tpeInfo.hasArgsTypePrimitive
-          || tpeInfo.hasArgsTypeOfString
-          || tpeInfo.isValueClassOfPrimitivesOrString
+          || tpeInfo.isValueClass
   ): XmlTypeInterpreter[T] =
     XmlTypeInterpreter.of[T] { case (paramName, tpeInfo) =>
       if (textDiscriminator(paramName, tpeInfo))
