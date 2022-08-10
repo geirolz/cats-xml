@@ -38,7 +38,7 @@ lazy val `cats-xml`: Project = project
   .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
-  .aggregate(docs, core, metrics, utils, effect, scalaxml)
+  .aggregate(core, docs, metrics, utils, effect, generic, scalaxml)
 
 lazy val docs: Project =
   project
@@ -111,11 +111,10 @@ lazy val scalaxml: Project =
 lazy val generic: Project =
   buildModule(
     prjModuleName = "generic",
-    toPublish     = false, // TODO ENABLE ONCE READY
+    toPublish     = true,
     folder        = "modules"
   ).dependsOn(core, utils)
     .settings(
-      noPublishSettings, // TODO ENABLE ONCE READY
       libraryDependencies ++= {
         CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, _)) => ProjectDependencies.Generic.scala2
