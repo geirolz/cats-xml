@@ -1,7 +1,10 @@
 import sbt.project
 
-val prjName = "cats-xml"
-val org     = "com.github.geirolz"
+lazy val scala213               = "2.13.8"
+lazy val scala31                = "3.1.3"
+lazy val supportedScalaVersions = List(scala213, scala31)
+lazy val prjName                = "cats-xml"
+lazy val org                    = "com.github.geirolz"
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
@@ -29,13 +32,17 @@ lazy val `cats-xml`: Project = project
   .settings(
     name         := prjName,
     description  := "A purely functional XML library",
-    organization := org,
-
-    // docs
+    organization := org
+  )
+  .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
-    (Compile / compile) := (Compile / compile)
-      .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
-      .value
+    (Compile / compile) := (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        (Compile / compile)
+          .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
+          .value
+      case _ => (Compile / compile).value
+    })
   )
   .aggregate(docs, core, metrics, utils, effect, scalaxml)
 
@@ -138,7 +145,8 @@ def buildModule(prjModuleName: String, toPublish: Boolean, folder: String): Proj
       moduleName     := s"$prjName-$prjModuleName",
       name           := s"$prjName $docName",
       publish / skip := !toPublish,
-      baseSettings
+      baseSettings,
+      crossScalaVersions := supportedScalaVersions
     )
 }
 
@@ -152,8 +160,8 @@ lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   // scala
-  crossScalaVersions := List("2.13.8", "3.1.3"),
-  scalaVersion       := crossScalaVersions.value.head,
+  crossScalaVersions := Nil, // to avoid double publication
+  scalaVersion       := supportedScalaVersions.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
   // dependencies
   resolvers ++= ProjectResolvers.all,
