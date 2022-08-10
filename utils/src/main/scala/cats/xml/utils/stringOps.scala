@@ -1,6 +1,6 @@
-package cats.xml.generic
+package cats.xml.utils
 
-import cats.xml.generic.StringMapper.*
+import cats.xml.utils.StringMapper.*
 
 sealed trait StringMapper extends (String => String) {
 

@@ -40,6 +40,7 @@ class NodeContentSuite extends munit.ScalaCheckSuite {
   testContentTextIso[Boolean]
   testContentTextIso[String]
   testContentTextIso[BigDecimal]
+  testContentTextIso[BigInt]
 
   private def testContentTextIso[T: Arbitrary: DataEncoder: Decoder](implicit
     c: ClassTag[T]

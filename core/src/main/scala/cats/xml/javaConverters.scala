@@ -49,7 +49,7 @@ object JavaConverters extends JavaConvertersSyntax {
     }
 }
 
-trait JavaConvertersSyntax {
+private[xml] sealed trait JavaConvertersSyntax {
 
   implicit class JDocumentOps(doc: JDocument) {
     def asCatsXml: XmlNode = JavaConverters.nodeFromJavaDocument(doc)

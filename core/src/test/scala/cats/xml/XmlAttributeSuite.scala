@@ -16,6 +16,7 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeDataIso[Boolean]
   testAttributeDataIso[String]
   testAttributeDataIso[BigDecimal]
+  testAttributeDataIso[BigInt]
 
   // equality
   testAttributeEquality[Unit]
@@ -25,6 +26,7 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeEquality[Boolean]
   testAttributeEquality[String]
   testAttributeEquality[BigDecimal]
+  testAttributeEquality[BigInt]
 
   private def testAttributeDataIso[T: Arbitrary: DataEncoder: Decoder](implicit
     c: ClassTag[T]

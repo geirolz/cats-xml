@@ -1,11 +1,14 @@
 import sbt.project
 
-val prjName = "cats-xml"
-val org     = "com.github.geirolz"
+lazy val scala213               = "2.13.8"
+lazy val scala31                = "3.1.3"
+lazy val supportedScalaVersions = List(scala213, scala31)
+lazy val prjName                = "cats-xml"
+lazy val org                    = "com.github.geirolz"
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
-lazy val catsxml: Project = project
+lazy val `cats-xml`: Project = project
   .in(file("."))
   .settings(
     inThisBuild(
@@ -27,15 +30,13 @@ lazy val catsxml: Project = project
   .settings(baseSettings)
   .settings(noPublishSettings)
   .settings(
-    name         := prjName,
-    description  := "A purely functional XML library",
-    organization := org,
-
-    // docs
-    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
-    (Compile / compile) := (Compile / compile)
-      .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
-      .value
+    name               := prjName,
+    description        := "A purely functional XML library",
+    organization       := org,
+    crossScalaVersions := Nil
+  )
+  .settings(
+    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
   .aggregate(docs, core, metrics, utils, effect, scalaxml)
 
@@ -43,7 +44,7 @@ lazy val docs: Project =
   project
     .in(file("docs"))
     .enablePlugins(MdocPlugin)
-    .dependsOn(core)
+    .dependsOn(core, effect, generic, scalaxml)
     .settings(
       baseSettings,
       noPublishSettings,
@@ -60,23 +61,6 @@ lazy val docs: Project =
       )
     )
 
-lazy val core: Project =
-  buildModule(
-    prjModuleName = "core",
-    toPublish     = true,
-    folder        = "."
-  )
-
-lazy val metrics: Project =
-  buildModule(
-    prjModuleName = "metrics",
-    toPublish     = false,
-    folder        = "."
-  ).dependsOn(core, effect, scalaxml, generic)
-    .settings(
-      libraryDependencies ++= ProjectDependencies.Metrics.dedicated
-    )
-
 lazy val utils: Project =
   buildModule(
     prjModuleName = "utils",
@@ -86,13 +70,30 @@ lazy val utils: Project =
     libraryDependencies ++= ProjectDependencies.Utils.dedicated
   )
 
+lazy val core: Project =
+  buildModule(
+    prjModuleName = "core",
+    toPublish     = true,
+    folder        = "."
+  ).dependsOn(utils)
+
+lazy val metrics: Project =
+  buildModule(
+    prjModuleName = "metrics",
+    toPublish     = false,
+    folder        = "."
+  ).dependsOn(core, utils, effect, scalaxml, generic)
+    .settings(
+      libraryDependencies ++= ProjectDependencies.Metrics.dedicated
+    )
+
 // modules
 lazy val effect: Project =
   buildModule(
     prjModuleName = "effect",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core)
+  ).dependsOn(core, utils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Effect.dedicated
     )
@@ -102,7 +103,7 @@ lazy val scalaxml: Project =
     prjModuleName = "standard",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core)
+  ).dependsOn(core, utils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
@@ -152,8 +153,8 @@ lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   // scala
-  crossScalaVersions := List("2.13.8", "3.1.3"),
-  scalaVersion       := crossScalaVersions.value.head,
+  crossScalaVersions := supportedScalaVersions,
+  scalaVersion       := supportedScalaVersions.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
   // dependencies
   resolvers ++= ProjectResolvers.all,
@@ -231,3 +232,4 @@ def scalacSettings(scalaVersion: String): Seq[String] =
 
 //=============================== ALIASES ===============================
 addCommandAlias("check", "scalafmtAll;clean;coverage;test;coverageAggregate")
+addCommandAlias("generate-docs", "mdoc;copyReadMe;")

@@ -1,6 +1,6 @@
 package cats.xml
 
-import cats.{MonadThrow, Show}
+import cats.{xml, Show}
 import cats.xml.codec.Decoder
 import cats.xml.Xml.XmlNull
 
@@ -42,11 +42,7 @@ object Xml {
   case object XmlNull extends Xml with XmlData
 
   final lazy val Null: Xml & XmlData = XmlNull
-
-  def fromString[F[_]: MonadThrow](xmlString: String)(implicit
-    parser: XmlParser[F]
-  ): F[XmlNode] =
-    parser.parseString(xmlString)
+  final lazy val Data: XmlData.type  = xml.XmlData
 }
 
 sealed trait XmlData extends Xml with Serializable {
@@ -65,12 +61,6 @@ sealed trait XmlData extends Xml with Serializable {
 }
 object XmlData {
 
-  case class XmlString(value: String) extends XmlData
-  case class XmlNumber[T <: Number](value: T) extends XmlData
-  case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
-  case class XmlByte(value: Byte) extends XmlData
-  case class XmlBool(value: Boolean) extends XmlData
-
   lazy val True: XmlData  = fromBoolean(true)
   lazy val False: XmlData = fromBoolean(false)
   lazy val empty: XmlData = fromString("")
@@ -82,6 +72,12 @@ object XmlData {
   def fromValues[T <: XmlData: ClassTag](value: T*): XmlData  = XmlArray(value.toArray)
   def fromByte(value: Byte): XmlData                          = XmlByte(value)
   def fromBoolean(value: Boolean): XmlData                    = XmlBool(value)
+
+  private[xml] case class XmlString(value: String) extends XmlData
+  private[xml] case class XmlNumber[T <: Number](value: T) extends XmlData
+  private[xml] case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
+  private[xml] case class XmlByte(value: Byte) extends XmlData
+  private[xml] case class XmlBool(value: Boolean) extends XmlData
 
   // TODO: TO CHECK EQ TO DECODE STRING
   implicit val showXmlData: Show[XmlData] = {

@@ -166,8 +166,8 @@ sealed private[xml] trait DecoderDataInstances {
   implicit val decodeLong: Decoder[Long]             = decodeString.emapTry(s => Try(s.toLong))
   implicit val decodeFloat: Decoder[Float]           = decodeString.emapTry(s => Try(s.toFloat))
   implicit val decodeDouble: Decoder[Double]         = decodeString.emapTry(s => Try(s.toDouble))
-  implicit val decodeBigDecimal: Decoder[BigDecimal] =
-    decodeString.emapTry(s => Try(BigDecimal(s)))
+  implicit val decodeBigDecimal: Decoder[BigDecimal] = decodeString.emapTry(s => Try(BigDecimal(s)))
+  implicit val decodeBigInt: Decoder[BigInt]         = decodeString.emapTry(s => Try(BigInt(s)))
 }
 
 sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
@@ -197,7 +197,7 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
       .flatMapF(str => {
         str
           .split(",")
-          .map(s => Decoder[T].decode(XmlString(s)))
+          .map(s => Decoder[T].decode(Xml.Data.fromString(s)))
           .toVector
           .sequence
           .map(_.to(f))

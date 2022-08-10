@@ -239,7 +239,7 @@ class DecoderLifterSuite extends munit.ScalaCheckSuite {
     property(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor success") {
       forAll { (value: T) =>
         assertEquals(
-          obtained = Decoder[F[T]].decodeCursorResult(Right(XmlString(value.toString))),
+          obtained = Decoder[F[T]].decodeCursorResult(Right(Xml.Data.fromString(value.toString))),
           expected = Valid(F.pure(value))
         )
       }
