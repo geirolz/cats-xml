@@ -36,14 +36,7 @@ lazy val `cats-xml`: Project = project
     crossScalaVersions := Nil
   )
   .settings(
-    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md")),
-    (Compile / compile) := (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, _)) =>
-        (Compile / compile)
-          .dependsOn(copyReadMe.toTask.dependsOn((docs / mdoc).toTask("")))
-          .value
-      case _ => (Compile / compile).value
-    })
+    copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
   .aggregate(docs, core, metrics, utils, effect, scalaxml)
 
@@ -239,3 +232,4 @@ def scalacSettings(scalaVersion: String): Seq[String] =
 
 //=============================== ALIASES ===============================
 addCommandAlias("check", "scalafmtAll;clean;coverage;test;coverageAggregate")
+addCommandAlias("generate-docs", "mdoc;copyReadMe;")
