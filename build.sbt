@@ -5,7 +5,7 @@ val org     = "com.github.geirolz"
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
-lazy val catsxml: Project = project
+lazy val `cats-xml`: Project = project
   .in(file("."))
   .settings(
     inThisBuild(
@@ -43,7 +43,7 @@ lazy val docs: Project =
   project
     .in(file("docs"))
     .enablePlugins(MdocPlugin)
-    .dependsOn(core)
+    .dependsOn(core, effect, generic, scalaxml)
     .settings(
       baseSettings,
       noPublishSettings,
