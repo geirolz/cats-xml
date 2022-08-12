@@ -43,7 +43,3 @@ val encoderResult                      = encFoo.encode(decFoo.decode(fooNode).to
 //encFoo.encode(Foo(None, "TEST", None, Bar("100")))
 //TypeInfo.deriveTypeInfo[String]
 //TypeInfo.deriveTypeInfo[Int]
-
-
-
-
