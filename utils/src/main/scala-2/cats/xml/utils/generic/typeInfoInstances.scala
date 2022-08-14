@@ -3,13 +3,12 @@ package cats.xml.utils.generic
 import scala.reflect.macros.blackbox
 
 trait TypeInfoInstances {
-  implicit def deriveTypeInfo[T]: TypeInfo[T] =
-    macro TypeInfoMacros.deriveTypeInfoImpl[T]
+  implicit def deriveTypeInfo[T]: TypeInfo[T] = macro TypeInfoMacrosScala2.deriveTypeInfoImpl[T]
 
-  implicit def deriveFieldsTypeInfo[T]: Map[ParamName[T], TypeInfo[?]] =
-    macro TypeInfoMacros.deriveFieldsTypeInfoImpl[T]
+  implicit def deriveFieldsTypeInfo[T]: Map[ParamName[T], TypeInfo[?]] = macro
+    TypeInfoMacrosScala2.deriveFieldsTypeInfoImpl[T]
 }
-object TypeInfoMacros {
+object TypeInfoMacrosScala2 {
 
   def deriveTypeInfoImpl[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[TypeInfo[T]] = {
     import c.universe.*

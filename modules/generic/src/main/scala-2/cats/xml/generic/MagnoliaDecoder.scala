@@ -3,7 +3,6 @@ package cats.xml.generic
 import cats.data.NonEmptyList
 import cats.xml.codec.Decoder
 import cats.xml.cursor.{CursorFailure, FreeCursor}
-import cats.xml.utils.generic.ParamName
 import cats.xml.Xml
 import magnolia1.{CaseClass, Param}
 
