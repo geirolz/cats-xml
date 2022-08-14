@@ -5,7 +5,7 @@ class TypeInfoSuite extends munit.FunSuite {
   case class Foo(a: String, b: Option[Int], c: Bar)
   case class Bar(d: String)
 
-  test("") {
+  test("TypeInfo.deriveTypeInfo derives the right information for the type Foo") {
     val fooTypeInfo: TypeInfo[Foo] = TypeInfo.deriveTypeInfo[Foo]
     assertEquals(
       obtained = fooTypeInfo,

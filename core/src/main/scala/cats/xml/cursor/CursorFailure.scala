@@ -4,7 +4,7 @@ import cats.{Eq, Show}
 import cats.data.NonEmptyList
 import cats.xml.codec.DecoderFailure
 import cats.xml.cursor.CursorFailure.CursorFailureException
-import cats.xml.utils.UnderlyingThrowable
+import cats.xml.utils.UnderlyingThrowableWeakEq
 import cats.xml.XmlNode
 
 /** A coproduct ADT to represent the `Cursor` possible failures.
@@ -52,7 +52,7 @@ object CursorFailure {
   case class LeftBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
   case class RightBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
   case class Custom(message: String) extends CursorFailure
-  case class Error(error: Throwable) extends CursorFailure with UnderlyingThrowable
+  case class Error(error: Throwable) extends CursorFailure with UnderlyingThrowableWeakEq
 
   case class CursorFailureException(failure: CursorFailure)
       extends RuntimeException(s"Cursor failure: $failure")
