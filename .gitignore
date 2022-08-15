@@ -21,6 +21,21 @@ out/
 .idea_modules/
 atlassian-ide-plugin.xml
 
+# VS CODE
+.vscode
+.metals
+.bloop
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
 
 private.sbt
 
@@ -32,3 +47,5 @@ modules/generic/target/
 
 # CHANGELOG
 changelog.md
+
+

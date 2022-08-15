@@ -36,11 +36,11 @@ class StringOpsSuite extends munit.FunSuite {
     mapper: StringMapper
   )(values: (String, String)*)(implicit loc: Location): Unit =
     test(s"StringMapper.${mapper.getClass.getSimpleName.replace("$", "")}") {
-      values.foreach((input, expected) =>
+      values.foreach { case (input, expected) =>
         assertEquals(
           obtained = mapper(input),
           expected = expected
         )
-      )
+      }
     }
 }

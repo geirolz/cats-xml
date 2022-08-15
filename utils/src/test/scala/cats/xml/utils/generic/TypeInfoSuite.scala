@@ -10,45 +10,50 @@ class TypeInfoSuite extends munit.FunSuite {
     assertEquals(
       obtained = fooTypeInfo,
       expected = TypeInfo.of(
-        isString           = false,
-        isPrimitiveWrapper = false,
-        isPrimitive        = false,
-        isValueClass       = false,
+        isString                       = false,
+        isPrimitiveWrapper             = false,
+        isPrimitive                    = false,
+        isValueClass                   = false,
+        isOptionOfAnyPrimitiveOrString = false,
         accessorsInfo = Map(
           ParamName(
             value = "a"
-          ) -> TypeInfo.of(
-            isString           = true,
-            isPrimitiveWrapper = false,
-            isPrimitive        = false,
-            isValueClass       = false,
-            accessorsInfo      = Map()
+          ) -> TypeInfo.of[String](
+            isString                       = true,
+            isPrimitiveWrapper             = false,
+            isPrimitive                    = false,
+            isValueClass                   = false,
+            isOptionOfAnyPrimitiveOrString = false,
+            accessorsInfo                  = Map.empty[ParamName[String], TypeInfo[?]]
           ),
           ParamName(
             value = "b"
-          ) -> TypeInfo.of(
-            isString           = false,
-            isPrimitiveWrapper = false,
-            isPrimitive        = false,
-            isValueClass       = false,
-            accessorsInfo      = Map()
+          ) -> TypeInfo.of[Option[Int]](
+            isString                       = false,
+            isPrimitiveWrapper             = false,
+            isPrimitive                    = false,
+            isValueClass                   = false,
+            isOptionOfAnyPrimitiveOrString = true,
+            accessorsInfo                  = Map.empty[ParamName[Option[Int]], TypeInfo[?]]
           ),
           ParamName(
             value = "c"
-          ) -> TypeInfo.of(
-            isString           = false,
-            isPrimitiveWrapper = false,
-            isPrimitive        = false,
-            isValueClass       = false,
+          ) -> TypeInfo.of[Bar](
+            isString                       = false,
+            isPrimitiveWrapper             = false,
+            isPrimitive                    = false,
+            isValueClass                   = false,
+            isOptionOfAnyPrimitiveOrString = false,
             accessorsInfo = Map(
               ParamName(
                 value = "d"
-              ) -> TypeInfo.of(
-                isString           = true,
-                isPrimitiveWrapper = false,
-                isPrimitive        = false,
-                isValueClass       = false,
-                accessorsInfo      = Map()
+              ) -> TypeInfo.of[String](
+                isString                       = true,
+                isPrimitiveWrapper             = false,
+                isPrimitive                    = false,
+                isValueClass                   = false,
+                isOptionOfAnyPrimitiveOrString = false,
+                accessorsInfo                  = Map.empty[ParamName[String], TypeInfo[?]]
               )
             )
           )
