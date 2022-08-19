@@ -51,13 +51,16 @@ object TypeInfoInstances {
 
       val wtpe = weakTypeOf[T].finalResultType
 
-      val tuples: List[Tree] = wtpe.members.collect {
-        case mSymbol: MethodSymbol if mSymbol.isGetter && mSymbol.isPublic =>
-          val name = mSymbol.name.toString
-          q"""
+      val tuples: List[Tree] = wtpe.members
+        .collect {
+          case mSymbol: MethodSymbol if mSymbol.isGetter && mSymbol.isPublic =>
+            val name = mSymbol.name.toString
+            q"""
            (ParamName[$wtpe]($name), TypeInfo.deriveTypeInfo[${mSymbol.returnType}])
          """
-      }.toList
+        }
+        .toList
+        .reverse
 
       c.Expr[Map[ParamName[T], TypeInfo[?]]](
         q"""
@@ -88,7 +91,7 @@ object TypeInfoInstances {
 
       def isOptionOfAnyPrimitiveOrString(tpe: c.universe.Type): Boolean = {
         val typeArgs = tpe.typeArgs
-        tpe <:< typeOf[Option[Nothing]]
+        tpe <:< typeOf[Option[?]]
         && typeArgs.nonEmpty
         && (
           typeArgs.exists(isPrimitive) ||

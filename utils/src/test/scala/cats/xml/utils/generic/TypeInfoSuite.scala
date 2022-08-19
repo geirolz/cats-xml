@@ -9,7 +9,7 @@ class TypeInfoSuite extends munit.FunSuite {
     val fooTypeInfo: TypeInfo[Foo] = TypeInfo.deriveTypeInfo[Foo]
     assertEquals(
       obtained = fooTypeInfo,
-      expected = TypeInfo.of(
+      expected = TypeInfo.of[Foo](
         isString                       = false,
         isPrimitiveWrapper             = false,
         isPrimitive                    = false,

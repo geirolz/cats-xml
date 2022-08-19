@@ -1,6 +1,7 @@
 package cats.xml.generic
 
 import cats.Endo
+import cats.xml.utils.generic.{ParamName, ParamNameExtractor, TypeInfo}
 
 case class XmlElemTypeParamInfo(
   elemType: XmlElemType,

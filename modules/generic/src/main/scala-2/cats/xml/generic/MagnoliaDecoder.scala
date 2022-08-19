@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import cats.xml.codec.Decoder
 import cats.xml.cursor.{CursorFailure, FreeCursor}
 import cats.xml.Xml
+import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param}
 
 import scala.annotation.unused
