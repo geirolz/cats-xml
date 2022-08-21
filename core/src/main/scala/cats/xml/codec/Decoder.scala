@@ -74,6 +74,12 @@ object Decoder extends DecoderInstances with DecoderSyntax {
       }
   }
 
+  def fromXml[T](f: Xml => Decoder.Result[T]): Decoder[T] =
+    id.flatMapF(f)
+
+  def fromOption[T](f: Xml => Option[T]): Decoder[T] =
+    fromEither(f.andThen(_.toRight(DecoderFailure.Custom("Cannot decode Xml."))))
+
   def fromEither[T](f: Xml => Either[DecoderFailure, T]): Decoder[T] =
     id.emap(f)
 
