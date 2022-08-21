@@ -104,6 +104,7 @@ object XmlTypeInterpreter {
           || tpeInfo.isPrimitive
           || tpeInfo.isPrimitiveWrapper
           || tpeInfo.isValueClass
+          || tpeInfo.isOptionOfAnyPrimitiveOrString
   ): XmlTypeInterpreter[T] =
     XmlTypeInterpreter.of[T] { case (paramName, tpeInfo) =>
       if (textDiscriminator(paramName, tpeInfo))
