@@ -14,7 +14,7 @@ object MagnoliaEncoder {
     ctx: CaseClass[Encoder, T],
     @unused config: Configuration
   ): Encoder[T] = {
-    if (ctx.isValueClass) {
+    if (ctx.isValueClass && config.unwrapValueClasses) {
       val valueParam: Param[Encoder, T] = ctx.parameters.head
       valueParam.typeclass.contramap[T](valueParam.dereference(_))
     } else {

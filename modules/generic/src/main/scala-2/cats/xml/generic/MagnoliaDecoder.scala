@@ -7,17 +7,15 @@ import cats.xml.Xml
 import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param}
 
-import scala.annotation.unused
-
 object MagnoliaDecoder {
 
   import cats.implicits.*
 
   private[generic] def join[T: XmlTypeInterpreter](
     ctx: CaseClass[Decoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Decoder[T] =
-    if (ctx.isValueClass) {
+    if (ctx.isValueClass && config.unwrapValueClasses) {
       ctx.parameters.head.typeclass.map(v => ctx.rawConstruct(Seq(v)))
     } else {
       val interpreter: XmlTypeInterpreter[T] = XmlTypeInterpreter[T]
