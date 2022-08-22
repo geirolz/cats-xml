@@ -7,7 +7,7 @@ import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 class EncoderSuite extends munit.FunSuite {
 
   import cats.xml.syntax.*
-  import cats.xml.generic.Samples.*
+  import cats.xml.generic.testing.Samples.*
 
   test("auto") {
 

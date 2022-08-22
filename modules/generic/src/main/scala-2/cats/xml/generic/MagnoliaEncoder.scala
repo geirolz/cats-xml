@@ -12,7 +12,7 @@ object MagnoliaEncoder {
 
   private[generic] def join[T: XmlTypeInterpreter](
     ctx: CaseClass[Encoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Encoder[T] = {
     if (ctx.isValueClass && config.unwrapValueClasses) {
       val valueParam: Param[Encoder, T] = ctx.parameters.head

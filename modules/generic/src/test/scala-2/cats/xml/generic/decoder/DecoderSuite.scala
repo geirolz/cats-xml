@@ -3,13 +3,17 @@ package cats.xml.generic.decoder
 import cats.data.Validated.Valid
 import cats.xml.XmlNode
 import cats.xml.codec.Decoder
-import cats.xml.generic.Samples
+import cats.xml.codec.DecoderFailure.CursorFailed
+import cats.xml.cursor.CursorFailure
+import cats.xml.generic.testing.Samples
 
 class DecoderSuite extends munit.FunSuite {
 
+  import cats.syntax.all.*
   import cats.xml.syntax.*
   import Samples.*
 
+  // --------------------- AUTO ---------------------
   test("auto") {
 
     import cats.xml.generic.decoder.auto.*
@@ -40,6 +44,45 @@ class DecoderSuite extends munit.FunSuite {
     )
   }
 
+  test("auto without useDefaults") {
+
+    import cats.xml.generic.decoder.auto.*
+
+    case class Foo(
+      a: String,
+      b: String = "DEFAULT"
+    )
+
+    assertEquals(
+      obtained = XmlNode("Foo")
+        .withAttributes(
+          "a" := "TEST"
+        )
+        .as[Foo],
+      expected = CursorFailed(
+        CursorFailure.MissingAttrByKey(
+          path = "/@b",
+          key  = "b"
+        )
+      ).invalidNel
+    )
+  }
+
+  test("auto with ADT") {
+
+    import cats.xml.generic.decoder.auto.*
+
+    assertEquals(
+      obtained = XmlNode("Bike")
+        .withAttributes(
+          "wheelCount" := 2
+        )
+        .as[Vehicle],
+      expected = Valid(Bike(2))
+    )
+  }
+
+  // --------------------- SEMIAUTO ---------------------
   test("semiauto") {
 
     import cats.xml.generic.decoder.semiauto.*
@@ -75,4 +118,19 @@ class DecoderSuite extends munit.FunSuite {
 
   }
 
+  test("semiauto with ADT") {
+
+    import cats.xml.generic.decoder.semiauto.*
+
+    implicit val decoder: Decoder[Vehicle] = deriveDecoder[Vehicle]
+
+    assertEquals(
+      obtained = XmlNode("Bike")
+        .withAttributes(
+          "wheelCount" := 2
+        )
+        .as[Vehicle],
+      expected = Valid(Bike(2))
+    )
+  }
 }

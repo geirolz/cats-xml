@@ -2,7 +2,7 @@ package cats.xml.generic.decoder.configured
 
 import cats.xml.codec.Decoder
 import cats.xml.generic.{Configuration, MagnoliaDecoder, XmlTypeInterpreter}
-import magnolia1.{CaseClass, Magnolia}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 
 object auto {
 
@@ -14,4 +14,9 @@ object auto {
     config: Configuration
   ): Typeclass[T] =
     MagnoliaDecoder.join(ctx, config)
+
+  def split[T: XmlTypeInterpreter](ctx: SealedTrait[Typeclass, T])(implicit
+    config: Configuration
+  ): Typeclass[T] =
+    MagnoliaDecoder.split(ctx, config)
 }

@@ -43,7 +43,7 @@ object Decoder extends DecoderInstances with DecoderSyntax {
 
   import cats.implicits.*
 
-  type Result[T] = ValidatedNel[DecoderFailure, T]
+  type Result[+T] = ValidatedNel[DecoderFailure, T]
 
   lazy val id: Decoder[Xml] = of {
     case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
