@@ -112,7 +112,7 @@ object NodeCursor {
   }
 
   // kind
-  case object Root extends NodeCursor {
+  final case object Root extends NodeCursor {
 
     override protected val lastCursor: NodeCursor = this
 
@@ -121,7 +121,8 @@ object NodeCursor {
     override def focus(xml: XmlNode): Cursor.Result[XmlNode] = Right(xml)
   }
 
-  class Simple(protected val lastCursor: NodeCursor, protected val lastOp: Op) extends NodeCursor {
+  final class Simple(protected val lastCursor: NodeCursor, protected val lastOp: Op)
+      extends NodeCursor {
 
     import cats.implicits.*
 

@@ -4,7 +4,7 @@ import cats.xml.Xml.XmlNull
 import cats.xml.XmlNode.XmlNodeGroup
 import cats.xml.utils.format.Indentator
 
-import scala.annotation.{tailrec, unused}
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 object XmlPrinter {
@@ -33,7 +33,7 @@ object XmlPrinter {
       )
     )
 
-  def prettyString(xml: Xml)(implicit @unused config: Config): String = {
+  def prettyString(xml: Xml)(implicit config: Config): String = {
 
     val returnString: String =
       config.nodeReturnChar

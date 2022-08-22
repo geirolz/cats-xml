@@ -22,39 +22,45 @@ sealed trait CursorFailure {
 }
 object CursorFailure {
 
-  case class InvalidTargetType(required: Class[?], actual: Class[?]) extends CursorFailure
+  final case class InvalidTargetType(required: Class[?], actual: Class[?]) extends CursorFailure
 
   // decode
-  case class DecoderFailed(path: String, failure: DecoderFailure) extends CursorFailure
+  final case class DecoderFailed(path: String, failure: DecoderFailure) extends CursorFailure
 
   // validation
-  case class ValidationsFailed(path: String, errors: NonEmptyList[String]) extends FailedNode
+  final case class ValidationsFailed(path: String, errors: NonEmptyList[String]) extends FailedNode
 
   // node
   sealed trait Missing extends CursorFailure {
     val path: String
   }
   sealed trait FailedNode extends CursorFailure
-  case class MissingNode(path: String, nodeName: String) extends FailedNode with Missing
-  case class MissingNodeAtIndex(path: String, index: Int) extends FailedNode with Missing
-  case class MissingNodeFind(path: String, predicate: XmlNode => Boolean)
+  final case class MissingNode(path: String, nodeName: String) extends FailedNode with Missing
+  final case class MissingNodeAtIndex(path: String, index: Int) extends FailedNode with Missing
+  final case class MissingNodeFind(path: String, predicate: XmlNode => Boolean)
       extends FailedNode
       with Missing
-  case class MissingNodeHead(path: String) extends FailedNode with Missing
-  case class MissingNodeLast(path: String) extends FailedNode with Missing
-  case class MissingText(path: String) extends FailedNode with Missing
+  final case class MissingNodeHead(path: String) extends FailedNode with Missing
+  final case class MissingNodeLast(path: String) extends FailedNode with Missing
+  final case class MissingText(path: String) extends FailedNode with Missing
 
   sealed trait FailedAttribute extends CursorFailure
-  case class MissingAttrByKey(path: String, key: String) extends FailedAttribute with Missing
-  case class MissingAttrAtIndex(path: String, index: Long) extends FailedAttribute with Missing
-  case class MissingAttrHead(path: String) extends FailedAttribute with Missing
-  case class MissingAttrLast(path: String) extends FailedAttribute with Missing
-  case class LeftBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
-  case class RightBoundLimitAttr(path: String, lastKey: String) extends FailedAttribute with Missing
-  case class Custom(message: String) extends CursorFailure
-  case class Error(error: Throwable) extends CursorFailure with UnderlyingThrowableWeakEq
+  final case class MissingAttrByKey(path: String, key: String) extends FailedAttribute with Missing
+  final case class MissingAttrAtIndex(path: String, index: Long)
+      extends FailedAttribute
+      with Missing
+  final case class MissingAttrHead(path: String) extends FailedAttribute with Missing
+  final case class MissingAttrLast(path: String) extends FailedAttribute with Missing
+  final case class LeftBoundLimitAttr(path: String, lastKey: String)
+      extends FailedAttribute
+      with Missing
+  final case class RightBoundLimitAttr(path: String, lastKey: String)
+      extends FailedAttribute
+      with Missing
+  final case class Custom(message: String) extends CursorFailure
+  final case class Error(error: Throwable) extends CursorFailure with UnderlyingThrowableWeakEq
 
-  case class CursorFailureException(failure: CursorFailure)
+  final case class CursorFailureException(failure: CursorFailure)
       extends RuntimeException(s"Cursor failure: $failure")
 
   implicit val eqCursorFailureReason: Eq[CursorFailure] =

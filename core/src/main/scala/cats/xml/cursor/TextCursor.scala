@@ -6,12 +6,13 @@ import cats.xml.modifier.{Modifier, ModifierFailure}
 
 /** Vertical cursor for node Text
   */
-class TextCursor(protected[xml] val lastCursor: NodeCursor) extends VCursor[XmlData, NodeCursor] {
+final class TextCursor(protected[xml] val lastCursor: NodeCursor)
+    extends VCursor[XmlData, NodeCursor] {
   $this =>
 
   import cats.implicits.*
 
-  override final lazy val path: String = lastCursor.path
+  override lazy val path: String = lastCursor.path
 
   // modify
   def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =

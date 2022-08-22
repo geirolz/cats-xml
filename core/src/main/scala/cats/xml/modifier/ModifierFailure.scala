@@ -15,12 +15,12 @@ sealed trait ModifierFailure {
 }
 object ModifierFailure {
 
-  case class InvalidData[D](message: String, data: D) extends ModifierFailure
-  case class CursorFailed(cursorFailure: CursorFailure) extends ModifierFailure
-  case class Custom(message: String) extends ModifierFailure
-  case class Error(error: Throwable) extends ModifierFailure with UnderlyingThrowableWeakEq
+  final case class InvalidData[D](message: String, data: D) extends ModifierFailure
+  final case class CursorFailed(cursorFailure: CursorFailure) extends ModifierFailure
+  final case class Custom(message: String) extends ModifierFailure
+  final case class Error(error: Throwable) extends ModifierFailure with UnderlyingThrowableWeakEq
 
-  case class ModifierFailureException(failure: ModifierFailure)
+  final case class ModifierFailureException(failure: ModifierFailure)
       extends RuntimeException(s"Modifier failure: $failure")
 
   implicit val showModifierFailureReason: Show[ModifierFailure] = {

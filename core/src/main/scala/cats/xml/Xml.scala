@@ -39,7 +39,7 @@ trait Xml {
 }
 object Xml {
 
-  case object XmlNull extends Xml with XmlData
+  final case object XmlNull extends Xml with XmlData
 
   final lazy val Null: Xml & XmlData = XmlNull
   final lazy val Data: XmlData.type  = xml.XmlData
@@ -73,11 +73,11 @@ object XmlData {
   def fromByte(value: Byte): XmlData                          = XmlByte(value)
   def fromBoolean(value: Boolean): XmlData                    = XmlBool(value)
 
-  private[xml] case class XmlString(value: String) extends XmlData
-  private[xml] case class XmlNumber[T <: Number](value: T) extends XmlData
-  private[xml] case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
-  private[xml] case class XmlByte(value: Byte) extends XmlData
-  private[xml] case class XmlBool(value: Boolean) extends XmlData
+  private[xml] final case class XmlString(value: String) extends XmlData
+  private[xml] final case class XmlNumber[T <: Number](value: T) extends XmlData
+  private[xml] final case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
+  private[xml] final case class XmlByte(value: Byte) extends XmlData
+  private[xml] final case class XmlBool(value: Boolean) extends XmlData
 
   // TODO: TO CHECK EQ TO DECODE STRING
   implicit val showXmlData: Show[XmlData] = {
