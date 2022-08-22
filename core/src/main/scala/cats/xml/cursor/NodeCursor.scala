@@ -112,7 +112,7 @@ object NodeCursor {
   }
 
   // kind
-  final case object Root extends NodeCursor {
+  case object Root extends NodeCursor {
 
     override protected val lastCursor: NodeCursor = this
 
