@@ -7,21 +7,11 @@ import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 class EncoderSuite extends munit.FunSuite {
 
   import cats.xml.syntax.*
-  import cats.xml.generic.Samples.*
+  import cats.xml.generic.testing.Samples.*
 
   test("auto") {
 
     import cats.xml.generic.encoder.auto.*
-
-    implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
-      XmlTypeInterpreter
-        .default[Foo]
-        .overrideType(
-          _.param(_.valueClass) -> XmlElemType.Attribute
-        )
-
-    implicit val encoderBar: Encoder[Bar] = deriveEncoder[Bar]
-    implicit val encoderFoo: Encoder[Foo] = deriveEncoder[Foo]
 
     assertEquals(
       obtained = Foo(

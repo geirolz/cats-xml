@@ -1,11 +1,11 @@
 package cats.xml.generic
 
 import cats.data.NonEmptyList
-import cats.xml.codec.Decoder
+import cats.xml.codec.{Decoder, DecoderFailure}
 import cats.xml.cursor.{CursorFailure, FreeCursor}
+import cats.xml.{Xml, XmlNode}
 import cats.xml.utils.generic.ParamName
-import cats.xml.Xml
-import magnolia1.{CaseClass, Param}
+import magnolia1.{CaseClass, Param, SealedTrait, Subtype}
 
 import scala.annotation.unused
 
@@ -15,9 +15,9 @@ object MagnoliaDecoder {
 
   private[generic] def join[T: XmlTypeInterpreter](
     ctx: CaseClass[Decoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Decoder[T] =
-    if (ctx.isValueClass) {
+    if (ctx.isValueClass && config.unwrapValueClasses) {
       ctx.parameters.head.typeclass.map(v => ctx.rawConstruct(Seq(v)))
     } else {
       val interpreter: XmlTypeInterpreter[T] = XmlTypeInterpreter[T]
@@ -59,6 +59,35 @@ object MagnoliaDecoder {
             .map(ctx.rawConstruct)
         })
     }
+
+  private[generic] def split[T](
+    ctx: SealedTrait[Decoder, T],
+    @unused config: Configuration
+  ): Decoder[T] =
+    Decoder.fromXml(xml => {
+
+      val subtypeTypeClass: Option[Subtype[Decoder, T]] = xml match {
+        case node: XmlNode =>
+          val target: String = (config.discriminatorAttrKey match {
+            case Some(discriminatorAttrKey) => node.findAttrValue[String](discriminatorAttrKey)
+            case None                       => node.label.some
+          }).getOrElse(node.label)
+
+          ctx.subtypes.find(_.typeName.short == target)
+        case _ =>
+          ctx.subtypes.headOption
+      }
+
+      subtypeTypeClass.map(_.typeclass.decode(xml)) match {
+        case Some(result) => result
+        case None =>
+          DecoderFailure
+            .Custom(
+              s"Cannot find a valid subtype for sealed trait ${ctx.typeName.full}. Config: $config"
+            )
+            .invalidNel
+      }
+    })
 
   // Internal error: unable to find the outer accessor symbol of class $read
   private def useDefaultParameterIfPresentToRecoverMissing[F[_], T, PT](

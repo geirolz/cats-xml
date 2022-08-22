@@ -9,12 +9,12 @@ import cats.xml.modifier.{Modifier, ModifierFailure}
 
 /** Horizontal cursor for node attributes
   */
-class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
+final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
     extends HCursor[XmlAttribute, NodeCursor, AttrCursor] { $this =>
 
   import cats.implicits.*
 
-  final lazy val path: String = s"${vCursor.path}$op"
+  lazy val path: String = s"${vCursor.path}$op"
 
   // modify
   def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =

@@ -8,8 +8,7 @@ object semiauto {
 
   type Typeclass[T] = Encoder[T]
 
-  def deriveConfiguredEncoder[T]: Encoder[T] =
-    macro Magnolia.gen[T]
+  def deriveConfiguredEncoder[T]: Encoder[T] = macro Magnolia.gen[T]
 
   def join[T: XmlTypeInterpreter](caseClass: CaseClass[Typeclass, T])(implicit
     config: Configuration

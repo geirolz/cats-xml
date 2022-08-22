@@ -4,8 +4,7 @@ import scala.annotation.{tailrec, unused}
 import scala.reflect.macros.blackbox
 
 class ParamNameExtractor[T] private () {
-  def param[U](@unused path: T => U): ParamName[T] =
-    macro ParamNameExtractor.Macros.extract[T, U]
+  def param[U](@unused path: T => U): ParamName[T] = macro ParamNameExtractor.Macros.extract[T, U]
 }
 object ParamNameExtractor {
 

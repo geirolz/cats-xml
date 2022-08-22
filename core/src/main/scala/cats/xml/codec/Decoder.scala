@@ -43,7 +43,7 @@ object Decoder extends DecoderInstances with DecoderSyntax {
 
   import cats.implicits.*
 
-  type Result[T] = ValidatedNel[DecoderFailure, T]
+  type Result[+T] = ValidatedNel[DecoderFailure, T]
 
   lazy val id: Decoder[Xml] = of {
     case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
@@ -73,6 +73,12 @@ object Decoder extends DecoderInstances with DecoderSyntax {
         case Validated.Invalid(e)   => e.map(DecoderFailure.CursorFailed(_)).invalid
       }
   }
+
+  def fromXml[T](f: Xml => Decoder.Result[T]): Decoder[T] =
+    id.flatMapF(f)
+
+  def fromOption[T](f: Xml => Option[T]): Decoder[T] =
+    fromEither(f.andThen(_.toRight(DecoderFailure.Custom("Cannot decode Xml."))))
 
   def fromEither[T](f: Xml => Either[DecoderFailure, T]): Decoder[T] =
     id.emap(f)

@@ -7,7 +7,7 @@ import cats.xml.generic.{Configuration, XmlElemType, XmlTypeInterpreter}
 
 class ConfiguredDecoderSuite extends munit.FunSuite {
 
-  import cats.xml.generic.Samples.*
+  import cats.xml.generic.testing.Samples.*
   import cats.xml.syntax.*
 
   test("configured.auto") {

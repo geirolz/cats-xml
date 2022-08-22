@@ -1,5 +1,4 @@
-import cats.xml.utils.generic.TypeInfo
-import cats.xml.utils.generic._
+
 
 val t: TypeInfo[Foo] = TypeInfo.deriveTypeInfo[Foo]
 

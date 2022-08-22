@@ -3,7 +3,7 @@ package cats.xml
 import cats.{Endo, Eq, Show}
 import cats.xml.codec.DataEncoder
 
-case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
+final case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
 
   def map[T: DataEncoder](f: XmlData => T): XmlAttribute =
     map(value => DataEncoder[T].encode(f(value)))

@@ -2,8 +2,8 @@ package cats.xml.generic
 
 import cats.xml.{Xml, XmlAttribute, XmlData, XmlNode}
 import cats.xml.codec.Encoder
-import cats.xml.utils.generic.ParamName
 import cats.xml.Xml.XmlNull
+import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param, SealedTrait}
 
 import scala.annotation.unused
@@ -12,9 +12,9 @@ object MagnoliaEncoder {
 
   private[generic] def join[T: XmlTypeInterpreter](
     ctx: CaseClass[Encoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Encoder[T] = {
-    if (ctx.isValueClass) {
+    if (ctx.isValueClass && config.unwrapValueClasses) {
       val valueParam: Param[Encoder, T] = ctx.parameters.head
       valueParam.typeclass.contramap[T](valueParam.dereference(_))
     } else {

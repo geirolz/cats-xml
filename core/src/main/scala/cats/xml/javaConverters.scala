@@ -35,8 +35,7 @@ object JavaConverters extends JavaConvertersSyntax {
   }
 
   def attrFromJavaNodeMap(nMap: NamedNodeMap): List[XmlAttribute] =
-    if (nMap == null)
-      Nil
+    if (nMap == null) Nil
     else {
       val len: Int                    = nMap.getLength
       val result: Array[XmlAttribute] = new Array[XmlAttribute](len)
