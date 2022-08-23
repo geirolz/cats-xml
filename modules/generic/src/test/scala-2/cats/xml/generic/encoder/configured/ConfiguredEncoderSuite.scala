@@ -35,7 +35,7 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
     implicit val config: Configuration = Configuration.default
       .withDiscriminatorAttrKey("kind")
 
-    implicit val encoder: Encoder[Vehicle] =
+    implicit val encoderVehicle: Encoder[Vehicle] =
       deriveConfiguredEncoder[Vehicle]
 
     assertEquals(
