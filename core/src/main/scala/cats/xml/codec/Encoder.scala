@@ -4,7 +4,7 @@ import cats.xml.{Xml, XmlData}
 import cats.Contravariant
 
 // T => XML
-trait Encoder[-T] {
+trait Encoder[T] {
 
   def encode(t: T): Xml
 
@@ -27,7 +27,11 @@ object Encoder extends EncoderInstances with EncoderSyntax {
 private[xml] trait EncoderSyntax {
 
   implicit class EncoderOps[T](t: T) {
+
     def toXml(implicit e: Encoder[T]): Xml =
+      e.encode(t)
+
+    def toXmlWiden[TT >: T](implicit e: Encoder[TT]): Xml =
       e.encode(t)
   }
 }
@@ -69,7 +73,7 @@ private[xml] trait EncoderPrimitivesInstances {
 }
 
 // #################### DATA ENCODER ####################
-trait DataEncoder[-T] extends Encoder[T] {
+trait DataEncoder[T] extends Encoder[T] {
   override def encode(t: T): XmlData
   override def contramap[U](f: U => T): DataEncoder[U] =
     DataEncoder.of(f.andThen(encode))

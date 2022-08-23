@@ -115,6 +115,12 @@ sealed class XmlNode private (
   def appendAttr(newAttr: XmlAttribute): XmlNode =
     updateAttrs(ls => ls :+ newAttr)
 
+  def appendAttrs(newAttr: XmlAttribute, newAttrs: XmlAttribute*): XmlNode =
+    appendAttrs(newAttr +: newAttrs)
+
+  def appendAttrs(newAttrs: Seq[XmlAttribute]): XmlNode =
+    updateAttrs(ls => ls ++ newAttrs)
+
   def removeAttr(key: String): XmlNode =
     updateAttrs(_.filterNot(_.key == key))
 
@@ -158,8 +164,11 @@ sealed class XmlNode private (
   def drainContent: XmlNode =
     withContent(NodeContent.empty)
 
-  private[xml] def withContent(newContent: NodeContent): XmlNode =
+  def withContent(newContent: NodeContent): XmlNode =
     updateContent(_ => newContent)
+
+  def withOptContent(newContent: Option[NodeContent]): XmlNode =
+    updateContent(_ => newContent.getOrElse(NodeContent.empty))
 
   private[xml] def updateContent(f: Endo[NodeContent]): XmlNode =
     copy(content = f(content))
