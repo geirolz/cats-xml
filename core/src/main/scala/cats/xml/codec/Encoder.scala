@@ -27,7 +27,11 @@ object Encoder extends EncoderInstances with EncoderSyntax {
 private[xml] trait EncoderSyntax {
 
   implicit class EncoderOps[T](t: T) {
+
     def toXml(implicit e: Encoder[T]): Xml =
+      e.encode(t)
+
+    def toXmlWiden[TT >: T](implicit e: Encoder[TT]): Xml =
       e.encode(t)
   }
 }

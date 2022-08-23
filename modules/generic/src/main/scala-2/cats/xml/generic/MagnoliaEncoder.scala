@@ -1,14 +1,15 @@
 package cats.xml.generic
 
-import cats.xml.{Xml, XmlAttribute, XmlData, XmlNode}
+import cats.xml.*
 import cats.xml.codec.Encoder
 import cats.xml.Xml.XmlNull
 import cats.xml.utils.generic.ParamName
+import cats.xml.XmlNode.XmlNodeGroup
 import magnolia1.{CaseClass, Param, SealedTrait}
 
-import scala.annotation.unused
-
 object MagnoliaEncoder {
+
+  import cats.xml.syntax.*
 
   private[generic] def join[T: XmlTypeInterpreter](
     ctx: CaseClass[Encoder, T],
@@ -66,11 +67,29 @@ object MagnoliaEncoder {
 
   private[generic] def split[T: XmlTypeInterpreter](
     sealedTrait: SealedTrait[Encoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Encoder[T] = { (a: T) =>
-    {
-      sealedTrait.split(a) { subtype =>
-        subtype.typeclass.encode(subtype.cast(a))
+    sealedTrait.split(a) { subtype =>
+      val subTypeXml = subtype.typeclass.encode(subtype.cast(a))
+      config.discriminatorAttrKey match {
+        case Some(discriminatorAttrKey) =>
+          val base = XmlNode(sealedTrait.typeName.short)
+            .withAttributes(
+              discriminatorAttrKey := subtype.typeName.short
+            )
+
+          subTypeXml match {
+            case group: XmlNodeGroup => base.withContent(group.content)
+            case node: XmlNode =>
+              base
+                .appendAttrs(node.attributes)
+                .withContent(node.content)
+            case attr: XmlAttribute => base.appendAttr(attr)
+            case data: XmlData      => base.withText(data)
+            case _                  => base
+          }
+
+        case None => subTypeXml
       }
     }
   }

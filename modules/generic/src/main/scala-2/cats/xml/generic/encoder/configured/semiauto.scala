@@ -8,14 +8,14 @@ object semiauto {
 
   type Typeclass[T] = Encoder[T]
 
-  def deriveConfiguredEncoder[T]: Encoder[T] = macro Magnolia.gen[T]
+  def deriveConfiguredEncoder[T]: Typeclass[T] = macro Magnolia.gen[T]
 
   def join[T: XmlTypeInterpreter](caseClass: CaseClass[Typeclass, T])(implicit
     config: Configuration
   ): Typeclass[T] =
     MagnoliaEncoder.join(caseClass, config)
 
-  def split[T](sealedTrait: SealedTrait[Typeclass, T])(implicit
+  def split[T: XmlTypeInterpreter](sealedTrait: SealedTrait[Typeclass, T])(implicit
     config: Configuration
   ): Typeclass[T] =
     MagnoliaEncoder.split(sealedTrait, config)

@@ -15,7 +15,7 @@ object auto {
   ): Typeclass[T] =
     MagnoliaEncoder.join(caseClass, config)
 
-  def split[T](sealedTrait: SealedTrait[Typeclass, T])(implicit
+  def split[T: XmlTypeInterpreter](sealedTrait: SealedTrait[Typeclass, T])(implicit
     config: Configuration
   ): Typeclass[T] =
     MagnoliaEncoder.split(sealedTrait, config)
