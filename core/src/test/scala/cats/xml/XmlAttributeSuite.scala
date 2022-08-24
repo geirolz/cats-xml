@@ -1,6 +1,7 @@
 package cats.xml
 
 import cats.xml.codec.{DataEncoder, Decoder}
+import cats.xml.testing.XmlValidName
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
 
@@ -32,9 +33,9 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
     c: ClassTag[T]
   ): Unit =
     property(s"XmlAttribute create an attr with ${c.runtimeClass.getSimpleName} data") {
-      forAll { (key: String, value: T) =>
+      forAll { (key: XmlValidName, value: T) =>
         assertEquals(
-          obtained = XmlAttribute(key, value).value.as[T].toOption,
+          obtained = XmlAttribute(key.value, value).value.as[T].toOption,
           expected = Some(value)
         )
       }
@@ -46,10 +47,10 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
     property(
       s"Two XmlAttribute with the same (key, ${c.runtimeClass.getSimpleName}) are equals"
     ) {
-      forAll { (key: String, value: T) =>
+      forAll { (key: XmlValidName, value: T) =>
         assertEquals(
-          obtained = XmlAttribute(key, value),
-          expected = XmlAttribute(key, value)
+          obtained = XmlAttribute(key.value, value),
+          expected = XmlAttribute(key.value, value)
         )
       }
     }

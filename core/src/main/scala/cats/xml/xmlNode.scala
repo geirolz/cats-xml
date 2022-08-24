@@ -4,6 +4,7 @@ import cats.{Endo, Eq, Show}
 import cats.data.NonEmptyList
 import cats.kernel.Monoid
 import cats.xml.codec.{DataEncoder, Decoder}
+import cats.xml.Xml.requireValidXmlName
 import cats.xml.XmlNode.XmlNodeGroup
 
 import scala.annotation.tailrec
@@ -244,7 +245,7 @@ object XmlNode extends XmlNodeInstances {
     attributes: List[XmlAttribute] = Nil,
     content: NodeContent           = NodeContent.empty
   ): XmlNode = {
-    require(label != null && label.nonEmpty)
+    requireValidXmlName(label)
     require(attributes != null)
     require(content != null)
     new XmlNode(

@@ -3,7 +3,7 @@ package cats.xml
 import cats.{Endo, Eq, Show}
 import cats.xml.codec.DataEncoder
 
-final case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
+final case class XmlAttribute private (key: String, value: XmlData) extends Xml with Serializable {
 
   def map[T: DataEncoder](f: XmlData => T): XmlAttribute =
     map(value => DataEncoder[T].encode(f(value)))
@@ -19,8 +19,10 @@ final case class XmlAttribute(key: String, value: XmlData) extends Xml with Seri
 }
 object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 
-  def apply[T: DataEncoder](key: String, value: T): XmlAttribute =
+  def apply[T: DataEncoder](key: String, value: T): XmlAttribute = {
+    require(Xml.isValidXmlName(key))
     XmlAttribute(key, DataEncoder[T].encode(value))
+  }
 
   def fromMap(values: Map[String, String]): List[XmlAttribute] =
     values.map { case (k, v) =>
