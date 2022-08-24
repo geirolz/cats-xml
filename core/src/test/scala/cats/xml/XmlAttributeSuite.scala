@@ -9,6 +9,8 @@ import scala.reflect.ClassTag
 
 class XmlAttributeSuite extends munit.ScalaCheckSuite {
 
+  import cats.xml.syntax.*
+
   // isomorphism
   testAttributeDataIso[Unit]
   testAttributeDataIso[Int]
@@ -28,6 +30,45 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeEquality[String]
   testAttributeEquality[BigDecimal]
   testAttributeEquality[BigInt]
+
+  test("XmlAttribute.normalizeAttrs") {
+
+    assertEquals(
+      XmlAttribute.normalizeAttrs(
+        List(
+          "A" := 1,
+          "B" := 2,
+          "C" := 3,
+          "A" := 4,
+          "B" := 5,
+          "C" := 6
+        )
+      ),
+      List(
+        "A" := 4,
+        "B" := 5,
+        "C" := 6
+      )
+    )
+
+    assertEquals(
+      XmlAttribute.normalizeAttrs(
+        List(
+          "first"  := 1,
+          "second" := 2,
+          "third"  := 3,
+          "first"  := 4,
+          "second" := 5,
+          "third"  := 6
+        )
+      ),
+      List(
+        "first"  := 4,
+        "second" := 5,
+        "third"  := 6
+      )
+    )
+  }
 
   private def testAttributeDataIso[T: Arbitrary: DataEncoder: Decoder](implicit
     c: ClassTag[T]

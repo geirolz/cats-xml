@@ -36,7 +36,13 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
     }
 
   def normalizeAttrs(attrs: List[XmlAttribute]): List[XmlAttribute] =
-    attrs.groupBy(_.key).flatMap(_._2.lastOption).toList.reverse
+    attrs
+      .foldLeft(Map.empty[String, XmlAttribute])((acc, attr) => {
+        acc.updated(attr.key, attr)
+      })
+      .values
+      .toList
+
 }
 private[xml] trait XmlAttributeSyntax {
 
