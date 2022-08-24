@@ -8,7 +8,7 @@ import cats.xml.XmlNode.XmlNodeGroup
 
 import scala.annotation.tailrec
 
-sealed trait AbstractXmlNode extends Xml {
+private[xml] sealed trait AbstractXmlNode extends Xml {
 
   // must be 'def' due it's mutable
   def content: NodeContent
@@ -73,35 +73,53 @@ sealed class XmlNode private (
   private var mContent: NodeContent
 ) extends AbstractXmlNode {
 
+  import cats.syntax.all.*
+
   def label: String = mLabel
 
   def attributes: List[XmlAttribute] = mAttributes
 
   def content: NodeContent = mContent
 
-  // ---- LABEL ----
+  // ######### LABEL #########
   def updateLabel(newLabel: String): XmlNode =
     updateLabel(_ => newLabel)
 
   def updateLabel(f: Endo[String]): XmlNode =
-    copy(label = f(label))
+    safeCopy(label = f(label))
 
-  // ---- ATTRS ----
-  def findAttr(key: String): Option[XmlAttribute] =
+  // ######### ATTRS #########
+  def findAttrRaw(key: String): Option[XmlAttribute] =
     attributes.find(_.key == key)
 
-  def findAttrValue(key: String): Option[String] =
+  def findAttr(key: String): Option[String] =
     attributes
       .find(_.key == key)
       .map(_.value.asString)
 
-  def findAttrValue[T: Decoder](key: String): Option[T] =
+  def findAttr[T: Decoder](key: String): Option[T] =
     attributes
       .find(_.key == key)
       .flatMap(_.value.as[T].toOption)
 
-  def existsAttrValue[T: Decoder](key: String, p: T => Boolean): Boolean =
-    findAttrValue[T](key).exists(p)
+  def findAttrWhere[T: Decoder](keyP: String => Boolean, valueP: T => Boolean): Option[T] =
+    attributes
+      .mapFilter(a => {
+        if (keyP(a.key))
+          a.value.as[T].toOption.filter(valueP)
+        else
+          None
+      })
+      .headOption
+
+  def existsAttrByKey(p: String => Boolean): Boolean =
+    attributes.exists(a => p(a.key))
+
+  def existsAttrWithValue[T: Decoder](key: String, valueP: T => Boolean): Boolean =
+    existsAttrByKeyAndValue(_.eqv(key), valueP)
+
+  def existsAttrByKeyAndValue[T: Decoder](keyP: String => Boolean, valueP: T => Boolean): Boolean =
+    findAttrWhere(keyP, valueP).isDefined
 
   def withAttributes(attrs: Seq[XmlAttribute]): XmlNode =
     updateAttrs(_ => attrs.toList)
@@ -109,9 +127,7 @@ sealed class XmlNode private (
   def withAttributes(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode =
     updateAttrs(_ => (attr +: attrs).toList)
 
-  def prependAttr(newAttr: XmlAttribute): XmlNode =
-    updateAttrs(ls => newAttr +: ls)
-
+  // append attrs
   def appendAttr(newAttr: XmlAttribute): XmlNode =
     updateAttrs(ls => ls :+ newAttr)
 
@@ -121,16 +137,26 @@ sealed class XmlNode private (
   def appendAttrs(newAttrs: Seq[XmlAttribute]): XmlNode =
     updateAttrs(ls => ls ++ newAttrs)
 
+  // prepend attrs
+  def prependAttr(newAttr: XmlAttribute): XmlNode =
+    updateAttrs(ls => newAttr +: ls)
+
+  def prependAttrs(newAttr: XmlAttribute, newAttrs: XmlAttribute*): XmlNode =
+    prependAttrs(newAttr +: newAttrs)
+
+  def prependAttrs(newAttrs: Seq[XmlAttribute]): XmlNode =
+    updateAttrs(ls => (newAttrs ++ ls).toList)
+
   def removeAttr(key: String): XmlNode =
     updateAttrs(_.filterNot(_.key == key))
 
   def updateAttrs(f: Endo[List[XmlAttribute]]): XmlNode =
-    copy(attributes = f(attributes))
+    safeCopy(attributes = f(attributes))
 
   def updateAttr(key: String)(f: Endo[XmlAttribute]): XmlNode =
     updateAttrs(_.map(attr => if (attr.key == key) f(attr) else attr))
 
-  // ------ CONTENT ------
+  // ######### CONTENT #########
   def hasChildren: Boolean = children.nonEmpty
 
   def hasText: Boolean = text.nonEmpty
@@ -171,17 +197,25 @@ sealed class XmlNode private (
     updateContent(_ => newContent.getOrElse(NodeContent.empty))
 
   private[xml] def updateContent(f: Endo[NodeContent]): XmlNode =
-    copy(content = f(content))
+    safeCopy(content = f(content))
 
   def text: Option[XmlData] =
     content.text
 
+  def textString: String =
+    content.text.map(_.asString).getOrElse("")
+
   // -----------------------------//
-  def copy(
+  def safeCopy(
     label: String                  = this.label,
     attributes: List[XmlAttribute] = this.attributes,
     content: NodeContent           = this.content
-  ): XmlNode = new XmlNode(label, attributes, content)
+  ): XmlNode =
+    XmlNode(
+      label      = label,
+      attributes = XmlAttribute.normalizeAttrs(attributes),
+      content    = content
+    )
 
   /** ##### BE CAREFUL! ##### */
   private[xml] def mute(f: Endo[XmlNode]): Unit = {
@@ -209,7 +243,16 @@ object XmlNode extends XmlNodeInstances {
     label: String,
     attributes: List[XmlAttribute] = Nil,
     content: NodeContent           = NodeContent.empty
-  ): XmlNode = new XmlNode(label, attributes, content)
+  ): XmlNode = {
+    require(label != null && label.nonEmpty)
+    require(attributes != null)
+    require(content != null)
+    new XmlNode(
+      label,
+      XmlAttribute.normalizeAttrs(attributes),
+      content
+    )
+  }
 
   def group(node: XmlNode, nodeN: XmlNode*): XmlNodeGroup =
     group(node +: nodeN)

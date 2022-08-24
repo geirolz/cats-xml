@@ -18,7 +18,7 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
 
   def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
     Modifier(node => {
-      val nodeClone = node.copy()
+      val nodeClone = node.safeCopy()
       focus(nodeClone) match {
         case Right(focus) =>
           focus.mute(modifier)

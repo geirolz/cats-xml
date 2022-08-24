@@ -32,6 +32,9 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
       case Xml.Null => ""
       case _        => s"${ls.key}=\"${showData.show(ls.value)}\""
     }
+
+  def normalizeAttrs(attrs: List[XmlAttribute]): List[XmlAttribute] =
+    attrs.groupBy(_.key).flatMap(_._2.lastOption).toList.reverse
 }
 private[xml] trait XmlAttributeSyntax {
 

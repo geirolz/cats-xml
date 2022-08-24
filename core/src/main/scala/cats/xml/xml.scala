@@ -1,8 +1,8 @@
 package cats.xml
 
 import cats.{xml, Show}
-import cats.xml.codec.Decoder
 import cats.xml.Xml.XmlNull
+import cats.xml.codec.Decoder
 
 import scala.reflect.ClassTag
 
