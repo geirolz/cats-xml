@@ -34,7 +34,7 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
       op match {
         case Op.SelectAttr(key) =>
           node
-            .findAttr(key)
+            .findAttrRaw(key)
             .toRight(CursorFailure.MissingAttrByKey(path, key))
 
         case Op.SelectAttrByIndex(index) =>

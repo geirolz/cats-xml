@@ -1,9 +1,9 @@
 import sbt.project
 
-lazy val prjName  = "cats-xml"
-lazy val org      = "com.github.geirolz"
-lazy val scala213 = "2.13.8"
-lazy val scala31  = "3.1.3"
+lazy val prjName                = "cats-xml"
+lazy val org                    = "com.github.geirolz"
+lazy val scala213               = "2.13.8"
+lazy val scala31                = "3.1.3"
 lazy val supportedScalaVersions = List(scala213, scala31)
 //lazy val supportedScalaVersions = List(scala31)
 
@@ -233,4 +233,5 @@ def scalacSettings(scalaVersion: String): Seq[String] =
 
 //=============================== ALIASES ===============================
 addCommandAlias("check", "scalafmtAll;clean;coverage;test;coverageAggregate")
-addCommandAlias("generate-docs", "mdoc;copyReadMe;")
+addCommandAlias("gen-doc", "mdoc;copyReadMe;")
+addCommandAlias("coverage-test", "coverage;test;coverageReport")

@@ -69,7 +69,7 @@ object MagnoliaDecoder {
       val subtypeTypeClass: Option[Subtype[Decoder, T]] = xml match {
         case node: XmlNode =>
           val target: String = (config.discriminatorAttrKey match {
-            case Some(discriminatorAttrKey) => node.findAttrValue[String](discriminatorAttrKey)
+            case Some(discriminatorAttrKey) => node.findAttr[String](discriminatorAttrKey)
             case None                       => node.label.some
           }).getOrElse(node.label)
 

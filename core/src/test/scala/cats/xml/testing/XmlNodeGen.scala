@@ -2,6 +2,7 @@ package cats.xml.testing
 
 import cats.data.NonEmptyList
 import cats.xml.{NodeContent, XmlAttribute, XmlNode}
+import cats.xml.testing.GenUtils.getNonEmptyString
 import org.scalacheck.Gen
 
 object XmlNodeGen {
@@ -109,7 +110,7 @@ object XmlNodeGen {
       size <- Gen.choose[Int](0, maxAttrs)
       attributesNames <-
         if (size > 0)
-          Gen.listOfN(size, getNonEmptyString(maxAttrNameSize)).map(_.distinct)
+          Gen.listOfN(size, XmlValidName.genXmlValidName(maxAttrNameSize)).map(_.distinct)
         else
           Gen.const(Nil)
       values <-
@@ -117,12 +118,6 @@ object XmlNodeGen {
           Gen.listOfN(attributesNames.size, getNonEmptyString(maxAttrValueSize))
         else
           Gen.const(Nil)
-    } yield attributesNames.zip(values).map(t => XmlAttribute(t._1, t._2))
+    } yield attributesNames.map(_.value).zip(values).map(t => XmlAttribute(t._1, t._2))
 
-  def getNonEmptyString(maxSize: Int = 10): Gen[String] =
-    Gen.lzy(
-      Gen
-        .choose(1, maxSize)
-        .flatMap(Gen.stringOfN(_, Gen.alphaChar))
-    )
 }

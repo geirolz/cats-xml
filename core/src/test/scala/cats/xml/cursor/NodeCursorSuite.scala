@@ -107,7 +107,7 @@ class NodeCursorSuite extends munit.FunSuite {
       )
 
     assertEquals(
-      obtained = (Root \\ "bar").filter(_.existsAttrValue[Int]("attr", _ % 2 != 0)).focus(node),
+      obtained = (Root \\ "bar").filter(_.existsAttrWithValue[Int]("attr", _ % 2 != 0)).focus(node),
       expected = Right(
         XmlNode.group(
           XmlNode("bar").withAttributes("attr" := 1),
@@ -197,7 +197,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root
-        .filter(_.findAttrValue[Int]("attr").contains(1))
+        .filter(_.findAttr[Int]("attr").contains(1))
         .focus(node),
       expected = Right(
         XmlNode.group(
@@ -207,7 +207,7 @@ class NodeCursorSuite extends munit.FunSuite {
     )
 
     assertEquals(
-      obtained = Root.filter(_.findAttrValue[Int]("attr").contains(100)).focus(node),
+      obtained = Root.filter(_.findAttr[Int]("attr").contains(100)).focus(node),
       expected = Right(XmlNode.emptyGroup)
     )
   }
@@ -222,7 +222,7 @@ class NodeCursorSuite extends munit.FunSuite {
       )
 
     def withAttrEqTo(value: Int): XmlNode => Boolean =
-      _.findAttrValue[Int]("attr").contains(value)
+      _.findAttr[Int]("attr").contains(value)
 
     assertEquals(
       obtained = (Root | withAttrEqTo(1)).focus(node),
@@ -251,7 +251,7 @@ class NodeCursorSuite extends munit.FunSuite {
       )
 
     assertEquals(
-      obtained = Root.foo.find(_.findAttr("a").exists(_.value.asString == "3")).focus(node),
+      obtained = Root.foo.find(_.findAttrRaw("a").exists(_.value.asString == "3")).focus(node),
       expected = Right(XmlNode("bar2").withAttributes("a" := "3"))
     )
   }

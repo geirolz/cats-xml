@@ -43,7 +43,7 @@ private[xml] trait XmlParserInstances {
   implicit val xmlParserForTry: XmlParser[Try] = (inputStream: InputStream) =>
     Try {
 
-      var initNode: XmlNode = XmlNode("")
+      var initNode: XmlNode = XmlNode("TEMP_NODE")
       val handler: DefaultHandler = new DefaultHandler {
 
         var depth: Int           = 0
