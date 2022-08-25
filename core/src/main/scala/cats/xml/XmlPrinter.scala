@@ -1,7 +1,6 @@
 package cats.xml
 
 import cats.xml.Xml.XmlNull
-import cats.xml.XmlNode.XmlNodeGroup
 import cats.xml.utils.format.Indentator
 
 import scala.annotation.tailrec
@@ -97,7 +96,7 @@ object XmlPrinter {
           append(XmlAttribute.stringify(attr))
         case data: XmlData =>
           append(data.asString)
-        case group: XmlNodeGroup =>
+        case group: XmlNode.Group =>
           recAppendXml(
             ls               = group.children.toList,
             acc              = acc,

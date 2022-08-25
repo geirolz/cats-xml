@@ -1,6 +1,7 @@
 package cats.xml
 
 import cats.MonadThrow
+import cats.xml.utils.impure
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
 
@@ -24,7 +25,7 @@ private[xml] trait XmlParserInstances {
 
   import cats.implicits.*
 
-  private val defaultSaxParser: SAXParser = {
+  private val defaultSaxParser: SAXParser = synchronized {
     val parserFactory: SAXParserFactory = SAXParserFactory.newInstance()
     parserFactory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true)
     parserFactory.setFeature(
@@ -43,12 +44,14 @@ private[xml] trait XmlParserInstances {
   implicit val xmlParserForTry: XmlParser[Try] = (inputStream: InputStream) =>
     Try {
 
-      var initNode: XmlNode = XmlNode("TEMP_NODE")
+      @impure
+      var initNode: XmlNode.Node = XmlNode("TEMP_NODE")
       val handler: DefaultHandler = new DefaultHandler {
 
         var depth: Int           = 0
         var nodes: List[XmlNode] = Nil
 
+        @impure
         override def startElement(
           uri: String,
           localName: String,
@@ -56,7 +59,7 @@ private[xml] trait XmlParserInstances {
           attributes: Attributes
         ): Unit = {
 
-          val newNode: XmlNode = XmlNode(qName)
+          val newNode: XmlNode.Node = XmlNode(qName)
             .withAttributes(
               (0 until attributes.getLength).map(i =>
                 XmlAttribute(
@@ -70,7 +73,7 @@ private[xml] trait XmlParserInstances {
             initNode = newNode
             newNode
           } else {
-            nodes(depth - 1).mute(_.appendChild(newNode))
+            nodes(depth - 1).unsafeMute(_.appendChild(newNode))
             newNode
           }
 
@@ -86,12 +89,14 @@ private[xml] trait XmlParserInstances {
         override def characters(ch: Array[Char], start: Int, length: Int): Unit = {
           val value = new String(ch, start, length).trim
           if (value != null & value.nonEmpty)
-            nodes(depth - 1).mute(_.withText(value))
+            nodes(depth - 1).unsafeMute(_.unsafeNarrowNode.withText(value))
         }
       }
 
-      defaultSaxParser.parse(inputStream, handler)
-      initNode
+      synchronized {
+        defaultSaxParser.parse(inputStream, handler)
+        initNode
+      }
     }
 
   implicit def xmlParserOfMonadThrow[F[_]: MonadThrow]: XmlParser[F] =

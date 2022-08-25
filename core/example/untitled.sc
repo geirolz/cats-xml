@@ -1,6 +1,6 @@
-import cats.xml.codec.Decoder
 import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor.Root
+import cats.xml.cursor.FreeCursor
 import cats.xml.implicits._
 import cats.xml.modifier.Modifier
 
@@ -9,9 +9,36 @@ import cats.xml.modifier.Modifier
 ////val n1: XmlNode = <root>TEST</root>
 ////
 //////############### CURSOR ###############
-val node: XmlNode =
-  xml"""<root>
-         <foo>
+//val node: XmlNode =
+//  xml"""<root>
+//         <foo>
+//           <bar>
+//             <root>
+//               <foo>
+//                 <bar>
+//                   <root>
+//                     <foo>
+//                       <bar>
+//                         <roar a="1" b="2" c="3">
+//                           LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA
+//                         </roar>
+//                       </bar>
+//                     </foo>
+//                   </root>
+//                 </bar>
+//               </foo>
+//             </root>
+//           </bar>
+//         </foo>
+//       </root>"""
+
+
+//node.findDeepChild("roar")
+
+val group: XmlNode = XmlNode.group(
+
+  xml"""
+       <foo>
            <bar>
              <root>
                <foo>
@@ -29,13 +56,9 @@ val node: XmlNode =
                </foo>
              </root>
            </bar>
-         </foo>
-       </root>"""
-
-////
-////node.findDeepChild("roar")
-////Xml.toNodeSeq(node)
-////
+         </foo>""",
+//  xml"<Foo a='3'/>",
+)
 //val result1: FreeCursor.Result[Int] =
 //  Root
 //    .down("foo")
@@ -49,7 +72,7 @@ val node: XmlNode =
 //    .down("roar")
 //    .attr("a")
 //    .as[Int]
-//    .focus(node)
+//    .focus(group)
 
 val result1: Modifier.Result[XmlNode] =
   Root
@@ -64,7 +87,7 @@ val result1: Modifier.Result[XmlNode] =
     .down("roar")
     .attr("a")
     .modify(_ => "TEST")
-    .apply(node)
+    .apply(group)
 
 ////
 ////
@@ -75,16 +98,16 @@ val result1: Modifier.Result[XmlNode] =
 ////    .focus(node)
 ////
 ////// ############### DECODER ###############
-val tree: XmlNode =
-  XmlNode("Foo")
-    .withAttributes("name" := "TEST")
-    .withAttributes("age" := "10")
-    .withText("1")
+//val tree: XmlNode =
+//  XmlNode("Foo")
+//    .withAttributes("name" := "TEST")
+//    .withAttributes("age" := "10")
+//    .withText("1")
 ////
 ////val ressa = tree.findChild("foo")
 ////
 //
-case class Foo(name: Option[String], bar: Int, text: Boolean)
+//case class Foo(name: Option[String], bar: Int, text: Boolean)
 //val dec: Decoder[Foo] =
 //  Decoder.fromCursor(c =>
 //    for {
@@ -95,21 +118,21 @@ case class Foo(name: Option[String], bar: Int, text: Boolean)
 //      text <- c.text.as[Boolean]
 //    } yield Foo(foo, bar, text)
 //  )
-
-import cats.implicits._
-
-val dec: Decoder[Foo] =
-  Decoder.fromCursor(c =>
-    (
-      c.attr("name1").as[Option[String]],
-      c.attr("age").as[Int],
-      c.attr("age2").as[Boolean]
-    ).mapN(Foo)
-  )
-
-val result: Decoder.Result[Foo] = dec.decode(tree) //Valid(Foo(None,10))
-result.toString
 //
+//import cats.implicits._
+//
+//val dec: Decoder[Foo] =
+//  Decoder.fromCursor(c =>
+//    (
+//      c.attr("name1").as[Option[String]],
+//      c.attr("age").as[Int],
+//      c.attr("age2").as[Boolean]
+//    ).mapN(Foo)
+//  )
+//
+//val result: Decoder.Result[Foo] = dec.decode(tree) //Valid(Foo(None,10))
+//result.toString
+////
 ////############### ENCODER ###############
 //val encoder: Encoder[Foo] = Encoder.of(t =>
 //  XmlNode("Foo")
@@ -128,12 +151,16 @@ result.toString
 //
 //
 //
-//val ORIGINAL: XmlNode = Xml.fromNodeSeq(<Test name="FOO" age="20">200</Test>)
+//
+//
 //
 //
 //val modifyResult = Root
-//  .modify(_.withText("HEEEEEY!"))
+//  .modifyIfNode(_.withText("HEEEEEY!"))
 //  .apply(ORIGINAL)
-//
+
 //
 //ORIGINAL
+
+
+XmlNode("Tst").unsa

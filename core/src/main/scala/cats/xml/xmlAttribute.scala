@@ -2,6 +2,7 @@ package cats.xml
 
 import cats.{Endo, Eq, Show}
 import cats.xml.codec.DataEncoder
+import cats.xml.utils.impure
 
 final case class XmlAttribute private (key: String, value: XmlData) extends Xml with Serializable {
 
@@ -19,11 +20,14 @@ final case class XmlAttribute private (key: String, value: XmlData) extends Xml 
 }
 object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 
-  def apply[T: DataEncoder](key: String, value: T): XmlAttribute = {
-    require(Xml.isValidXmlName(key))
-    XmlAttribute(key, DataEncoder[T].encode(value))
-  }
+  @impure
+  def apply[T: DataEncoder](key: String, value: T): XmlAttribute =
+    XmlAttribute(
+      Xml.unsafeRequireValidXmlName(key),
+      DataEncoder[T].encode(value)
+    )
 
+  @impure
   def fromMap(values: Map[String, String]): List[XmlAttribute] =
     values.map { case (k, v) =>
       XmlAttribute(k, v)
@@ -47,6 +51,7 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 private[xml] trait XmlAttributeSyntax {
 
   implicit class XmlAttrStringOps(key: String) {
+    @impure
     def :=[T: DataEncoder](value: T): XmlAttribute = XmlAttribute[T](key, value)
   }
 

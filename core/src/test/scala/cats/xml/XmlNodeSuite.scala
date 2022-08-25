@@ -46,7 +46,7 @@ class XmlNodeSuite extends munit.FunSuite {
 
   test("XmlNode.apply") {
     assertEquals(
-      obtained = XmlNode("Foo", List("A" := 1), NodeContent.text("Text")),
+      obtained = XmlNode("Foo", List("A" := 1), NodeContent.textOrEmpty("Text")),
       expected = XmlNode("Foo").withAttributes("A" := 1).withText("Text")
     )
     intercept[IllegalArgumentException](
@@ -69,14 +69,14 @@ class XmlNodeSuite extends munit.FunSuite {
       XmlNode("Foo")
         .withAttributes("A" := 1)
         .withText("Text")
-        .updateLabel("Bar"),
+        .withLabel("Bar"),
       XmlNode("Bar")
         .withAttributes("A" := 1)
         .withText("Text")
     )
 
     intercept[IllegalArgumentException](
-      XmlNode("Foo").updateLabel("")
+      XmlNode("Foo").withLabel("")
     )
   }
 
@@ -216,25 +216,25 @@ class XmlNodeSuite extends munit.FunSuite {
   // ----------- appendAttrs -----------
   test("XmlNode.appendAttr preserve normalization") {
     assertEquals(
-      XmlNode("Foo").withAttributes("A" := 1).appendAttr("A" := 2),
-      XmlNode("Foo").withAttributes("A"                      := 2)
+      obtained = XmlNode("Foo").withAttributes("A" := 1).appendAttr("A" := 2),
+      expected = XmlNode("Foo").withAttributes("A" := 2)
     )
   }
 
   test("XmlNode.appendAttr") {
     assertEquals(
-      XmlNode("Foo").appendAttr("A"     := 1),
-      XmlNode("Foo").withAttributes("A" := 1)
+      obtained = XmlNode("Foo").appendAttr("A" := 1),
+      expected = XmlNode("Foo").withAttributes("A" := 1)
     )
   }
 
   test("XmlNode.appendAttrs varargs") {
     assertEquals(
-      XmlNode("Foo").appendAttrs(
+      obtained = XmlNode("Foo").appendAttrs(
         "A" := 1,
         "B" := 2
       ),
-      XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttributes(
         "A" := 1,
         "B" := 2
       )
@@ -243,13 +243,13 @@ class XmlNodeSuite extends munit.FunSuite {
 
   test("XmlNode.appendAttrs") {
     assertEquals(
-      XmlNode("Foo").appendAttrs(
+      obtained = XmlNode("Foo").appendAttrs(
         Seq(
           "A" := 1,
           "B" := 2
         )
       ),
-      XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttributes(
         Seq(
           "A" := 1,
           "B" := 2
@@ -261,21 +261,21 @@ class XmlNodeSuite extends munit.FunSuite {
   // ----------- prependAttrs -----------
   test("XmlNode.prependAttr preserve normalization") {
     assertEquals(
-      XmlNode("Foo").withAttributes("A" := 2).prependAttrs("A" := 1),
-      XmlNode("Foo").withAttributes("A"                        := 2)
+      obtained = XmlNode("Foo").withAttributes("A" := 2).prependAttrs("A" := 1),
+      expected = XmlNode("Foo").withAttributes("A" := 2)
     )
   }
 
   test("XmlNode.prependAttr") {
     assertEquals(
-      XmlNode("Foo").prependAttr("A"    := 1),
-      XmlNode("Foo").withAttributes("A" := 1)
+      obtained = XmlNode("Foo").prependAttr("A" := 1),
+      expected = XmlNode("Foo").withAttributes("A" := 1)
     )
   }
 
   test("XmlNode.prependAttrs varargs") {
     assertEquals(
-      XmlNode("Foo")
+      obtained = XmlNode("Foo")
         .withAttributes(
           "C" := 3
         )
@@ -283,7 +283,7 @@ class XmlNodeSuite extends munit.FunSuite {
           "A" := 1,
           "B" := 2
         ),
-      XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttributes(
         "A" := 1,
         "B" := 2,
         "C" := 3
@@ -293,7 +293,7 @@ class XmlNodeSuite extends munit.FunSuite {
 
   test("XmlNode.prependAttrs") {
     assertEquals(
-      XmlNode("Foo")
+      obtained = XmlNode("Foo")
         .withAttributes(
           "C" := 3
         )
@@ -303,7 +303,7 @@ class XmlNodeSuite extends munit.FunSuite {
             "B" := 2
           )
         ),
-      XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttributes(
         Seq(
           "A" := 1,
           "B" := 2,
@@ -316,10 +316,62 @@ class XmlNodeSuite extends munit.FunSuite {
   // ----------- removeAttr -----------
   test("XmlNode.removeAttr") {
     assertEquals(
-      XmlNode("Foo")
+      obtained = XmlNode("Foo")
         .withAttributes("A" := 1, "B" := 2)
         .removeAttr("A"),
-      XmlNode("Foo").withAttributes("B" := 2)
+      expected = XmlNode("Foo").withAttributes("B" := 2)
     )
+  }
+
+  // ################### CONTENT ###################
+  test("XmlNode.withText") {
+    assertEquals(
+      obtained = XmlNode("Foo").withText("Text"),
+      expected = XmlNode("Foo").withText("Text")
+    )
+    assertEquals(
+      obtained = XmlNode("Foo").withText(""),
+      expected = XmlNode("Foo")
+    )
+  }
+
+  test("XmlNode.textString") {
+    assertEquals(
+      obtained = XmlNode("Foo").withText("Text").textString,
+      expected = "Text"
+    )
+  }
+
+  test("XmlNode.updateText[T]") {
+    assertEquals(
+      obtained = XmlNode("Foo")
+        .withText("Text")
+        .updateText[String](_ ++ "Bar")
+        .textString,
+      expected = "TextBar"
+    )
+  }
+
+  test("XmlNode.updateText[T1, T2]") {
+    assertEquals(
+      XmlNode("Foo").withText(1).updateText[Int, String](_.toString ++ "Bar").textString,
+      "1Bar"
+    )
+  }
+
+  test("XmlNode.updateTextRaw[T]") {
+    assertEquals(
+      XmlNode("Foo").withText(1).updateTextRaw[String](r => r.asString ++ "Bar").textString,
+      "1Bar"
+    )
+
+    assertEquals(
+      XmlNode("Foo")
+        .withChild(XmlNode("Foo"))
+        .updateTextRaw[String](_ => "Bar")
+        .textString,
+      ""
+    )
+
   }
 }

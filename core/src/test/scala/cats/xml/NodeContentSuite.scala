@@ -17,13 +17,13 @@ class NodeContentSuite extends munit.ScalaCheckSuite {
 
   test("NodeContent.text('FOO') is NOT empty") {
     assert(
-      NodeContent.text("FOO").nonEmpty
+      NodeContent.textOrEmpty("FOO").nonEmpty
     )
   }
 
-  test("NodeContent.text('') is NOT empty") {
+  test("NodeContent.text('') is empty") {
     assert(
-      NodeContent.text("").nonEmpty
+      NodeContent.textOrEmpty("").isEmpty
     )
   }
 
@@ -48,8 +48,8 @@ class NodeContentSuite extends munit.ScalaCheckSuite {
     property(s"NodeContent.text create content with ${c.runtimeClass.getSimpleName}") {
       forAll { (value: T) =>
         assertEquals(
-          obtained = NodeContent.text(value).text.flatMap(_.as[T].toOption),
-          expected = Some(value)
+          obtained = NodeContent.textOrEmpty(value).text.flatMap(_.as[T].toOption),
+          expected = if (DataEncoder[T].encode(value).isEmpty) None else Some(value)
         )
       }
     }

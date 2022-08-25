@@ -4,7 +4,7 @@ import cats.xml.*
 import cats.xml.codec.Encoder
 import cats.xml.Xml.XmlNull
 import cats.xml.utils.generic.ParamName
-import cats.xml.XmlNode.XmlNodeGroup
+import cats.xml.utils.impure
 import magnolia1.{CaseClass, Param, SealedTrait}
 
 object MagnoliaEncoder {
@@ -23,7 +23,7 @@ object MagnoliaEncoder {
 
       Encoder.of(t => {
 
-        val nodeBuild = XmlNode(ctx.typeName.short)
+        val nodeBuild: XmlNode.Node = XmlNode(ctx.typeName.short)
 
         def evaluateAndAppend(
           xml: Xml,
@@ -33,7 +33,7 @@ object MagnoliaEncoder {
           xml match {
             case XmlNull => ()
             case data: XmlData if paramInfo.elemType == XmlElemType.Attribute =>
-              nodeBuild.mute(
+              nodeBuild.unsafeMuteNode(
                 _.appendAttr(
                   XmlAttribute(
                     key   = paramInfo.labelMapper(param.label),
@@ -42,9 +42,9 @@ object MagnoliaEncoder {
                 )
               )
             case data: XmlData if paramInfo.elemType == XmlElemType.Text =>
-              nodeBuild.mute(_.withText(data))
+              nodeBuild.unsafeMuteNode(_.withText(data))
             case node: XmlNode if paramInfo.elemType == XmlElemType.Child =>
-              nodeBuild.mute(_.appendChild(node))
+              nodeBuild.unsafeMuteNode(_.appendChild(node))
             case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
           }
 
@@ -65,6 +65,7 @@ object MagnoliaEncoder {
     }
   }
 
+  @impure
   private[generic] def split[T: XmlTypeInterpreter](
     sealedTrait: SealedTrait[Encoder, T],
     config: Configuration
@@ -79,8 +80,8 @@ object MagnoliaEncoder {
             )
 
           subTypeXml match {
-            case group: XmlNodeGroup => base.withContent(group.content)
-            case node: XmlNode =>
+            case group: XmlNode.Group => base.withContent(group.content)
+            case node: XmlNode.Node =>
               base
                 .appendAttrs(node.attributes)
                 .withContent(node.content)
