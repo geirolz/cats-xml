@@ -19,7 +19,7 @@ final class TextCursor(protected[xml] val lastCursor: NodeCursor)
     Modifier(node =>
       $this.focus(node) match {
         case Right(textValue) =>
-          lastCursor.modify(_.withText(f(textValue)))(node)
+          lastCursor.modifyIfNode(_.withText(f(textValue)))(node)
         case Left(failure) =>
           ModifierFailure.CursorFailed(failure).asLeft
       }

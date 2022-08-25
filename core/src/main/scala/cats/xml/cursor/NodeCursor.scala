@@ -16,12 +16,18 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] {
 
   override final lazy val path: String = CursorOp.buildOpsPath(history)
 
+  def modifyIfNode(modifier: Endo[XmlNode.Node]): Modifier[XmlNode] =
+    modify {
+      case node: XmlNode.Node   => modifier(node)
+      case group: XmlNode.Group => group
+    }
+
   def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
     Modifier(node => {
-      val nodeClone = node.safeCopy()
+      val nodeClone = node.duplicate
       focus(nodeClone) match {
         case Right(focus) =>
-          focus.mute(modifier)
+          focus.unsafeMute(modifier)
           Right(focus)
         case Left(failure) =>
           Left(ModifierFailure.CursorFailed(failure))

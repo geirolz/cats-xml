@@ -1,6 +1,7 @@
 package cats.xml
 
 import cats.xml.codec.{DecoderFailureSyntax, DecoderSyntax, EncoderSyntax}
+import cats.xml.utils.DebugSyntax
 
 object implicits extends AllSyntax
 
@@ -11,3 +12,4 @@ private[xml] sealed trait AllSyntax
     with XmlParserSyntax
     with EncoderSyntax
     with DecoderSyntax
+    with DebugSyntax

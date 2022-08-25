@@ -36,8 +36,13 @@ object NodeContent {
 
   final val empty: NodeContent = Empty
 
-  def text[T: DataEncoder](data: T): NodeContent =
-    Text(DataEncoder[T].encode(data))
+  def text[T: DataEncoder](data: T): Option[NodeContent] = {
+    val encData = DataEncoder[T].encode(data)
+    if (encData.isEmpty) None else Some(Text(encData))
+  }
+
+  def textOrEmpty[T: DataEncoder](data: T): NodeContent =
+    text[T](data).getOrElse(NodeContent.empty)
 
   def childrenSeq(childrenLs: Seq[XmlNode]): Option[NodeContent] =
     NonEmptyList.fromList(childrenLs.toList).map(children)
@@ -52,6 +57,7 @@ object NodeContent {
     childrenSeq(childrenLs).getOrElse(NodeContent.empty)
 
   case object Empty extends NodeContent
-  final case class Text(data: XmlData) extends NodeContent
-  final case class Children(childrenNel: NonEmptyList[XmlNode]) extends NodeContent
+  final case class Text private[NodeContent] (data: XmlData) extends NodeContent
+  final case class Children private[NodeContent] (childrenNel: NonEmptyList[XmlNode])
+      extends NodeContent
 }
