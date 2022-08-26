@@ -21,7 +21,9 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
     Modifier(node =>
       $this.focus(node) match {
         case Right(attr) =>
-          vCursor.modify(_.updateAttr(attr.key)(_ => attr.map(f)))(node)
+          vCursor
+            .modifyIfNode(_.updateAttr(attr.key)(_ => attr.map(f)))
+            .apply(node)
         case Left(failure) =>
           ModifierFailure.CursorFailed(failure).asLeft
       }

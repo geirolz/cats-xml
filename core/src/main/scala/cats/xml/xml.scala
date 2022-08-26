@@ -3,6 +3,7 @@ package cats.xml
 import cats.{xml, Show}
 import cats.xml.Xml.XmlNull
 import cats.xml.codec.Decoder
+import cats.xml.utils.{impure, UnsafeValidator}
 
 import scala.reflect.ClassTag
 
@@ -32,9 +33,14 @@ trait Xml {
     case _                   => None
   }
 
-  final def asNode: Option[XmlNode] = this match {
-    case value: XmlNode => Some(value)
-    case _              => None
+  final def asNode: Option[XmlNode.Node] = this match {
+    case value: XmlNode.Node => Some(value)
+    case _                   => None
+  }
+
+  final def asGroup: Option[XmlNode.Group] = this match {
+    case value: XmlNode.Group => Some(value)
+    case _                    => None
   }
 }
 object Xml {
@@ -60,8 +66,9 @@ object Xml {
           + "\\u00b7\\u0300-\\u036f\\u203f-\\u2040]*\\Z"
       )
 
-  def requireValidXmlName(value: String): Unit =
-    require(isValidXmlName(value), s"Invalid XML name [$value].")
+  @impure
+  def unsafeRequireValidXmlName(value: String): String =
+    UnsafeValidator.unsafeRequire(value, s"Invalid XML name [$value].")(isValidXmlName)
 }
 
 sealed trait XmlData extends Xml with Serializable {

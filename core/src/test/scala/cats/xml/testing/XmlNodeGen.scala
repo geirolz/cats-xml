@@ -64,7 +64,7 @@ object XmlNodeGen {
     maxTextSize: Int      = 100
   ): Gen[XmlNode] = {
 
-    def genChildren: Gen[Option[NodeContent.Children]] =
+    def genChildren: Gen[Option[NodeContent]] =
       if (maxDeep > 0)
         Gen.lzy(
           Gen
@@ -81,7 +81,7 @@ object XmlNodeGen {
                 )
               )
             )
-            .map(NonEmptyList.fromList(_).map(NodeContent.Children(_)))
+            .map(NonEmptyList.fromList(_).map(NodeContent.children(_)))
         )
       else
         Gen.const(None)
@@ -92,7 +92,7 @@ object XmlNodeGen {
       content <- Gen.lzy(
         Gen.frequency(
           2  -> Gen.const(NodeContent.empty),
-          18 -> Gen.lzy(getNonEmptyString(maxTextSize).map(NodeContent.text(_))),
+          18 -> Gen.lzy(getNonEmptyString(maxTextSize).map(NodeContent.textOrEmpty(_))),
           80 -> Gen.lzy(genChildren.map(_.getOrElse(NodeContent.empty)))
         )
       )
