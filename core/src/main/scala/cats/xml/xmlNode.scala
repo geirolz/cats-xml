@@ -166,6 +166,10 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     XmlNode.group(Nil)
 
   /** Unsafe create a new [[XmlNode.Node]]
+    *
+    * Throws `IllegalArgumentException` If label is not a valid xml name or attributes and content
+    * are null.
+    *
     * @param label
     *   Node label value. Must be valid and non-empty. See [[Xml.isValidXmlName]]
     * @param attributes
@@ -174,8 +178,6 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     *   Node content.
     * @return
     *   A new [[XmlNode.Node]] instance with the specified values
-    * @throws IllegalArgumentException
-    *   If label is not a valid xml name or attributes and content are null.
     */
   @impure
   def apply(
@@ -468,31 +470,33 @@ sealed trait XmlNodeSyntax {
     }
   }
 
-  implicit class GenericXmlNodeWriteOps[K <: XmlNode](genericNode: K) {
+  implicit class GenericXmlNodeWriteOps[K <: XmlNode](val genericNode: K) {
 
-    def drainContent: K#Self =
+    type Self = genericNode.Self
+
+    def drainContent: Self =
       withContent(NodeContent.empty)
 
-    def withContent(newContent: NodeContent): K#Self =
+    def withContent(newContent: NodeContent): Self =
       genericNode.updateContent(_ => newContent)
 
-    def withOptContent(newContent: Option[NodeContent]): K#Self =
+    def withOptContent(newContent: Option[NodeContent]): Self =
       genericNode.updateContent(_ => newContent.getOrElse(NodeContent.empty))
 
     // ------------------ CHILDREN ------------------
-    def withChild(child: XmlNode, children: XmlNode*): K#Self =
+    def withChild(child: XmlNode, children: XmlNode*): Self =
       withChildren(child +: children)
 
-    def withChildren(children: Seq[XmlNode]): K#Self =
+    def withChildren(children: Seq[XmlNode]): Self =
       withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
 
-    def appendChild(child: XmlNode, children: XmlNode*): K#Self =
+    def appendChild(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => currentChildren ++ List(child) ++ children)
 
-    def prependChild(child: XmlNode, children: XmlNode*): K#Self =
+    def prependChild(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => List(child) ++ children ++ currentChildren)
 
-    def updateChildren(f: Endo[Seq[XmlNode]]): K#Self =
+    def updateChildren(f: Endo[Seq[XmlNode]]): Self =
       genericNode.updateContent(currentContent =>
         NonEmptyList.fromFoldable(f(currentContent.children)) match {
           case Some(newChildrenNel) => NodeContent.children(newChildrenNel)
@@ -506,12 +510,13 @@ sealed trait XmlNodeSyntax {
     // ------------------ LABEL ------------------
     /** Rename node label. This method isn't pure for usability purpose.
       *
+      * Throws `IllegalArgumentException` If the new label values is not valid. See
+      * [[Xml.isValidXmlName]]
+      *
       * @param newLabel
       *   new label value
       * @return
       *   Same node with updated label
-      * @throws IllegalArgumentException
-      *   If the new label values is not valid. See [[Xml.isValidXmlName]]
       */
     @impure
     def withLabel(newLabel: String): XmlNode.Node =
@@ -575,7 +580,7 @@ sealed trait XmlNodeSyntax {
 
     /** Update node text if content is text.
       *
-      * If you need decoded data see [[updateText]]
+      * If you need decoded data see `updateText`
       */
     def updateTextRaw[T: DataEncoder](f: XmlData => T): XmlNode.Node =
       node.text.map(f) match {

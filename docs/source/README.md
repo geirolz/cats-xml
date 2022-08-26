@@ -87,6 +87,6 @@ val node: XmlNode = XmlNode("Foo")
   .withText("ORIGINAL")
   
 val result: Modifier.Result[XmlNode] = Root
-  .modify(_.withText("NEW"))
+  .modifyIfNode(_.withText("NEW"))
   .apply(node)  
 ```
