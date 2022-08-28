@@ -399,6 +399,24 @@ class DecoderCompanionSuite extends munit.FunSuite {
     )
   }
 
+  test("Decoder.fromOption - Some") {
+    assertEquals(
+      obtained = Decoder
+        .fromOption(_ => Some(1))
+        .decode(dummyNode),
+      expected = 1.validNel
+    )
+  }
+
+  test("Decoder.fromOption - None") {
+    assertEquals(
+      obtained = Decoder
+        .fromOption(_ => none[Int])
+        .decode(dummyNode),
+      expected = DecoderFailure.Custom("Cannot decode None Xml.").invalidNel
+    )
+  }
+
   test("Decoder.fromEither - Right") {
     assertEquals(
       obtained = Decoder

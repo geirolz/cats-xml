@@ -1,6 +1,6 @@
 package cats.xml
 
-import cats.{xml, Show}
+import cats.{xml, Eq, Show}
 import cats.xml.Xml.XmlNull
 import cats.xml.codec.Decoder
 import cats.xml.utils.{impure, UnsafeValidator}
@@ -45,6 +45,8 @@ trait Xml {
 }
 object Xml {
 
+  import cats.syntax.all.*
+
   case object XmlNull extends Xml with XmlData
 
   final lazy val Null: Xml & XmlData = XmlNull
@@ -69,6 +71,15 @@ object Xml {
   @impure
   def unsafeRequireValidXmlName(value: String): String =
     UnsafeValidator.unsafeRequire(value, s"Invalid XML name [$value].")(isValidXmlName)
+
+  implicit val eqXml: Eq[Xml] =
+    (x: Xml, y: Xml) =>
+      (x, y) match {
+        case (a: XmlAttribute, b: XmlAttribute) => a.eqv(b)
+        case (a: XmlData, b: XmlData)           => a.eqv(b)
+        case (a: XmlNode, b: XmlNode)           => a.eqv(b)
+        case (XmlNull, XmlNull)                 => true
+      }
 }
 
 sealed trait XmlData extends Xml with Serializable {
@@ -114,4 +125,15 @@ object XmlData {
     case XmlBool(value)   => value.toString
     case XmlString(value) => value
   }
+
+  implicit val eqXmlData: Eq[XmlData] = (x: XmlData, y: XmlData) =>
+    (x, y) match {
+      case (a: XmlString, b: XmlString)       => a.value.equals(b.value)
+      case (a: XmlBool, b: XmlBool)           => a.value == b.value
+      case (a: XmlArray[?], b: XmlArray[?])   => a.value.sameElements(b.value)
+      case (a: XmlNumber[?], b: XmlNumber[?]) => a.value.equals(b.value)
+      case (a: XmlByte, b: XmlByte)           => a.value.equals(b.value)
+      case (a, b) if a.isNull && b.isNull     => true
+      case (_, _)                             => false
+    }
 }
