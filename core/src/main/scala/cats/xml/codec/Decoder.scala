@@ -32,6 +32,9 @@ trait Decoder[T] {
   def emapTry[U](f: T => Try[U]): Decoder[U] =
     emap(f.andThen(_.toEither))
 
+  def emapOption[U](f: T => Option[U]): Decoder[U] =
+    emap(f.andThen(_.toRight(DecoderFailure.Custom("Empty option value"))))
+
   def flatMapF[U](f: T => Decoder.Result[U]): Decoder[U] =
     Decoder.of(ns => decodeCursorResult(ns).andThen(t => f(t)))
 
@@ -62,6 +65,28 @@ object Decoder extends DecoderInstances with DecoderSyntax {
 
   def const[T](r: => Decoder.Result[T]): Decoder[T] =
     Decoder.of(_ => r)
+
+  def oneOf[T <: Any](
+    d: Decoder[? <: T],
+    d1: Decoder[? <: T],
+    dn: Decoder[? <: T]*
+  ): Decoder[? <: T] =
+    Decoder.fromXml(xml => {
+      NonEmptyList
+        .of(d, (d1 +: dn)*)
+        .foldLeft[Decoder.Result[T]](
+          DecoderFailure.Custom("Cannot decode the value.").invalidNel[T]
+        )((err, decoder) => {
+          err match {
+            case v @ Validated.Valid(_) => v
+            case Validated.Invalid(errors1) =>
+              decoder.decode(xml) match {
+                case v @ Validated.Valid(_)     => v
+                case Validated.Invalid(errors2) => errors2.concatNel(errors1).invalid[T]
+              }
+          }
+        })
+    })
 
   def fromCursor[U](
     f: NodeCursor => FreeCursor[Xml, U]
@@ -144,12 +169,13 @@ sealed private[xml] trait DecoderDataInstances {
     case XmlAttribute(_, value) => decodeString.decode(value)
     case data: XmlData =>
       def rec(d: XmlData): String = d match {
-        case XmlNull          => "null" // should never happen
-        case XmlString(value) => value
-        case XmlNumber(value) => value.toString
-        case XmlArray(value)  => value.map(rec).mkString(",")
-        case XmlByte(value)   => value.toString
-        case XmlBool(value)   => value.toString
+        case XmlNull             => "null" // should never happen
+        case XmlString(value)    => value
+        case XmlChar(value)      => value.toString
+        case XmlByte(value)      => value.toString
+        case XmlBool(value)      => value.toString
+        case n: XmlDataNumber[?] => n.value.toString
+        case XmlArray(value)     => value.map(rec).mkString(",")
       }
 
       rec(data).validNel
@@ -163,11 +189,12 @@ sealed private[xml] trait DecoderDataInstances {
   implicit val decodeXml: Decoder[Xml]   = Decoder.id
   implicit val decodeUnit: Decoder[Unit] = Decoder.pure[Unit](())
   implicit val decodeBoolean: Decoder[Boolean] = decodeString.map(_.toLowerCase).emap[Boolean] {
-    case "true" | "1"  => Right(true)
-    case "false" | "0" => Right(false)
-    case v             => Left(DecoderFailure.CoproductNoMatch[Any](v, Vector(true, false, 1, 0)))
+    case "true"  => Right(true)
+    case "false" => Right(false)
+    case v       => Left(DecoderFailure.CoproductNoMatch[Any](v, Vector(true, false, 1, 0)))
   }
   implicit val decodeCharArray: Decoder[Array[Char]] = decodeString.map(_.toCharArray)
+  implicit val decodeByte: Decoder[Byte]             = decodeString.emapTry(s => Try(s.toByte))
   implicit val decodeInt: Decoder[Int]               = decodeString.emapTry(s => Try(s.toInt))
   implicit val decodeLong: Decoder[Long]             = decodeString.emapTry(s => Try(s.toLong))
   implicit val decodeFloat: Decoder[Float]           = decodeString.emapTry(s => Try(s.toFloat))

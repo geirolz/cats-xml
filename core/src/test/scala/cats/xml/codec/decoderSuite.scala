@@ -4,7 +4,7 @@ import cats.{Alternative, ApplicativeThrow, Eq}
 import cats.data.NonEmptyList
 import cats.data.Validated.Valid
 import cats.laws.discipline.MonadErrorTests
-import cats.xml.{Xml, XmlNode}
+import cats.xml.{Xml, XmlData, XmlNode}
 import cats.xml.XmlData.*
 import cats.xml.cursor.CursorFailure
 import cats.xml.testing.Samples.dummyNode
@@ -396,6 +396,78 @@ class DecoderCompanionSuite extends munit.FunSuite {
           DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@c", DecoderFailure.Error(ex)))
         )
         .invalid
+    )
+  }
+
+  test("Decoder.oneOf") {
+
+    // int
+    assertEquals(
+      obtained = Decoder
+        .oneOf[Any](
+          Decoder.decodeInt,
+          Decoder.decodeFloat,
+          Decoder.decodeBoolean,
+          Decoder.decodeString
+        )
+        .decode(XmlData.fromInt(100))
+        .map(_.asInstanceOf[Int]),
+      expected = Valid(100)
+    )
+
+    // float
+    assertEquals(
+      obtained = Decoder
+        .oneOf[Any](
+          Decoder.decodeInt,
+          Decoder.decodeFloat,
+          Decoder.decodeBoolean,
+          Decoder.decodeString
+        )
+        .decode(XmlData.fromFloat(100.99f))
+        .map(_.asInstanceOf[Float]),
+      expected = Valid(100.99f)
+    )
+
+    // boolean
+    assertEquals(
+      obtained = Decoder
+        .oneOf[Any](
+          Decoder.decodeInt,
+          Decoder.decodeFloat,
+          Decoder.decodeBoolean,
+          Decoder.decodeString
+        )
+        .decode(XmlData.fromBoolean(true))
+        .map(_.asInstanceOf[Boolean]),
+      expected = Valid(true)
+    )
+
+    // string
+    assertEquals(
+      obtained = Decoder
+        .oneOf[Any](
+          Decoder.decodeInt,
+          Decoder.decodeFloat,
+          Decoder.decodeBoolean,
+          Decoder.decodeString
+        )
+        .decode(XmlData.fromString("foo"))
+        .map(_.asInstanceOf[String]),
+      expected = Valid("foo")
+    )
+
+    assertEquals(
+      obtained = Decoder
+        .oneOf(
+          Decoder.decodeInt,
+          Decoder.decodeFloat,
+          Decoder.decodeBoolean,
+          Decoder.decodeString
+        )
+        .decode(XmlData.fromString("100.99"))
+        .map(_.asInstanceOf[Float]),
+      expected = Valid(100.99f)
     )
   }
 
