@@ -41,8 +41,14 @@ object NodeContent {
     if (encData.isEmpty) None else Some(Text(encData))
   }
 
+  def parseText(data: String): Option[NodeContent] =
+    text(Xml.Data.parseString(data))
+
   def textOrEmpty[T: DataEncoder](data: T): NodeContent =
     text[T](data).getOrElse(NodeContent.empty)
+
+  def parseTextOrEmpty(data: String): NodeContent =
+    parseText(data).getOrElse(NodeContent.empty)
 
   def childrenSeq(childrenLs: Seq[XmlNode]): Option[NodeContent] =
     NonEmptyList.fromList(childrenLs.toList).map(children)

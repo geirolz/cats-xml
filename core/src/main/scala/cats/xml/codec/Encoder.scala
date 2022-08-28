@@ -61,7 +61,6 @@ private[xml] trait EncoderPrimitivesInstances {
   implicit val encoderUnit: DataEncoder[Unit]             = DataEncoder.of(_ => Xml.Null)
   implicit val encoderString: DataEncoder[String]         = DataEncoder.of(XmlData.fromString(_))
   implicit val encoderChar: DataEncoder[Char]             = DataEncoder.of(XmlData.fromChar)
-  implicit val encoderByte: DataEncoder[Byte]             = DataEncoder.of(XmlData.fromByte)
   implicit val encoderBoolean: DataEncoder[Boolean]       = DataEncoder.of(XmlData.fromBoolean)
   implicit val encoderInt: DataEncoder[Int]               = DataEncoder.of(XmlData.fromInt)
   implicit val encoderLong: DataEncoder[Long]             = DataEncoder.of(XmlData.fromLong)
@@ -89,7 +88,6 @@ object DataEncoder {
       value match {
         case v: String     => Right(XmlData.fromString(v))
         case v: Char       => Right(XmlData.fromChar(v))
-        case v: Byte       => Right(XmlData.fromByte(v))
         case v: Boolean    => Right(XmlData.fromBoolean(v))
         case v: Int        => Right(XmlData.fromInt(v))
         case v: Long       => Right(XmlData.fromLong(v))
@@ -110,7 +108,6 @@ object DataEncoder {
           Decoder.decodeDouble.emap(fromValue),
           Decoder.decodeBigInt.emap(fromValue),
           Decoder.decodeBigDecimal.emap(fromValue),
-          Decoder.decodeByte.emap(fromValue),
           Decoder.decodeCharArray.emap(fromValue),
           Decoder.decodeString.emap(fromValue)
         )

@@ -169,13 +169,12 @@ sealed private[xml] trait DecoderDataInstances {
     case XmlAttribute(_, value) => decodeString.decode(value)
     case data: XmlData =>
       def rec(d: XmlData): String = d match {
-        case XmlNull             => "null" // should never happen
-        case XmlString(value)    => value
-        case XmlChar(value)      => value.toString
-        case XmlByte(value)      => value.toString
-        case XmlBool(value)      => value.toString
-        case n: XmlDataNumber[?] => n.value.toString
-        case XmlArray(value)     => value.map(rec).mkString(",")
+        case XmlNull          => "null" // should never happen
+        case XmlString(value) => value
+        case XmlChar(value)   => value.toString
+        case XmlBool(value)   => value.toString
+        case n: XmlNumber[?]  => n.value.toString
+        case XmlArray(value)  => value.map(rec).mkString(",")
       }
 
       rec(data).validNel
@@ -194,6 +193,12 @@ sealed private[xml] trait DecoderDataInstances {
     case v       => Left(DecoderFailure.CoproductNoMatch[Any](v, Vector(true, false, 1, 0)))
   }
   implicit val decodeCharArray: Decoder[Array[Char]] = decodeString.map(_.toCharArray)
+  implicit val decodeChar: Decoder[Char] = decodeString.emap(s => {
+    if (s.nonEmpty && s.length == 1)
+      Right(s.head)
+    else
+      Left(DecoderFailure.Custom(s"Unable to decode string $s into `Char`"))
+  })
   implicit val decodeByte: Decoder[Byte]             = decodeString.emapTry(s => Try(s.toByte))
   implicit val decodeInt: Decoder[Int]               = decodeString.emapTry(s => Try(s.toInt))
   implicit val decodeLong: Decoder[Long]             = decodeString.emapTry(s => Try(s.toLong))

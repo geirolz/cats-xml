@@ -2,6 +2,8 @@ package cats.xml
 
 import cats.xml.Xml.XmlNull
 import cats.xml.utils.format.Indentator
+import cats.xml.utils.Debug
+import cats.Show
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -93,9 +95,21 @@ object XmlPrinter {
       xml match {
         case XmlNull => acc
         case attr: XmlAttribute =>
-          append(XmlAttribute.stringify(attr))
+          if (Debug.enabledAnd(_.xmlPrinterPrintTypesName)) {
+            attr.value match {
+              case Xml.Null => append(s"${attr.key}=\"NULL\"")
+              case _        => append(s"${attr.key}=\"${attr.value.getClass.getTypeName}\"")
+            }
+          } else {
+            attr.value match {
+              case Xml.Null => acc
+              case _        => append(s"${attr.key}=\"${Show[XmlData].show(attr.value)}\"")
+            }
+          }
         case data: XmlData =>
-          append(data.asString)
+          append(
+            Debug.ifEnabledAnd(_.xmlPrinterPrintTypesName)(data.getClass.getTypeName)(data.asString)
+          )
         case group: XmlNode.Group =>
           recAppendXml(
             ls               = group.children.toList,

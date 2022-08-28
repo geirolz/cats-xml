@@ -42,6 +42,10 @@ trait Xml {
     case value: XmlNode.Group => Some(value)
     case _                    => None
   }
+
+  final def asString: String = Show[Xml].show(this)
+
+  override final def toString: String = asString
 }
 object Xml {
 
@@ -72,13 +76,20 @@ object Xml {
   def unsafeRequireValidXmlName(value: String): String =
     UnsafeValidator.unsafeRequire(value, s"Invalid XML name [$value].")(isValidXmlName)
 
+  implicit val showXml: Show[Xml] = {
+    case attr: XmlAttribute => attr.show
+    case data: XmlData      => data.show
+    case node: XmlNode      => node.show
+    case other              => other.toString
+  }
+
   implicit val eqXml: Eq[Xml] =
     (x: Xml, y: Xml) =>
       (x, y) match {
+        case (XmlNull, XmlNull)                 => true
         case (a: XmlAttribute, b: XmlAttribute) => a.eqv(b)
         case (a: XmlData, b: XmlData)           => a.eqv(b)
         case (a: XmlNode, b: XmlNode)           => a.eqv(b)
-        case (XmlNull, XmlNull)                 => true
       }
 }
 
@@ -86,15 +97,11 @@ sealed trait XmlData extends Xml with Serializable {
 
   def as[T: Decoder]: Decoder.Result[T] = Decoder[T].decode(this)
 
-  def asString: String = Show[XmlData].show(this)
-
   def isEmpty: Boolean = this match {
     case XmlData.XmlString(value) => value.isEmpty
     case XmlData.XmlArray(value)  => value.isEmpty
     case _                        => false
   }
-
-  override def toString: String = asString
 }
 object XmlData {
 
@@ -105,7 +112,6 @@ object XmlData {
   // ------------------------------------//
   def fromString(value: String): XmlData         = XmlString(value)
   def fromChar(value: Char): XmlData             = XmlChar(value)
-  def fromByte(value: Byte): XmlData             = XmlByte(value)
   def fromBoolean(value: Boolean): XmlData       = XmlBool(value)
   def fromInt(value: Int): XmlData               = XmlInt(value)
   def fromLong(value: Long): XmlData             = XmlLong(value)
@@ -113,6 +119,23 @@ object XmlData {
   def fromDouble(value: Double): XmlData         = XmlDouble(value)
   def fromBigDecimal(value: BigDecimal): XmlData = XmlBigDecimal(value)
   def fromBigInt(value: BigInt): XmlData         = XmlBigInt(value)
+
+  def parseString(value: String): XmlData = {
+    val strData = XmlData.fromString(value)
+    Decoder
+      .oneOf(
+        Decoder.decodeBoolean.map(XmlData.fromBoolean),
+        Decoder.decodeInt.map(XmlData.fromInt),
+        Decoder.decodeLong.map(XmlData.fromLong),
+        Decoder.decodeFloat.map(XmlData.fromFloat),
+        Decoder.decodeDouble.map(XmlData.fromDouble),
+        Decoder.decodeBigInt.map(XmlData.fromBigInt),
+        Decoder.decodeBigDecimal.map(XmlData.fromBigDecimal),
+        Decoder.decodeChar.map(XmlData.fromChar)
+      )
+      .decode(strData)
+      .getOrElse(strData)
+  }
 
   // collections
   def fromArray[T <: XmlData](value: Array[T]): XmlData       = XmlArray(value)
@@ -122,45 +145,41 @@ object XmlData {
   // ------------------------------------//
   private[xml] final case class XmlString(value: String) extends XmlData
   private[xml] final case class XmlChar(value: Char) extends XmlData
-  private[xml] final case class XmlByte(value: Byte) extends XmlData
   private[xml] final case class XmlBool(value: Boolean) extends XmlData
 
   // number
-  private[xml] sealed trait XmlDataNumber[@specialized(Int, Long, Float, Double) T]
-      extends XmlData {
+  private[xml] sealed trait XmlNumber[@specialized(Int, Long, Float, Double) T] extends XmlData {
     val value: T
   }
-  private[xml] final case class XmlInt(value: Int) extends XmlDataNumber[Int]
-  private[xml] final case class XmlLong(value: Long) extends XmlDataNumber[Long]
-  private[xml] final case class XmlFloat(value: Float) extends XmlDataNumber[Float]
-  private[xml] final case class XmlDouble(value: Double) extends XmlDataNumber[Double]
-  private[xml] final case class XmlBigDecimal(value: BigDecimal) extends XmlDataNumber[BigDecimal]
-  private[xml] final case class XmlBigInt(value: BigInt) extends XmlDataNumber[BigInt]
+  private[xml] final case class XmlInt(value: Int) extends XmlNumber[Int]
+  private[xml] final case class XmlLong(value: Long) extends XmlNumber[Long]
+  private[xml] final case class XmlFloat(value: Float) extends XmlNumber[Float]
+  private[xml] final case class XmlDouble(value: Double) extends XmlNumber[Double]
+  private[xml] final case class XmlBigDecimal(value: BigDecimal) extends XmlNumber[BigDecimal]
+  private[xml] final case class XmlBigInt(value: BigInt) extends XmlNumber[BigInt]
 
   // collections
   private[xml] final case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
 
   // ------------------------------------//
   // TODO: TO CHECK EQ TO DECODE STRING
-  implicit val showXmlData: Show[XmlData] = {
-    case XmlNull             => ""
-    case XmlString(value)    => value
-    case XmlChar(value)      => value.toString
-    case XmlByte(value)      => value.toString
-    case XmlBool(value)      => value.toString
-    case n: XmlDataNumber[?] => n.value.toString
-    case XmlArray(value)     => value.mkString(",")
+  implicit def showXmlData[T <: XmlData]: Show[T] = {
+    case XmlNull          => ""
+    case XmlString(value) => value
+    case XmlChar(value)   => value.toString
+    case XmlBool(value)   => value.toString
+    case n: XmlNumber[?]  => n.value.toString
+    case XmlArray(value)  => value.mkString(",")
   }
 
   implicit val eqXmlData: Eq[XmlData] = (x: XmlData, y: XmlData) =>
     (x, y) match {
-      case (a, b) if a.isNull && b.isNull             => true
-      case (a: XmlString, b: XmlString)               => a.value == b.value
-      case (a: XmlChar, b: XmlChar)                   => a.value == b.value
-      case (a: XmlByte, b: XmlByte)                   => a.value == b.value
-      case (a: XmlBool, b: XmlBool)                   => a.value == b.value
-      case (a: XmlDataNumber[?], b: XmlDataNumber[?]) => a.value == b.value
-      case (a: XmlArray[?], b: XmlArray[?])           => a.value.sameElements(b.value)
-      case (_, _)                                     => false
+      case (a, b) if a.isNull && b.isNull     => true
+      case (a: XmlString, b: XmlString)       => a.value == b.value
+      case (a: XmlChar, b: XmlChar)           => a.value == b.value
+      case (a: XmlBool, b: XmlBool)           => a.value == b.value
+      case (a: XmlNumber[?], b: XmlNumber[?]) => a.value == b.value
+      case (a: XmlArray[?], b: XmlArray[?])   => a.value.sameElements(b.value)
+      case (_, _)                             => false
     }
 }

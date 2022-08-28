@@ -10,13 +10,14 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
 
   test("NodeSeqConverter.fromNodeSeq") {
     assertEquals(
-      obtained = NodeSeqConverter.fromNodeSeq(
-        <Foo intAttr="1" boolAttr="true">
+      obtained = NodeSeqConverter
+        .fromNodeSeq(
+          <Foo intAttr="1" boolAttr="true">
           <Bar intAttr="2" emptyAttr="">
             <Baz>100</Baz>
           </Bar>
         </Foo>
-      ),
+        ),
       expected = XmlNode("Foo")
         .withAttributes(
           "intAttr"  := 1,

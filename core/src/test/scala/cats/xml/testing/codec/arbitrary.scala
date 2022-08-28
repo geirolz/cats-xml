@@ -6,20 +6,18 @@ import cats.xml.XmlNode
 import cats.xml.testing.Ops
 import org.scalacheck.{Arbitrary, Cogen, Gen}
 
-import scala.reflect.runtime.universe.*
-
 object arbitrary {
 
   import cats.implicits.*
   import cats.xml.implicits.*
 
-  implicit def arbEncoder[A: TypeTag](implicit
+  implicit def arbEncoder[A](implicit
     agen: Arbitrary[A]
   ): Arbitrary[Encoder[A]] =
     Arbitrary {
       agen.arbitrary.map(a =>
         Encoder.pure(
-          XmlNode(typeTag[A].tpe.typeSymbol.name.toString).withAttributes(
+          XmlNode(s"Node${a.hashCode()}").withAttributes(
             "Id"       := Ops.md5(a.toString),
             "hashcode" := a.hashCode()
           )
