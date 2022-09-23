@@ -15,7 +15,7 @@ object ProjectDependencies {
     "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
     "org.typelevel"  %% "cats-laws"        % "2.8.0"  % Test,
     "org.typelevel"  %% "discipline-munit" % "1.0.9"  % Test,
-    "org.scalacheck" %% "scalacheck"       % "1.16.0" % Test
+    "org.scalacheck" %% "scalacheck"       % "1.17.0" % Test
   )
 
   object Docs {
@@ -36,10 +36,10 @@ object ProjectDependencies {
     val scala2: Seq[ModuleID] = Seq(
       "com.softwaremill.magnolia1_2" %% "magnolia"      % "1.1.2",
       "org.scala-lang"                % "scala-reflect" % "2.13.8",
-      "com.chuusai"                  %% "shapeless"     % "2.3.9"
+      "com.chuusai"                  %% "shapeless"     % "2.3.10"
     )
     val scala3: Seq[ModuleID] = Seq(
-      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.1.5"
+      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.2.0"
     )
   }
 
