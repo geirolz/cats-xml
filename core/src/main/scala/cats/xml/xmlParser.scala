@@ -1,6 +1,7 @@
 package cats.xml
 
 import cats.MonadThrow
+import cats.xml.codec.DataEncoder
 import cats.xml.utils.impure
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
@@ -64,7 +65,7 @@ private[xml] trait XmlParserInstances {
               (0 until attributes.getLength).map(i =>
                 XmlAttribute(
                   attributes.getLocalName(i),
-                  attributes.getValue(i)
+                  DataEncoder.stringParsedEncoder.encode(attributes.getValue(i))
                 )
               )
             )
@@ -89,7 +90,11 @@ private[xml] trait XmlParserInstances {
         override def characters(ch: Array[Char], start: Int, length: Int): Unit = {
           val value = new String(ch, start, length).trim
           if (value != null & value.nonEmpty)
-            nodes(depth - 1).unsafeMute(_.unsafeNarrowNode.withText(value))
+            nodes(depth - 1).unsafeMute(
+              _.unsafeNarrowNode.withText(
+                DataEncoder.stringParsedEncoder.encode(value)
+              )
+            )
         }
       }
 

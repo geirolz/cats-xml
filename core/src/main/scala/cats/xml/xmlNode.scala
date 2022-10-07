@@ -150,15 +150,11 @@ sealed trait XmlNode extends Xml {
   /* ################################################ */
   /* ############### !! BE CAREFUL !! ############### */
   /* ################################################ */
-
   override final def equals(obj: Any): Boolean =
     obj match {
       case that: XmlNode => Eq[XmlNode].eqv(this, that)
       case _             => false
     }
-
-  override final lazy val toString: String =
-    Show[XmlNode].show(this)
 }
 object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
@@ -299,7 +295,6 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     /* ############### !! BE CAREFUL !! ############### */
     /* ################################################ */
   }
-
   // ----------------------------- XML GROUP -----------------------------
   /** Class that represent a group of nodes without a container node.
     *
@@ -609,11 +604,19 @@ sealed trait XmlNodeInstances {
 
   implicit val eqXmlNode: Eq[XmlNode] =
     (x: XmlNode, y: XmlNode) =>
-      x.label == y.label &&
-        x.attributes == y.attributes &&
-        x.content == y.content
+      (x, y) match {
+        case (a: XmlNode.Node, b: XmlNode.Node) =>
+          a.label == b.label &&
+          a.attributes == b.attributes &&
+          a.content == b.content
+        case (a: XmlNode.Group, b: XmlNode.Group) =>
+          a.content == b.content
+        case (_: XmlNode.Node, _: XmlNode.Group) => false
+        case (_: XmlNode.Group, _: XmlNode.Node) => false
+      }
 
-  implicit def showXmlNode(implicit config: XmlPrinter.Config): Show[XmlNode] =
+  implicit def showXmlNode[T <: XmlNode](implicit
+    config: XmlPrinter.Config
+  ): Show[T] =
     XmlPrinter.prettyString(_)
-
 }

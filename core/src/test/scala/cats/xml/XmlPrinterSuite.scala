@@ -4,6 +4,7 @@ import scala.util.{Success, Try}
 
 class XmlPrinterSuite extends munit.FunSuite {
 
+  import cats.implicits.*
   import cats.xml.implicits.*
 
   test("XmlPrinter.prettyString convert XmlData to string") {
@@ -166,10 +167,12 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlParser[Try].parseString(
-        XmlPrinter.prettyString(xml)
-      ),
-      expected = Success(xml)
+      obtained = XmlParser[Try]
+        .parseString(
+          XmlPrinter.prettyString(xml)
+        )
+        .map(_.show),
+      expected = Success(xml.show)
     )
   }
 }

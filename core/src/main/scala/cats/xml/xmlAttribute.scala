@@ -12,8 +12,6 @@ final case class XmlAttribute private (key: String, value: XmlData) extends Xml 
   def map(f: Endo[XmlData]): XmlAttribute =
     XmlAttribute(key, f(value))
 
-  override def toString: String = XmlAttribute.stringify(this)
-
   override def equals(obj: Any): Boolean =
     obj != null && obj
       .isInstanceOf[XmlAttribute] && Eq[XmlAttribute].eqv(this, obj.asInstanceOf[XmlAttribute])
@@ -33,6 +31,7 @@ object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
       XmlAttribute(k, v)
     }.toList
 
+  @deprecated
   def stringify(ls: XmlAttribute)(implicit showData: Show[XmlData]): String =
     ls.value match {
       case Xml.Null => ""
@@ -64,9 +63,11 @@ private[xml] trait XmlAttributeSyntax {
 }
 private[xml] sealed trait XmlAttributeInstances {
 
-  implicit def showInstanceForAttr(implicit sd: Show[XmlData]): Show[XmlAttribute] =
-    attr => XmlAttribute.stringify(attr)
+  implicit def showXmlAttribute(implicit
+    config: XmlPrinter.Config
+  ): Show[XmlAttribute] =
+    XmlPrinter.prettyString(_)
 
-  implicit val eqForXmlAttribute: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
+  implicit val eqXmlAttribute: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
     x.key == y.key && x.value == y.value
 }
