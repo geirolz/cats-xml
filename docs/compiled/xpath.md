@@ -16,7 +16,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = NodeCursor.fromXPath("/root[@id='1']")
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32259/0x0000000803565428@2096ba25]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$12522/0x0000000802d5dc08@74728984]
 // )
 ```
 
@@ -28,23 +28,24 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32259/0x0000000803565428@572001c8]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$12522/0x0000000802d5dc08@4f9c21ad]
 // )
 ```
 
 
 Full example
 ```scala
+import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor
 import cats.xml.xpath.error.*
-import cats.xml.xpath.implicits.*
-import cats.xml.XmlNode
-import cats.xml.implicits.*
+
 import cats.implicits.*
+import cats.xml.implicits.*
+import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32259/0x0000000803565428@51d0bc92]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$12522/0x0000000802d5dc08@64e6dc8e]
 // )
 
 val data = XmlNode("wrapper").withChildren(
@@ -58,4 +59,24 @@ val result: Either[Throwable, XmlNode] =
     .leftMapThrowable
     .flatMap(_.focus(data).leftMap(_.asException))
 // result: Either[Throwable, XmlNode] = Right(value = <root id="1"/>)
+```
+
+If you want you can use the xpath expression directly on a `XmlNode` focusing using that xpath
+```scala
+import cats.implicits.*
+import cats.xml.XmlNode
+import cats.xml.cursor.{Cursor, NodeCursor}
+import cats.xml.xpath.error.*
+
+import cats.xml.implicits.*
+import cats.xml.xpath.implicits.*
+
+val data = XmlNode("wrapper").withChildren(
+  XmlNode("root").withAttributes("id" := 1)
+)
+// data: XmlNode.Node = <wrapper>
+//  <root id="1"/>
+// </wrapper>
+val result: Cursor.Result[XmlNode] = data.xpath("/root[@id='1']")
+// result: Cursor.Result[XmlNode] = Right(value = <root id="1"/>)
 ```

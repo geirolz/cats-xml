@@ -48,14 +48,14 @@ implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
     .overrideType(
       _.param(_.valueClass) -> XmlElemType.Attribute
     )
-// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@606b22f5
+// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@607e49f8
 
 implicit val decoderValueClass: Decoder[ValueClass] = deriveDecoder[ValueClass]
-// decoderValueClass: Decoder[ValueClass] = cats.xml.codec.Decoder$$anonfun$of$2@428f2e22
+// decoderValueClass: Decoder[ValueClass] = cats.xml.codec.Decoder$$anonfun$of$2@76287bd
 implicit val decoderBar: Decoder[Bar] = deriveDecoder[Bar]
-// decoderBar: Decoder[Bar] = cats.xml.codec.Decoder$$anonfun$of$2@6fada069
+// decoderBar: Decoder[Bar] = cats.xml.codec.Decoder$$anonfun$of$2@32a60c36
 implicit val decoderFoo: Decoder[Foo] = deriveDecoder[Foo]
-// decoderFoo: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@6b03f2b0
+// decoderFoo: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@5c21bed9
 
 XmlNode("foo")
    .withAttributes(
@@ -87,14 +87,14 @@ implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
     .overrideType(
       _.param(_.valueClass) -> XmlElemType.Attribute
     )
-// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@6983d3eb
+// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@18cbc69f
 
 implicit val encoderValueClass: Encoder[ValueClass] = deriveEncoder[ValueClass]
-// encoderValueClass: Encoder[ValueClass] = cats.xml.codec.DataEncoder$$anonfun$of$4@6b2f985a
+// encoderValueClass: Encoder[ValueClass] = cats.xml.codec.DataEncoder$$anonfun$of$4@b2e52b4
 implicit val encoderBar: Encoder[Bar]               = deriveEncoder[Bar]
-// encoderBar: Encoder[Bar] = cats.xml.codec.Encoder$$anonfun$of$2@1fcd71fd
+// encoderBar: Encoder[Bar] = cats.xml.codec.Encoder$$anonfun$of$2@2d3645d7
 implicit val encoderFoo: Encoder[Foo]               = deriveEncoder[Foo]
-// encoderFoo: Encoder[Foo] = cats.xml.codec.Encoder$$anonfun$of$2@7da488da
+// encoderFoo: Encoder[Foo] = cats.xml.codec.Encoder$$anonfun$of$2@7a344531
 
 Foo(
   primitiveField = 1d,
