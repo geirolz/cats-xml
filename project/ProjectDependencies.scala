@@ -56,6 +56,12 @@ object ProjectDependencies {
     )
   }
 
+  object Xpath {
+    val dedicated: Seq[ModuleID] = Seq(
+      "eu.cdevreeze.xpathparser" %% "xpathparser" % "0.8.0"
+    )
+  }
+
   object Plugins {
     lazy val compilerPluginsFor2_13: Seq[ModuleID] = Seq(
       compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)
