@@ -3,17 +3,20 @@ package cats.xml.utils
 import cats.Show
 
 case class Debug(
-  xmlPrinterPrintTypesName: Boolean = false
+  xmlPrinterPrintTypesName: Boolean,
+  doNotOverrideXmlToString: Boolean
 )
 private[xml] object Debug extends DebugSyntax {
 
   private var _debug: Option[Debug] = None
 
   def enable(
-    xmlPrinterPrintTypesName: Boolean = false
+    xmlPrinterPrintTypesName: Boolean = false,
+    doNotOverrideXmlToString: Boolean = false
   ): Unit = _debug = Some(
     Debug(
-      xmlPrinterPrintTypesName
+      xmlPrinterPrintTypesName,
+      doNotOverrideXmlToString
     )
   )
 
@@ -27,10 +30,10 @@ private[xml] object Debug extends DebugSyntax {
 
   def disabled: Boolean = debug.isEmpty
 
-  def ifEnabledAnd[T](p: Debug => Boolean)(f: => T)(ifDisabled: => T): T =
-    debug.filter(p).fold(ifDisabled)(_ => f)
+  def ifEnabledAnd[T](p: Debug => Boolean)(ifTrue: => T, ifFalse: => T): T =
+    debug.filter(p).fold(ifFalse)(_ => ifTrue)
 
-  def ifEnabled[T](f: Debug => T)(ifDisabled: => T): T =
+  def ifEnabled[T](f: Debug => T, ifDisabled: => T): T =
     debug.fold(ifDisabled)(f)
 
   def ifEnabled(f: Debug => Unit): Unit =

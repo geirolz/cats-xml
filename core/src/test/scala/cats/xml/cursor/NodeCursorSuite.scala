@@ -10,8 +10,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.selectDynamic") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar")
         )
       )
@@ -30,8 +30,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.down") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar")
         )
       )
@@ -47,11 +47,32 @@ class NodeCursorSuite extends munit.FunSuite {
     )
   }
 
+  test("NodeCursor.down with group") {
+
+    val node: XmlNode = {
+
+      XmlNode("Root").withChildren(
+        XmlNode("Foo").withChildren(XmlNode("Value").withText(1)),
+        XmlNode("Foo").withChildren(XmlNode("Value").withText(2))
+      )
+    }
+
+    assertEquals(
+      obtained = Root.down("Foo").down("Value").focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("Value").withText(1),
+          XmlNode("Value").withText(2)
+        )
+      )
+    )
+  }
+
   test("NodeCursor.\\") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar")
         )
       )
@@ -70,8 +91,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor deepDown \\\\") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar").withAttributes("attr" := 1),
           XmlNode("bar").withAttributes("attr" := 2),
           XmlNode("bar").withAttributes("attr" := 3)
@@ -98,8 +119,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor deepDown and filter") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar").withAttributes("attr" := 1),
           XmlNode("bar").withAttributes("attr" := 2),
           XmlNode("bar").withAttributes("attr" := 3)
@@ -125,8 +146,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.downPath") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar")
         )
       )
@@ -145,8 +166,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.applyDynamic") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar0"),
           XmlNode("bar1"),
           XmlNode("bar2")
@@ -167,8 +188,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.apply with index") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar0"),
           XmlNode("bar1"),
           XmlNode("bar2")
@@ -189,7 +210,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.filter") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("bar").withAttributes("attr" := 1),
         XmlNode("bar").withAttributes("attr" := 2),
         XmlNode("bar").withAttributes("attr" := 3)
@@ -197,17 +218,16 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root
+        .down("bar")
         .filter(_.findAttr[Int]("attr").contains(1))
         .focus(node),
       expected = Right(
-        XmlNode.group(
-          XmlNode("bar").withAttributes("attr" := 1)
-        )
+        XmlNode("bar").withAttributes("attr" := 1)
       )
     )
 
     assertEquals(
-      obtained = Root.filter(_.findAttr[Int]("attr").contains(100)).focus(node),
+      obtained = Root.down("bar").filter(_.findAttr[Int]("attr").contains(100)).focus(node),
       expected = Right(XmlNode.emptyGroup)
     )
   }
@@ -215,7 +235,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.|") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("bar").withAttributes("attr" := 1),
         XmlNode("bar").withAttributes("attr" := 2),
         XmlNode("bar").withAttributes("attr" := 3)
@@ -225,16 +245,14 @@ class NodeCursorSuite extends munit.FunSuite {
       _.findAttr[Int]("attr").contains(value)
 
     assertEquals(
-      obtained = (Root | withAttrEqTo(1)).focus(node),
+      obtained = (Root.down("bar") | withAttrEqTo(1)).focus(node),
       expected = Right(
-        XmlNode.group(
-          XmlNode("bar").withAttributes("attr" := 1)
-        )
+        XmlNode("bar").withAttributes("attr" := 1)
       )
     )
 
     assertEquals(
-      obtained = (Root | withAttrEqTo(100)).focus(node),
+      obtained = (Root.down("bar") | withAttrEqTo(100)).focus(node),
       expected = Right(XmlNode.emptyGroup)
     )
   }
@@ -242,8 +260,8 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.find") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
-        XmlNode("foo").withChild(
+      XmlNode("root").withChildren(
+        XmlNode("foo").withChildren(
           XmlNode("bar0").withAttributes("a" := "1"),
           XmlNode("bar1").withAttributes("a" := "2"),
           XmlNode("bar2").withAttributes("a" := "3")
@@ -260,8 +278,8 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root.foo.head.focus(
-        XmlNode("root").withChild(
-          XmlNode("foo").withChild(
+        XmlNode("root").withChildren(
+          XmlNode("foo").withChildren(
             XmlNode("bar0"),
             XmlNode("bar1"),
             XmlNode("bar2")
@@ -272,7 +290,7 @@ class NodeCursorSuite extends munit.FunSuite {
     )
 
     assertEquals(
-      obtained = Root.foo.head.focus(XmlNode("root").withChild(XmlNode("foo"))),
+      obtained = Root.foo.head.focus(XmlNode("root").withChildren(XmlNode("foo"))),
       expected = Left(CursorFailure.MissingNodeHead("/foo"))
     )
   }
@@ -281,8 +299,8 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root.foo.last.focus(
-        XmlNode("root").withChild(
-          XmlNode("foo").withChild(
+        XmlNode("root").withChildren(
+          XmlNode("foo").withChildren(
             XmlNode("bar0"),
             XmlNode("bar1"),
             XmlNode("bar2")
@@ -293,7 +311,7 @@ class NodeCursorSuite extends munit.FunSuite {
     )
 
     assertEquals(
-      obtained = Root.foo.last.focus(XmlNode("root").withChild(XmlNode("foo"))),
+      obtained = Root.foo.last.focus(XmlNode("root").withChildren(XmlNode("foo"))),
       expected = Left(CursorFailure.MissingNodeLast("/foo"))
     )
   }
@@ -301,7 +319,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.attr") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("foo").withAttributes("bar" := "TEST")
       )
 
@@ -319,7 +337,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.attrAt") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("foo").withAttributes("bar" := "TEST")
       )
 
@@ -337,7 +355,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.attrHead") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("foo").withAttributes(
           "first"  := "TEST_1",
           "second" := "TEST_2"
@@ -353,7 +371,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.attrLast") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("foo").withAttributes(
           "first"  := "TEST_1",
           "second" := "TEST_2"
@@ -369,7 +387,7 @@ class NodeCursorSuite extends munit.FunSuite {
   test("NodeCursor.text") {
 
     val node: XmlNode =
-      XmlNode("root").withChild(
+      XmlNode("root").withChildren(
         XmlNode("foo").withText("TEST")
       )
 
@@ -381,6 +399,64 @@ class NodeCursorSuite extends munit.FunSuite {
     assertEquals(
       obtained = Root.missing.text.focus(node),
       expected = Left(CursorFailure.MissingNode("", "missing"))
+    )
+  }
+
+  test("NodeCursor.history") {
+    val predicate: XmlNode => Boolean = _ => true
+    assertEquals(
+      obtained = Root.noop.foo
+        .deepDown("bar")
+        .atIndex(1)
+        .filter(predicate)
+        .find(predicate)
+        .head
+        .last
+        .history,
+      expected = List(
+        NodeCursor.Op.Down("foo"),
+        NodeCursor.Op.DeepDown("bar"),
+        NodeCursor.Op.SelectNodeByIndex(1),
+        NodeCursor.Op.Filter(predicate),
+        NodeCursor.Op.FindChild(predicate),
+        NodeCursor.Op.Head,
+        NodeCursor.Op.Last
+      )
+    )
+  }
+
+  test("NodeCursor.path") {
+    val predicate: XmlNode => Boolean = _ => true
+    assertEquals(
+      obtained = Root.noop.foo
+        .deepDown("bar")
+        .atIndex(1)
+        .filter(predicate)
+        .find(predicate)
+        .head
+        .last
+        .path,
+      expected = s"/foo//bar[1][filter $predicate][find $predicate]/head/last"
+    )
+  }
+
+  test("NodeCursor.equals") {
+    val predicate: XmlNode => Boolean = _ => true
+    assertEquals(
+      obtained = Root.noop.foo
+        .deepDown("bar")
+        .atIndex(1)
+        .filter(predicate)
+        .find(predicate)
+        .head
+        .last,
+      expected = Root.noop.foo
+        .deepDown("bar")
+        .atIndex(1)
+        .filter(predicate)
+        .find(predicate)
+        .head
+        .last
     )
   }
 }

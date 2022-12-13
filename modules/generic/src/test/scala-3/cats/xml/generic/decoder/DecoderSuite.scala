@@ -28,7 +28,7 @@
 //          "primitiveField" := 1d,
 //          "valueClass"     := "TEST"
 //        )
-//        .withChild(
+//        .withChildren(
 //          XmlNode("bar")
 //            .withAttributes(
 //              "field1" := "BHO",

@@ -15,7 +15,7 @@ object JavaConverters extends JavaConvertersSyntax {
       left match {
         case Nil                                         => acc
         case head :: tail if head.getNodeName == "#text" => recScanJNode(tail, acc)
-        case head :: tail => recScanJNode(tail, acc.withChild(rec(head)))
+        case head :: tail => recScanJNode(tail, acc.withChildren(rec(head)))
       }
 
     @impure

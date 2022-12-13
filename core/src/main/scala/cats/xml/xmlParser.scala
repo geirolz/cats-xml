@@ -74,7 +74,7 @@ private[xml] trait XmlParserInstances {
             initNode = newNode
             newNode
           } else {
-            nodes(depth - 1).unsafeMute(_.appendChild(newNode))
+            nodes(depth - 1).unsafeMute(_.appendChildren(newNode))
             newNode
           }
 

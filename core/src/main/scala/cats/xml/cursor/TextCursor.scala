@@ -3,6 +3,7 @@ package cats.xml.cursor
 import cats.xml.{XmlData, XmlNode}
 import cats.xml.codec.DataEncoder
 import cats.xml.modifier.{Modifier, ModifierFailure}
+import cats.{Eq, Show}
 
 /** Vertical cursor for node Text
   */
@@ -34,4 +35,17 @@ final class TextCursor(protected[xml] val lastCursor: NodeCursor)
         case Some(value: XmlData) => Right(value)
         case None                 => Left(CursorFailure.MissingText(lastCursor.path))
       }
+
+  // eq
+  override def equals(obj: Any): Boolean =
+    obj.isInstanceOf[TextCursor]
+      && Eq[TextCursor].eqv(this, obj.asInstanceOf[TextCursor])
+}
+object TextCursor {
+
+  // instances
+  implicit val eq: Eq[TextCursor] = (x: TextCursor, y: TextCursor) =>
+    x.lastCursor.equals(y.lastCursor)
+
+  implicit val show: Show[TextCursor] = Show.fromToString
 }
