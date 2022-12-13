@@ -194,7 +194,7 @@ class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
 
     forAll { (value: XmlNode) =>
       assert(
-        Ops.timed(XmlPrinter.default.prettyString(value))._1 < 30.millis
+        Ops.timed(XmlPrinter.default.prettyString(value))._1 < 100.millis
       )
     }
   }
