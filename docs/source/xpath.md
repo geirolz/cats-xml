@@ -50,10 +50,8 @@ val result: Either[Throwable, XmlNode] =
 
 If you want you can use the xpath expression directly on a `XmlNode` focusing using that xpath
 ```scala mdoc:reset
-import cats.implicits.*
 import cats.xml.XmlNode
-import cats.xml.cursor.{Cursor, NodeCursor}
-import cats.xml.xpath.error.*
+import cats.xml.cursor.Cursor
 
 import cats.xml.implicits.*
 import cats.xml.xpath.implicits.*
