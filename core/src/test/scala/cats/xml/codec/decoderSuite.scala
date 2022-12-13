@@ -330,7 +330,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
             "intAttr"  := 10,
             "boolAttr" := true
           )
-          .withChild(
+          .withChildren(
             XmlNode("Bar").withText(BigDecimal(100))
           )
       ),
@@ -459,7 +459,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Decoder
-        .oneOf(
+        .oneOf[Any](
           Decoder.decodeInt,
           Decoder.decodeFloat,
           Decoder.decodeBoolean,

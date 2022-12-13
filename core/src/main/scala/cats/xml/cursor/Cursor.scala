@@ -4,6 +4,8 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.Decoder
 import cats.Show
 
+import scala.annotation.unused
+
 sealed trait Cursor[+X <: Xml] extends Serializable {
 
   def path: String
@@ -12,25 +14,36 @@ sealed trait Cursor[+X <: Xml] extends Serializable {
 
   def as[T: Decoder]: FreeCursor[Xml, T] =
     FreeCursor[T](this)
+
+  override final def toString: String = path
 }
 
 object Cursor {
 
+  import cats.syntax.all.*
+
   type Result[+T] = Either[CursorFailure, T]
 
-  trait CursorOp {
-    override def toString: String = Show[CursorOp].show(this)
+  def failed[X <: Xml](failure: CursorFailure): Cursor[X] =
+    Cursor.const(Left(failure))
+
+  def const[X <: Xml](result: Cursor.Result[X]): Cursor[X] = new Cursor[X] {
+    override def path: String                                    = ""
+    override def focus(@unused input: XmlNode): Cursor.Result[X] = result
   }
-  object CursorOp {
 
-    implicit val showInstanceForCursorOp: Show[CursorOp] = Show.show {
-      case op: AttrCursor.Op => Show[AttrCursor.Op].show(op)
-      case op: NodeCursor.Op => Show[NodeCursor.Op].show(op)
-      case op                => op.toString
-    }
+  private[cursor] trait CursorOp {
+    override final def toString: String = Show[CursorOp].show(this)
+  }
+  private[cursor] object CursorOp {
 
-    def buildOpsPath(ops: List[CursorOp]): String = {
-      ops.map(Show[CursorOp].show(_)).mkString("")
+    def buildOpsPath(ops: => List[CursorOp]): String =
+      ops.map(_.show).mkString("")
+
+    implicit val show: Show[CursorOp] = Show.show {
+      case op: AttrCursor.Op => op.show
+      case op: NodeCursor.Op => op.show
+      case _                 => "unsupported"
     }
   }
 }

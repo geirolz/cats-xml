@@ -1,6 +1,8 @@
 import sbt.project
 
 lazy val prjName                = "cats-xml"
+lazy val prjPackageName         = prjName.replaceAll("[^\\p{Alpha}\\d]+", ".")
+lazy val prjDescription         = "A purely functional XML library"
 lazy val org                    = "com.github.geirolz"
 lazy val scala213               = "2.13.9"
 lazy val scala32                = "3.2.0"
@@ -30,15 +32,12 @@ lazy val `cats-xml`: Project = project
   .settings(baseSettings)
   .settings(noPublishSettings)
   .settings(
-    name               := prjName,
-    description        := "A purely functional XML library",
-    organization       := org,
     crossScalaVersions := Nil
   )
   .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
-  .aggregate(core, docs, metrics, utils, effect, generic, scalaxml)
+  .aggregate(core, docs, metrics, utils, generic, effect, scalaxml, xpath)
 
 lazy val docs: Project =
   project
@@ -88,6 +87,22 @@ lazy val metrics: Project =
     )
 
 // modules
+lazy val generic: Project =
+  buildModule(
+    prjModuleName = "generic",
+    toPublish     = true,
+    folder        = "modules"
+  ).dependsOn(core, utils)
+    .settings(
+      libraryDependencies ++= {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, _)) => ProjectDependencies.Generic.scala2
+          case Some((3, _)) => ProjectDependencies.Generic.scala3
+          case _            => Nil
+        }
+      }
+    )
+
 lazy val effect: Project =
   buildModule(
     prjModuleName = "effect",
@@ -108,20 +123,14 @@ lazy val scalaxml: Project =
       libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
 
-lazy val generic: Project =
+lazy val xpath: Project =
   buildModule(
-    prjModuleName = "generic",
+    prjModuleName = "xpath",
     toPublish     = true,
     folder        = "modules"
   ).dependsOn(core, utils)
     .settings(
-      libraryDependencies ++= {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, _)) => ProjectDependencies.Generic.scala2
-          case Some((3, _)) => ProjectDependencies.Generic.scala3
-          case _            => Nil
-        }
-      }
+      libraryDependencies ++= ProjectDependencies.Xpath.dedicated
     )
 
 //=============================== MODULES UTILS ===============================
@@ -151,6 +160,11 @@ lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
 )
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
+  // project
+  name             := prjName,
+  description      := prjDescription,
+  organization     := org,
+//  idePackagePrefix := Some(prjPackageName),
   // scala
   crossScalaVersions := supportedScalaVersions,
   scalaVersion       := supportedScalaVersions.head,

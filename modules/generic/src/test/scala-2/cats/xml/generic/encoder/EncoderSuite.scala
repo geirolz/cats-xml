@@ -26,7 +26,7 @@ class EncoderSuite extends munit.FunSuite {
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "field1" := "BHO",
@@ -64,7 +64,7 @@ class EncoderSuite extends munit.FunSuite {
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "field1" := "BHO",

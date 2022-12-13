@@ -13,9 +13,9 @@ class FreeCursorSuite extends munit.FunSuite {
     val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
-        .withChild(
+        .withChildren(
           XmlNode("bar")
-            .withChild(
+            .withChildren(
               XmlNode("test").withText("1")
             )
         )
@@ -29,7 +29,7 @@ class FreeCursorSuite extends munit.FunSuite {
   test("FreeCursor.focus - invalid") {
 
     val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
-    val incompleteNode: XmlNode      = XmlNode("foo").withChild(XmlNode("bar"))
+    val incompleteNode: XmlNode      = XmlNode("foo").withChildren(XmlNode("bar"))
 
     assertEquals(
       obtained = cursor.focus(incompleteNode),
@@ -42,9 +42,9 @@ class FreeCursorSuite extends munit.FunSuite {
     val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
-        .withChild(
+        .withChildren(
           XmlNode("bar")
-            .withChild(
+            .withChildren(
               XmlNode("test").withText("1")
             )
         )
@@ -60,9 +60,9 @@ class FreeCursorSuite extends munit.FunSuite {
     val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
-        .withChild(
+        .withChildren(
           XmlNode("bar")
-            .withChild(
+            .withChildren(
               XmlNode("test").withText("1")
             )
         )
@@ -80,9 +80,9 @@ class FreeCursorSuite extends munit.FunSuite {
     val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
-        .withChild(
+        .withChildren(
           XmlNode("bar")
-            .withChild(
+            .withChildren(
               XmlNode("test").withText("1")
             )
         )

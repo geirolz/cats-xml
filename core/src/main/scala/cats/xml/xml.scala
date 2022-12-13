@@ -3,7 +3,7 @@ package cats.xml
 import cats.{xml, Eq, Show}
 import cats.xml.Xml.XmlNull
 import cats.xml.codec.Decoder
-import cats.xml.utils.{impure, UnsafeValidator}
+import cats.xml.utils.{impure, Debug, UnsafeValidator}
 
 import scala.reflect.ClassTag
 
@@ -45,7 +45,11 @@ trait Xml {
 
   final def asString: String = Show[Xml].show(this)
 
-  override final def toString: String = asString
+  override final def toString: String =
+    Debug.ifEnabledAnd(_.doNotOverrideXmlToString)(
+      ifTrue  = super.toString,
+      ifFalse = asString
+    )
 }
 object Xml {
 

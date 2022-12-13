@@ -7,40 +7,40 @@ class XmlPrinterSuite extends munit.FunSuite {
   import cats.implicits.*
   import cats.xml.implicits.*
 
-  test("XmlPrinter.prettyString convert XmlData to string") {
+  test("XmlPrinter.default.prettyString convert XmlData to string") {
 
     val tree: Xml = XmlData.fromString("VALUE")
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(tree),
+      obtained = XmlPrinter.default.prettyString(tree),
       expected = "VALUE"
     )
   }
 
-  test("XmlPrinter.prettyString convert XmlAttribute to string") {
+  test("XmlPrinter.default.prettyString convert XmlAttribute to string") {
 
     val xml: Xml = XmlAttribute("KEY", "VALUE")
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = "KEY=\"VALUE\""
     )
   }
 
-  test("XmlPrinter.prettyString convert XmlNull to string") {
+  test("XmlPrinter.default.prettyString convert XmlNull to string") {
 
     val xml: Xml = Xml.Null
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = ""
     )
   }
 
-  test("XmlPrinter.prettyString convert simple XmlNode to well formatted XML string") {
+  test("XmlPrinter.default.prettyString convert simple XmlNode to well formatted XML string") {
 
     val xml: XmlNode =
       XmlNode("Foo")
@@ -49,22 +49,22 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = """|<Foo A="10" B="true">
                     | Lorem ipsum dolor sit amet, Lorem ipsum dolor sit amet.
                     |</Foo>""".stripMargin
     )
   }
 
-  test("XmlPrinter.prettyString convert nested XmlNode to well formatted XML string") {
+  test("XmlPrinter.default.prettyString convert nested XmlNode to well formatted XML string") {
 
-    val xml: XmlNode = XmlNode("Foo").withChild(
+    val xml: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
         .withAttributes("F" := 'A')
-        .withChild(
+        .withChildren(
           XmlNode("Test")
             .withAttributes("G" := 100L)
-            .withChild(
+            .withChildren(
               XmlNode("Node")
                 .withAttributes("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
@@ -74,7 +74,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = """|<Foo>
                     | <Bar F="A">
                     |  <Test G="100">
@@ -85,10 +85,12 @@ class XmlPrinterSuite extends munit.FunSuite {
     )
   }
 
-  test("XmlPrinter.prettyString convert XmlNodeGroup inside a node to well formatted XML string") {
+  test(
+    "XmlPrinter.default.prettyString convert XmlNodeGroup inside a node to well formatted XML string"
+  ) {
 
     val xml: XmlNode =
-      XmlNode("Foo").withChild(
+      XmlNode("Foo").withChildren(
         XmlNode.group(
           XmlNode("Bar").withAttributes("F" := "A"),
           XmlNode("Bar").withAttributes("F" := "B"),
@@ -98,7 +100,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = """|<Foo>
                     | <Bar F="A"/>
                     | <Bar F="B"/>
@@ -107,7 +109,7 @@ class XmlPrinterSuite extends munit.FunSuite {
     )
   }
 
-  test("XmlPrinter.prettyString convert XmlNodeGroup to well formatted XML string") {
+  test("XmlPrinter.default.prettyString convert XmlNodeGroup to well formatted XML string") {
 
     val xml: XmlNode =
       XmlNode.group(
@@ -118,7 +120,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.prettyString(xml),
+      obtained = XmlPrinter.default.prettyString(xml),
       expected = """|<Bar F="A"/>
                     |<Bar F="B"/>
                     |<Bar F="C"/>""".stripMargin
@@ -127,13 +129,13 @@ class XmlPrinterSuite extends munit.FunSuite {
 
   test("XmlPrinter.stringify convert xml tree to un-formatted string") {
 
-    val tree: XmlNode = XmlNode("Foo").withChild(
+    val tree: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
         .withAttributes("F" := 'A')
-        .withChild(
+        .withChildren(
           XmlNode("Test")
             .withAttributes("G" := 100L)
-            .withChild(
+            .withChildren(
               XmlNode("Node")
                 .withAttributes("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
@@ -143,21 +145,21 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     // assert
     assertEquals(
-      obtained = XmlPrinter.stringify(tree),
+      obtained = XmlPrinter.default.stringify(tree),
       expected =
         """<Foo><Bar F="A"><Test G="100"><Node A="10" B="true">Lorem ipsum dolor sit amet</Node></Test></Bar></Foo>""".stripMargin
     )
   }
 
-  test("XmlPrinter.prettyString prints parsable XML") {
+  test("XmlPrinter.default.prettyString prints parsable XML") {
 
-    val xml: XmlNode = XmlNode("Foo").withChild(
+    val xml: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
         .withAttributes("F" := 'A')
-        .withChild(
+        .withChildren(
           XmlNode("Test")
             .withAttributes("G" := 100L)
-            .withChild(
+            .withChildren(
               XmlNode("Node")
                 .withAttributes("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
@@ -169,7 +171,7 @@ class XmlPrinterSuite extends munit.FunSuite {
     assertEquals(
       obtained = XmlParser[Try]
         .parseString(
-          XmlPrinter.prettyString(xml)
+          XmlPrinter.default.prettyString(xml)
         )
         .map(_.show),
       expected = Success(xml.show)
@@ -179,7 +181,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 //
 //class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
 //
-//  property("XmlPrinter.prettyString with XL document") {
+//  property("XmlPrinter.default.prettyString with XL document") {
 //
 //    implicit val arbXmlNode: Arbitrary[XmlNode] = Arbitrary(
 //      XmlNodeGen.genXmlNode(DataSize.XL)
@@ -187,7 +189,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 //
 //    forAll { (value: XmlNode) =>
 //      assert(
-//        Ops.timed(XmlPrinter.prettyString(value))._1 < 1.seconds
+//        Ops.timed(XmlPrinter.default.prettyString(value))._1 < 1.seconds
 //      )
 //    }
 //  }

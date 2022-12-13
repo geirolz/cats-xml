@@ -12,6 +12,23 @@ final case class XmlAttribute private (key: String, value: XmlData) extends Xml 
   def map(f: Endo[XmlData]): XmlAttribute =
     XmlAttribute(key, f(value))
 
+  def exists(keyp: String => Boolean, valuep: XmlData => Boolean): Boolean =
+    keyp(key) && valuep(value)
+
+  def exists(key: String, value: XmlData): Boolean =
+    exists(_ == key, _ == value)
+
+  def exists(key: String, value: String): Boolean =
+    exists(key, XmlData.parseString(value))
+
+  def exists(key: String, valuep: XmlData => Boolean): Boolean =
+    exists(_ == key, (data: XmlData) => valuep(data))
+
+  def exists(key: String)(valuep: String => Boolean)(implicit
+    dummyImplicit: DummyImplicit
+  ): Boolean =
+    exists(_ == key, (data: XmlData) => valuep(data.asString))
+
   override def equals(obj: Any): Boolean =
     obj != null && obj
       .isInstanceOf[XmlAttribute] && Eq[XmlAttribute].eqv(this, obj.asInstanceOf[XmlAttribute])
@@ -64,9 +81,10 @@ private[xml] trait XmlAttributeSyntax {
 private[xml] sealed trait XmlAttributeInstances {
 
   implicit def showXmlAttribute(implicit
+    printer: XmlPrinter,
     config: XmlPrinter.Config
   ): Show[XmlAttribute] =
-    XmlPrinter.prettyString(_)
+    printer.prettyString(_)
 
   implicit val eqXmlAttribute: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
     x.key == y.key && x.value == y.value

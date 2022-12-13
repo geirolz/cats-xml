@@ -40,6 +40,9 @@ object CursorFailure {
   final case class MissingNodeFind(path: String, predicate: XmlNode => Boolean)
       extends FailedNode
       with Missing
+  final case class MissingNodeInEmptyGroup(path: String, nodeName: String)
+      extends FailedNode
+      with Missing
   final case class MissingNodeHead(path: String) extends FailedNode with Missing
   final case class MissingNodeLast(path: String) extends FailedNode with Missing
   final case class MissingText(path: String) extends FailedNode with Missing
@@ -76,16 +79,17 @@ object CursorFailure {
     failure match {
       case InvalidTargetType(required, actual) =>
         s"Wrong XML element type, '$required' required but got '$actual'"
-      case MissingAttrByKey(path, key)     => s"Missing attribute '$key'${pathAt(path)}"
-      case MissingAttrAtIndex(path, index) => s"Missing attribute at index '$index'${pathAt(path)}"
-      case MissingAttrHead(path)           => s"Head attribute on empty list${pathAt(path)}"
-      case MissingAttrLast(path)           => s"Last attribute on empty list${pathAt(path)}"
-      case MissingNode(path, nodeName)     => s"Missing node '$nodeName'${pathAt(path)}"
-      case MissingNodeAtIndex(path, index) => s"Missing node at index '$index'${pathAt(path)}"
-      case MissingNodeFind(path, _)        => s"Missing node find${pathAt(path)}"
-      case MissingNodeHead(path)           => s"Missing head node${pathAt(path)}"
-      case MissingNodeLast(path)           => s"Missing last node${pathAt(path)}"
-      case MissingText(path)               => s"Missing text${pathAt(path)}'"
+      case MissingAttrByKey(path, key)      => s"Missing attribute '$key'${pathAt(path)}"
+      case MissingAttrAtIndex(path, index)  => s"Missing attribute at index '$index'${pathAt(path)}"
+      case MissingAttrHead(path)            => s"Head attribute on empty list${pathAt(path)}"
+      case MissingAttrLast(path)            => s"Last attribute on empty list${pathAt(path)}"
+      case MissingNode(path, nodeName)      => s"Missing node '$nodeName'${pathAt(path)}"
+      case MissingNodeAtIndex(path, index)  => s"Missing node at index '$index'${pathAt(path)}"
+      case MissingNodeFind(path, _)         => s"Missing node find${pathAt(path)}"
+      case MissingNodeInEmptyGroup(path, _) => s"Missing node in empty group ${pathAt(path)}"
+      case MissingNodeHead(path)            => s"Missing head node${pathAt(path)}"
+      case MissingNodeLast(path)            => s"Missing last node${pathAt(path)}"
+      case MissingText(path)                => s"Missing text${pathAt(path)}'"
       case ValidationsFailed(path, eNel) =>
         s"Validations (${eNel.size}) failed${pathAt(path)}. ${eNel.toList.mkString("\n- ", "\n- ", "")}"
       case LeftBoundLimitAttr(path, lastKey) =>

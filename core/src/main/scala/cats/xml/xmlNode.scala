@@ -47,6 +47,21 @@ sealed trait XmlNode extends Xml {
     */
   def attributes: List[XmlAttribute]
 
+  def hasAllAttributes(value: XmlAttribute => Boolean, values: XmlAttribute => Boolean*): Boolean =
+    (value +: values).forall(p => attributes.exists(p))
+
+  def hasAllAttributesKeys(key: String => Boolean, keys: String => Boolean*): Boolean =
+    (key +: keys).forall(p => attributes.exists(a => p(a.key)))
+
+  def hasAllAttributesKeys(key: String, keys: String*): Boolean =
+    hasAllAttributesKeys(
+      (_: String) == key,
+      keys.map(expected => (actual: String) => actual == expected)*
+    )
+
+  def hasAllAttributes(keyValue: (String, String), keyValues: (String, String)*): Boolean =
+    (keyValue +: keyValues).forall(p => attributes.exists(_.exists(p._1, p._2)))
+
   /** Return the node content which can be:
     *   - [[NodeContent.Empty]]
     *   - [[NodeContent.Text]]
@@ -91,12 +106,22 @@ sealed trait XmlNode extends Xml {
     content.text.map(_.asString).getOrElse("")
 
   // must be 'def' due it's mutable
-  /** Check is the node has children
+  /** Check if the node has children
     *
     * @return
     *   `true` if the node has children, `false` otherwise
     */
   def hasChildren: Boolean = children.nonEmpty
+
+  /** Check if the node has a child with the specified label which satisfies the specified
+    * predicate.
+    *
+    * @return
+    *   `true` if the node has a child with specified label which satisfies the predicate, `false`
+    *   otherwise
+    */
+  def hasChild(label: String, predicate: XmlNode => Boolean = _ => true): Boolean =
+    children.exists(n => (n.label == label) && predicate(n))
 
   // must be 'def' due it's mutable
   def children: Seq[XmlNode] =
@@ -116,6 +141,21 @@ sealed trait XmlNode extends Xml {
     case node: XmlNode.Node   => XmlNode.group(node.children)
     case group: XmlNode.Group => group
   }
+
+  /** @param ifNode
+    *   Function invoked when the current node is of type Node
+    * @param ifGroup
+    *   Function invoked when the current node is of type Group
+    * @tparam T
+    *   result type parameter
+    * @return
+    *   T value
+    */
+  def fold[T](ifNode: XmlNode.Node => T, ifGroup: XmlNode.Group => T): T =
+    this match {
+      case node: XmlNode.Node   => ifNode(node)
+      case group: XmlNode.Group => ifGroup(group)
+    }
 
   /** Update current node content
     * @return
@@ -158,8 +198,7 @@ sealed trait XmlNode extends Xml {
 }
 object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
-  lazy val emptyGroup: XmlNode.Group =
-    XmlNode.group(Nil)
+  lazy val emptyGroup: XmlNode.Group = new Group(NodeContent.empty)
 
   /** Unsafe create a new [[XmlNode.Node]]
     *
@@ -203,6 +242,14 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     content: NodeContent           = NodeContent.empty
   ): Either[Throwable, XmlNode.Node] =
     Try(XmlNode(label, attributes, content)).toEither
+
+  @impure
+  def fromSeq(elements: Seq[XmlNode]): XmlNode =
+    elements.toList match {
+      case Nil           => XmlNode.emptyGroup
+      case ::(head, Nil) => head
+      case all           => new Group(unsafeRequireNotNull(NodeContent.childrenOrEmpty(all)))
+    }
 
   /** Create a new [[XmlNode.Group]] instance with the specified [[XmlNode]]s
     *
@@ -479,16 +526,16 @@ sealed trait XmlNodeSyntax {
       genericNode.updateContent(_ => newContent.getOrElse(NodeContent.empty))
 
     // ------------------ CHILDREN ------------------
-    def withChild(child: XmlNode, children: XmlNode*): Self =
+    def withChildren(child: XmlNode, children: XmlNode*): Self =
       withChildren(child +: children)
 
     def withChildren(children: Seq[XmlNode]): Self =
       withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
 
-    def appendChild(child: XmlNode, children: XmlNode*): Self =
+    def appendChildren(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => currentChildren ++ List(child) ++ children)
 
-    def prependChild(child: XmlNode, children: XmlNode*): Self =
+    def prependChildren(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => List(child) ++ children ++ currentChildren)
 
     def updateChildren(f: Endo[Seq[XmlNode]]): Self =
@@ -592,13 +639,13 @@ sealed trait XmlNodeInstances {
     override def combine(x: XmlNode, y: XmlNode): XmlNode =
       (x, y) match {
         case (x1: XmlNode.Group, x2: XmlNode.Group) =>
-          XmlNode.group(x1.children ++ x2.children)
+          XmlNode.fromSeq(x1.children ++ x2.children)
         case (x1: XmlNode.Node, x2: XmlNode.Group) =>
-          XmlNode.group(x1 +: x2.children)
+          XmlNode.fromSeq(x1 +: x2.children)
         case (x1: XmlNode.Group, x2: XmlNode.Node) =>
-          XmlNode.group(x1.children :+ x2)
+          XmlNode.fromSeq(x1.children :+ x2)
         case (x1: XmlNode.Node, x2: XmlNode.Node) =>
-          XmlNode.group(Seq(x1, x2))
+          XmlNode.fromSeq(Seq(x1, x2))
       }
   }
 
@@ -616,7 +663,8 @@ sealed trait XmlNodeInstances {
       }
 
   implicit def showXmlNode[T <: XmlNode](implicit
+    printer: XmlPrinter,
     config: XmlPrinter.Config
   ): Show[T] =
-    XmlPrinter.prettyString(_)
+    printer.prettyString(_)
 }

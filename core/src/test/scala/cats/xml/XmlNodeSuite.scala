@@ -63,6 +63,21 @@ class XmlNodeSuite extends munit.FunSuite {
     )
   }
 
+  test("XmlNode.fromSeq") {
+    assertEquals(
+      obtained = XmlNode.fromSeq(Nil),
+      expected = XmlNode.emptyGroup
+    )
+    assertEquals(
+      obtained = XmlNode.fromSeq(List(XmlNode("Foo"))),
+      expected = XmlNode("Foo")
+    )
+    assertEquals(
+      obtained = XmlNode.fromSeq(List(XmlNode("Foo"), XmlNode("Bar"))),
+      expected = XmlNode.group(XmlNode("Foo"), XmlNode("Bar"))
+    )
+  }
+
   // ################### LABEL ###################
   test("XmlNode.updateLabel value") {
     assertEquals(
@@ -367,7 +382,7 @@ class XmlNodeSuite extends munit.FunSuite {
 
     assertEquals(
       XmlNode("Foo")
-        .withChild(XmlNode("Foo"))
+        .withChildren(XmlNode("Foo"))
         .updateTextRaw[String](_ => "Bar")
         .textString,
       ""

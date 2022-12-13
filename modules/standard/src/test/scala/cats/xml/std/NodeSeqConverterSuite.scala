@@ -23,13 +23,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
           "intAttr"  := 1,
           "boolAttr" := true
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
-            .withChild(
+            .withChildren(
               XmlNode("Baz").withText(100)
             )
         )
@@ -51,13 +51,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
           "intAttr"  := 1,
           "boolAttr" := true
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
-            .withChild(
+            .withChildren(
               XmlNode("Baz").withText(100)
             )
         )
@@ -76,13 +76,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
           "intAttr"  := 1,
           "boolAttr" := true
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
-            .withChild(
+            .withChildren(
               XmlNode("Baz").withText(100)
             )
         )
@@ -101,13 +101,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
           "intAttr"  := 1,
           "boolAttr" := true
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
-            .withChild(
+            .withChildren(
               XmlNode("Baz").withText(100)
             )
         )
@@ -123,13 +123,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
               "intAttr"  := 1,
               "boolAttr" := true
             )
-            .withChild(
+            .withChildren(
               XmlNode("Bar")
                 .withAttributes(
                   "intAttr"   := 2,
                   "emptyAttr" := ""
                 )
-                .withChild(
+                .withChildren(
                   XmlNode("Baz").withText(100)
                 )
             )
@@ -150,13 +150,13 @@ class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
             "intAttr"  := 1,
             "boolAttr" := true
           )
-          .withChild(
+          .withChildren(
             XmlNode("Bar")
               .withAttributes(
                 "intAttr"   := 2,
                 "emptyAttr" := ""
               )
-              .withChild(
+              .withChildren(
                 XmlNode("Baz").withText(100)
               )
           )

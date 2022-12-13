@@ -1,6 +1,6 @@
 package cats.xml.cursor
 
-import cats.Show
+import cats.{Eq, Show}
 import cats.xml.{XmlAttribute, XmlData, XmlNode}
 import cats.xml.codec.DataEncoder
 import cats.xml.cursor.AttrCursor.Op
@@ -97,6 +97,11 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
 
   private def move(op: AttrCursor.Op): AttrCursor =
     new AttrCursor(vCursor, op)
+
+  // eq
+  override def equals(obj: Any): Boolean =
+    obj.isInstanceOf[AttrCursor]
+      && Eq[AttrCursor].eqv(this, obj.asInstanceOf[AttrCursor])
 }
 object AttrCursor {
 
@@ -109,13 +114,24 @@ object AttrCursor {
     case class Left(currentOp: Op) extends Op
     case class Right(currentOp: Op) extends Op
 
-    implicit final val showCursorOp: Show[Op] = Show.show {
-      case SelectAttr(key)          => s"/@$key"
-      case SelectAttrByIndex(index) => s"/@[$index]"
-      case Head                     => "/@[0]"
-      case Last                     => "/@[last]"
-      case Left(op)                 => s"${showCursorOp.show(op)}/<-@"
-      case Right(op)                => s"${showCursorOp.show(op)}/@->"
+    implicit final val show: Show[Op] = {
+      def rec(op: Op): String =
+        op match {
+          case SelectAttr(key)          => s"/@$key"
+          case SelectAttrByIndex(index) => s"/@[$index]"
+          case Head                     => "/@[0]"
+          case Last                     => "/@[last]"
+          case Left(op)                 => s"${rec(op)}/<-@"
+          case Right(op)                => s"${rec(op)}/@->"
+        }
+
+      Show.show(rec)
     }
   }
+
+  // instances
+  implicit val eq: Eq[AttrCursor] =
+    (x: AttrCursor, y: AttrCursor) => x.path == y.path
+
+  implicit val show: Show[AttrCursor] = Show.fromToString
 }

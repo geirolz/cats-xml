@@ -16,13 +16,13 @@ class XmlLoaderSuite extends munit.CatsEffectSuite {
           "intAttr"  := 1,
           "boolAttr" := true
         )
-        .withChild(
+        .withChildren(
           XmlNode("Bar")
             .withAttributes(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
-            .withChild(
+            .withChildren(
               XmlNode("Baz").withText(100)
             )
         )
