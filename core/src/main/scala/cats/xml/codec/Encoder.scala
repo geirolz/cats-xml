@@ -99,7 +99,8 @@ object DataEncoder {
       }
 
     DataEncoder.of[String](strValue => {
-      Decoder
+
+      val res = Decoder
         .oneOf(
           Decoder.decodeBoolean.emap(fromValue),
           Decoder.decodeInt.emap(fromValue),
@@ -111,7 +112,9 @@ object DataEncoder {
           Decoder.decodeCharArray.emap(fromValue),
           Decoder.decodeString.emap(fromValue)
         )
-        .decode(XmlData.fromString(strValue)) match {
+        .decode(XmlData.fromString(strValue))
+
+      res match {
         case Validated.Valid(a)   => a
         case Validated.Invalid(_) => XmlData.fromString(strValue)
       }
