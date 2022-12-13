@@ -503,8 +503,8 @@ class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
     )
   }
 
-  test("Validator.maxSizeNel") {
-    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.maxSizeNel(2)
+  test("Validator.maxSizeFoldable") {
+    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.maxSizeFoldable(2)
 
     // seq
     assertEquals(
@@ -523,8 +523,8 @@ class ValidatorInstancesSuite extends munit.ScalaCheckSuite {
     )
   }
 
-  test("Validator.minSizeNel") {
-    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.minSizeNel(2)
+  test("Validator.minSizeFoldable") {
+    val validatorSeq: Validator[NonEmptyList[Int]] = Validator.minSizeFoldable(2)
 
     // seq
     assertEquals(

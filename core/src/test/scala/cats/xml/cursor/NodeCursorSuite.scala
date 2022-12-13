@@ -68,6 +68,40 @@ class NodeCursorSuite extends munit.FunSuite {
     )
   }
 
+  test("NodeCursor.downWildcard") {
+
+    val node: XmlNode =
+      XmlNode("wrapper").withChildren(
+        XmlNode("root").withChildren(
+          XmlNode("foo"),
+          XmlNode("bar"),
+          XmlNode("baz")
+        )
+      )
+
+    assertEquals(
+      obtained = Root.down("root").downWildcard.focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("foo"),
+          XmlNode("bar"),
+          XmlNode("baz")
+        )
+      )
+    )
+
+    assertEquals(
+      obtained = Root.down("root").*.focus(node),
+      expected = Right(
+        XmlNode.group(
+          XmlNode("foo"),
+          XmlNode("bar"),
+          XmlNode("baz")
+        )
+      )
+    )
+  }
+
   test("NodeCursor.\\") {
 
     val node: XmlNode =

@@ -1,9 +1,9 @@
 package cats.xml.validator
 
+import cats.{Contravariant, Eq, Foldable, Show}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
 import cats.kernel.Monoid
-import cats.{Contravariant, Eq, Show}
 import cats.xml.validator.Validator.must
 
 import scala.util.matching.Regex
@@ -168,17 +168,17 @@ private[validator] sealed trait ValidatorBuilders {
     )
 
   // ------------- cats-collections -------------
-  def maxSizeNel[T](
+  def maxSizeFoldable[F[_]: Foldable, T](
     maxSize: Int
-  )(implicit s: Show[T] = Show.fromToString[T]): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq => s"${iterableToStr(seq.toList)} size must be <= $maxSize")(
+  )(implicit s: Show[T] = Show.fromToString[T]): Validator[F[T]] =
+    must[F[T]](seq => s"${iterableToStr(seq.toList)} size must be <= $maxSize")(
       _.size <= maxSize
     )
 
-  def minSizeNel[T](
+  def minSizeFoldable[F[_]: Foldable, T](
     minSize: Int
-  )(implicit s: Show[T] = Show.fromToString[T]): Validator[NonEmptyList[T]] =
-    must[NonEmptyList[T]](seq => s"${iterableToStr(seq.toList)} size must be >= $minSize")(
+  )(implicit s: Show[T] = Show.fromToString[T]): Validator[F[T]] =
+    must[F[T]](seq => s"${iterableToStr(seq.toList)} size must be >= $minSize")(
       _.size >= minSize
     )
 

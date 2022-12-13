@@ -243,12 +243,11 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
   ): Either[Throwable, XmlNode.Node] =
     Try(XmlNode(label, attributes, content)).toEither
 
-  @impure
   def fromSeq(elements: Seq[XmlNode]): XmlNode =
     elements.toList match {
       case Nil           => XmlNode.emptyGroup
       case ::(head, Nil) => head
-      case all           => new Group(unsafeRequireNotNull(NodeContent.childrenOrEmpty(all)))
+      case all           => new Group(NodeContent.childrenOrEmpty(all))
     }
 
   /** Create a new [[XmlNode.Group]] instance with the specified [[XmlNode]]s
@@ -269,9 +268,8 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     * @return
     *   A new [[XmlNode.Group]] instance with the specified [[XmlNode]]s
     */
-  @impure
   def group(elements: Seq[XmlNode]): XmlNode.Group =
-    new Group(unsafeRequireNotNull(NodeContent.childrenOrEmpty(elements)))
+    new Group(NodeContent.childrenOrEmpty(elements))
 
   // --------------------- XML NODE ---------------------
   /** Represent a simple single XML node.
