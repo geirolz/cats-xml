@@ -1,0 +1,48 @@
+# XPath support
+
+Add XPath support.
+
+```sbt
+libraryDependencies += "com.github.geirolz" %% "cats-xml-xpath" % "@VERSION@"
+```
+
+With this module you can create `NodeCursor`s instances using XPath.
+
+Using `NodeCursor` companion object
+```scala mdoc:nest
+import cats.xml.cursor.NodeCursor
+import cats.xml.xpath.error.*
+import cats.xml.xpath.implicits.*
+
+val cursor: Either[XPathError, NodeCursor] = NodeCursor.fromXPath("/root[@id='1']")
+```
+
+Using string interpolation
+```scala mdoc:nest
+import cats.xml.cursor.NodeCursor
+import cats.xml.xpath.error.*
+import cats.xml.xpath.implicits.*
+
+val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
+```
+
+
+Full example
+```scala mdoc:reset
+import cats.xml.cursor.NodeCursor
+import cats.xml.xpath.error.*
+import cats.xml.xpath.implicits.*
+import cats.xml.XmlNode
+import cats.xml.implicits.*
+import cats.implicits.*
+
+val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
+
+val data = XmlNode("wrapper").withChildren(
+  XmlNode("root").withAttributes("id" := 1)
+)
+val result: Either[Throwable, XmlNode] =
+  cursor
+    .leftMapThrowable
+    .flatMap(_.focus(data).leftMap(_.asException))
+```

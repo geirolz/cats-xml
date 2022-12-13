@@ -30,6 +30,7 @@ Contributions are more than welcome 💪
 - [Effect](@DOC_OUT@/effect.md)
 - [Generic](@DOC_OUT@/generic.md)
 - [Standard](@DOC_OUT@/standard.md)
+- [XPath](@DOC_OUT@/xpath.md)
 
 ## Example
 Given

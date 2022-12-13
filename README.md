@@ -30,6 +30,7 @@ Contributions are more than welcome 💪
 - [Effect](docs/compiled/effect.md)
 - [Generic](docs/compiled/generic.md)
 - [Standard](docs/compiled/standard.md)
+- [XPath](docs/compiled/xpath.md)
 
 ## Example
 Given

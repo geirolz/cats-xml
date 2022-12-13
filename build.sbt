@@ -43,7 +43,7 @@ lazy val docs: Project =
   project
     .in(file("docs"))
     .enablePlugins(MdocPlugin)
-    .dependsOn(core, effect, generic, scalaxml)
+    .dependsOn(core, effect, generic, scalaxml, xpath)
     .settings(
       baseSettings,
       noPublishSettings,
@@ -161,9 +161,9 @@ lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   // project
-  name             := prjName,
-  description      := prjDescription,
-  organization     := org,
+  name         := prjName,
+  description  := prjDescription,
+  organization := org,
 //  idePackagePrefix := Some(prjPackageName),
   // scala
   crossScalaVersions := supportedScalaVersions,
