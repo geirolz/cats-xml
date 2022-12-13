@@ -39,7 +39,7 @@ object implicits {
       value.left.map(_.toException)
 
     def leftMapCursorFailure: Either[CursorFailure, NodeCursor] =
-      leftMapThrowable.left.map(CursorFailure.Error)
+      leftMapThrowable.left.map(CursorFailure.Error(_))
 
     def toTryValue: Try[NodeCursor] =
       value.left.map(_.toException).toTry
