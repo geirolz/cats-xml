@@ -14,7 +14,7 @@ trait Encoder[T] {
 }
 object Encoder extends EncoderInstances with EncoderSyntax {
 
-  // lazy due circular dependencies with instances
+  // lazy due circular dependency with instances
   lazy val id: Encoder[Xml] = Encoder.of(identity)
 
   def apply[T: Encoder]: Encoder[T] = implicitly[Encoder[T]]

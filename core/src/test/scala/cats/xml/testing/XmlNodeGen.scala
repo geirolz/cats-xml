@@ -29,27 +29,27 @@ object XmlNodeGen {
     size match {
       case DataSize.S =>
         compile(
-          maxAttrs    = 2,
-          maxChildren = 2,
-          maxDeep     = 2
+          maxAttrs    = 5,
+          maxChildren = 1,
+          maxDeep     = 1
         )
       case DataSize.M =>
         compile(
           maxAttrs    = 5,
-          maxChildren = 4,
-          maxDeep     = 4
+          maxChildren = 2,
+          maxDeep     = 2
         )
       case DataSize.L =>
         compile(
-          maxAttrs    = 10,
-          maxChildren = 6,
-          maxDeep     = 6
+          maxAttrs    = 15,
+          maxChildren = 4,
+          maxDeep     = 4
         )
       case DataSize.XL =>
         compile(
-          maxAttrs    = 20,
-          maxChildren = 8,
-          maxDeep     = 8
+          maxAttrs    = 30,
+          maxChildren = 6,
+          maxDeep     = 6
         )
     }
   }

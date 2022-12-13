@@ -1,5 +1,10 @@
 package cats.xml
 
+import cats.xml.testing.{DataSize, Ops, XmlNodeGen}
+import org.scalacheck.Arbitrary
+import org.scalacheck.Prop.forAll
+
+import scala.concurrent.duration.DurationInt
 import scala.util.{Success, Try}
 
 class XmlPrinterSuite extends munit.FunSuite {
@@ -178,19 +183,19 @@ class XmlPrinterSuite extends munit.FunSuite {
     )
   }
 }
-//
-//class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
-//
-//  property("XmlPrinter.default.prettyString with XL document") {
-//
-//    implicit val arbXmlNode: Arbitrary[XmlNode] = Arbitrary(
-//      XmlNodeGen.genXmlNode(DataSize.XL)
-//    )
-//
-//    forAll { (value: XmlNode) =>
-//      assert(
-//        Ops.timed(XmlPrinter.default.prettyString(value))._1 < 1.seconds
-//      )
-//    }
-//  }
-//}
+
+class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
+
+  property("XmlPrinter.default.prettyString with XL document") {
+
+    implicit val arbXmlNode: Arbitrary[XmlNode] = Arbitrary(
+      XmlNodeGen.genXmlNode(DataSize.L)
+    )
+
+    forAll { (value: XmlNode) =>
+      assert(
+        Ops.timed(XmlPrinter.default.prettyString(value))._1 < 30.millis
+      )
+    }
+  }
+}
