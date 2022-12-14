@@ -165,6 +165,11 @@ sealed private[xml] trait DecoderDataInstances {
 
   import cats.implicits.*
 
+  implicit val decodeXml: Decoder[Xml] = Decoder.id
+  implicit val decodeXmlData: Decoder[XmlData] = decodeXml.flatMapF {
+    case data: XmlData => data.validNel
+    case xml           => DecoderFailure.Custom(s"Unable to decode $xml to XmlData").invalidNel
+  }
   implicit val decodeString: Decoder[String] = Decoder.id.flatMapF {
     case XmlAttribute(_, value) => decodeString.decode(value)
     case data: XmlData =>
@@ -185,7 +190,6 @@ sealed private[xml] trait DecoderDataInstances {
       }
     case sbj => DecoderFailure.NoTextAvailable(sbj).invalidNel
   }
-  implicit val decodeXml: Decoder[Xml]   = Decoder.id
   implicit val decodeUnit: Decoder[Unit] = Decoder.pure[Unit](())
   implicit val decodeBoolean: Decoder[Boolean] = decodeString.map(_.toLowerCase).emap[Boolean] {
     case "true"  => Right(true)

@@ -1,6 +1,5 @@
 import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor.Root
-import cats.xml.cursor.FreeCursor
 import cats.xml.implicits._
 import cats.xml.modifier.Modifier
 
@@ -76,7 +75,6 @@ val group: XmlNode = XmlNode.group(
 
 val result1: Modifier.Result[XmlNode] =
   Root
-    .down("foo")
     .down("bar")
     .down("root")
     .down("foo")
@@ -86,7 +84,7 @@ val result1: Modifier.Result[XmlNode] =
     .down("bar")
     .down("roar")
     .attr("a")
-    .modify(_ => "TEST")
+    .set("TEST")
     .apply(group)
 
 ////
@@ -163,4 +161,3 @@ val result1: Modifier.Result[XmlNode] =
 //ORIGINAL
 
 
-XmlNode("Tst").unsa

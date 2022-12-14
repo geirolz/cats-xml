@@ -1,13 +1,16 @@
 package cats.xml
 
 import cats.{Endo, Eq, Show}
-import cats.xml.codec.DataEncoder
+import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.utils.impure
 
 final case class XmlAttribute private (key: String, value: XmlData) extends Xml with Serializable {
 
-  def map[T: DataEncoder](f: XmlData => T): XmlAttribute =
-    map(value => DataEncoder[T].encode(f(value)))
+  def mapDecode[T: Decoder, U: DataEncoder](f: T => U): Decoder.Result[XmlAttribute] =
+    value.as[T].map(value => XmlAttribute(key, f(value)))
+
+  def map[U: DataEncoder](f: XmlData => U): XmlAttribute =
+    map(value => DataEncoder[U].encode(f(value)))
 
   def map(f: Endo[XmlData]): XmlAttribute =
     XmlAttribute(key, f(value))
