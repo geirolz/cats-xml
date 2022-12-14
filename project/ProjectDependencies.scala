@@ -9,11 +9,11 @@ object ProjectDependencies {
 
   lazy val common: Seq[ModuleID] = Seq(
     // SCALA
-    "org.typelevel" %% "cats-core" % "2.8.0",
+    "org.typelevel" %% "cats-core" % "2.9.0",
     // TEST
     "org.scalameta"  %% "munit"            % "0.7.29" % Test,
     "org.scalameta"  %% "munit-scalacheck" % "0.7.29" % Test,
-    "org.typelevel"  %% "cats-laws"        % "2.8.0"  % Test,
+    "org.typelevel"  %% "cats-laws"        % "2.9.0"  % Test,
     "org.typelevel"  %% "discipline-munit" % "1.0.9"  % Test,
     "org.scalacheck" %% "scalacheck"       % "1.17.0" % Test
   )
@@ -39,13 +39,13 @@ object ProjectDependencies {
       "com.chuusai"                  %% "shapeless"     % "2.3.10"
     )
     val scala3: Seq[ModuleID] = Seq(
-      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.2.0"
+      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.2.5"
     )
   }
 
   object Effect {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.typelevel" %% "cats-effect"         % "3.3.14",
+      "org.typelevel" %% "cats-effect"         % "3.4.2",
       "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
     )
   }

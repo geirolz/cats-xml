@@ -1,6 +1,7 @@
 package cats.xml.cursor
 
 import cats.{Endo, Eq, Show}
+import cats.data.NonEmptyList
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor.{CursorOp, Result}
 import cats.xml.modifier.{Modifier, ModifierFailure}
@@ -10,7 +11,11 @@ import scala.collection.mutable.ListBuffer
 
 /** Vertical cursor for nodes
   */
-sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] { $this =>
+sealed trait NodeCursor
+    extends Dynamic
+    with VCursor[XmlNode, NodeCursor]
+    with WithModifierSupport[XmlNode] {
+  $this =>
 
   def history: List[NodeCursor.Op]
 
@@ -30,21 +35,28 @@ sealed trait NodeCursor extends Dynamic with VCursor[XmlNode, NodeCursor] { $thi
         $this.focus(input).flatMap(node => nextNodeCursor.focus(node))
     }
 
+  // modify
   def modifyIfNode(modifier: Endo[XmlNode.Node]): Modifier[XmlNode] =
     modify {
       case node: XmlNode.Node   => modifier(node)
       case group: XmlNode.Group => group
     }
 
-  def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
+  def modifyIfGroup(modifier: Endo[XmlNode.Group]): Modifier[XmlNode] =
+    modify {
+      case node: XmlNode.Node   => node
+      case group: XmlNode.Group => modifier(group)
+    }
+
+  override def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
     Modifier(node => {
       val nodeClone = node.duplicate
       focus(nodeClone) match {
         case Right(focus) =>
           focus.unsafeMute(modifier)
-          Right(focus)
+          Right(nodeClone)
         case Left(failure) =>
-          Left(ModifierFailure.CursorFailed(failure))
+          Left(ModifierFailure.CursorFailed(NonEmptyList.of(failure)))
       }
     })
 

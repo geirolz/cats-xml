@@ -5,6 +5,9 @@ import cats.data.NonEmptyList
 import cats.kernel.Monoid
 import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.Xml.unsafeRequireValidXmlName
+import cats.xml.cursor.{Cursor, FreeCursor, NodeCursor}
+import cats.xml.cursor.NodeCursor.Root
+import cats.xml.modifier.Modifier
 import cats.xml.utils.impure
 import cats.xml.utils.UnsafeValidator.unsafeRequireNotNull
 
@@ -627,6 +630,35 @@ sealed trait XmlNodeSyntax {
         case Some(data) => withText(data)
         case None       => node
       }
+  }
+
+  implicit class XmlNodeCursorOps(node: XmlNode) {
+
+    /** Build and apply a [[Cursor]] to this [[XmlNode]] instance.
+      * @param f
+      *   function to build the cursor
+      * @tparam X
+      *   type of the focusing output
+      * @return
+      *   Cursor result, Left when fails Right when succeed
+      */
+    def focus[X <: Xml](f: NodeCursor.Root.type => Cursor[X]): Cursor.Result[X] =
+      f(Root).focus(node)
+
+    /** Build and apply a [[FreeCursor]] to this [[XmlNode]] instance.
+      *
+      * @param f
+      *   function to build the cursor
+      * @tparam X
+      *   type of the focusing output
+      * @return
+      *   Cursor result, Left when fails Right when succeed
+      */
+    def focus[T](f: NodeCursor.Root.type => FreeCursor[Xml, T]): FreeCursor.Result[T] =
+      f(Root).focus(node)
+
+    def modify(f: NodeCursor.Root.type => Modifier[XmlNode]): Modifier.Result[XmlNode] =
+      f(Root).apply(node)
   }
 }
 sealed trait XmlNodeInstances {

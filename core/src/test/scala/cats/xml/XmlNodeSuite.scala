@@ -1,5 +1,7 @@
 package cats.xml
 
+import cats.xml.cursor.NodeCursor.Root
+
 class XmlNodeSuite extends munit.FunSuite {
 
   import cats.xml.syntax.*
@@ -387,6 +389,70 @@ class XmlNodeSuite extends munit.FunSuite {
         .textString,
       ""
     )
+  }
 
+  // ################### FOCUS ###################
+  test("XmlNode.focus with Cursor") {
+
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1),
+              XmlNode("baz").withText(2),
+              XmlNode("bar").withText(3)
+            )
+        )
+
+    assertEquals(
+      obtained = data.focus(_.root.foo),
+      expected = Root.root.foo.focus(data)
+    )
+  }
+
+  test("XmlNode.focus with FreeCursor") {
+
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1),
+              XmlNode("baz").withText(2),
+              XmlNode("bar").withText(3)
+            )
+        )
+
+    assertEquals(
+      obtained = data.focus(_.root.foo.text.as[Int]),
+      expected = Root.root.foo.text.as[Int].focus(data)
+    )
+  }
+
+  // ################### MODIFY ###################
+  test("XmlNode.modify with FreeCursor") {
+
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1)
+            )
+        )
+
+    assertEquals(
+      obtained = data.modify(_.root.foo.text.set("UPDATED")),
+      expected = Right(
+        XmlNode("wrapper")
+          .withChildren(
+            XmlNode("root")
+              .withChildren(
+                XmlNode("foo").withText("UPDATED")
+              )
+          )
+      )
+    )
   }
 }
