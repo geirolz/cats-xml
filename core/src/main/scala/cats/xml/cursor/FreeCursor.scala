@@ -7,25 +7,25 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.{Decoder, DecoderFailure}
 import cats.xml.validator.Validator
 
-/** [[FreeCursor]] represent a cursor with a free `O` type as result of the focusing and a free `I`
+/** `FreeCursor` represent a cursor with a free `O` type as result of the focusing and a free `I`
   * type as target of the focusing.
   *
   * @tparam I
-  *   Input type of the [[FreeCursor]]
+  *   Input type of the `FreeCursor`
   * @tparam O
-  *   Output type of the [[FreeCursor]]
+  *   Output type of the `FreeCursor`
   */
 sealed trait FreeCursor[I, +O] extends Serializable { $this =>
 
   /** Apply the current cursor to the specified input of type `I`. This allows to select a precise
     * part of the input `I` tree.
     *
-    * The method is pure and return a [[Left]] when the focusing fails
+    * The method is pure and return a `Left` when the focusing fails
     *
     * @param input
     *   target of the cursor
     * @return
-    *   [[Right]] when succeed [[Left]] when fail
+    *   `Right` when succeed `Left` when fail
     */
   def focus(input: I): FreeCursor.Result[O]
 
@@ -35,7 +35,7 @@ sealed trait FreeCursor[I, +O] extends Serializable { $this =>
     * @tparam U
     *   Type of mapped value
     * @return
-    *   A new [[FreeCursor]] which once applied, apply this cursor and then if succeed apply the
+    *   A new `FreeCursor` which once applied, apply this cursor and then if succeed apply the
     *   function `f` in order to map the result
     */
   def map[U](f: O => U): FreeCursor[I, U] =

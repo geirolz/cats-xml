@@ -634,7 +634,7 @@ sealed trait XmlNodeSyntax {
 
   implicit class XmlNodeCursorOps(node: XmlNode) {
 
-    /** Build and apply a [[Cursor]] to this [[XmlNode]] instance.
+    /** Build and apply a `Cursor` to this `XmlNode` instance.
       * @param f
       *   function to build the cursor
       * @tparam X
@@ -645,11 +645,11 @@ sealed trait XmlNodeSyntax {
     def focus[X <: Xml](f: NodeCursor.Root.type => Cursor[X]): Cursor.Result[X] =
       f(Root).focus(node)
 
-    /** Build and apply a [[FreeCursor]] to this [[XmlNode]] instance.
+    /** Build and apply a `FreeCursor` to this `XmlNode` instance.
       *
       * @param f
       *   function to build the cursor
-      * @tparam X
+      * @tparam T
       *   type of the focusing output
       * @return
       *   Cursor result, Left when fails Right when succeed

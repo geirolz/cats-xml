@@ -12,35 +12,35 @@ sealed trait Cursor[+X <: Xml] extends Serializable {
   type Focus
 
   /** Apply the current cursor to the specified input. This allows to select a precise part of the
-    * [[Xml]] tree.
+    * `Xml` tree.
     *
     * The method is pure and return a Left when the focusing fails
     * @param input
     *   target of the cursor
     * @return
-    *   [[Right]] when succeed [[Left]] when fail
+    *   `Right` when succeed `Left` when fail
     */
   def focus(input: XmlNode): Cursor.Result[X]
 
-  /** Create a [[FreeCursor]] which represent a cursor with a free `T` type as result of the
+  /** Create a `FreeCursor` which represent a cursor with a free `T` type as result of the
     * focusing, this implies that a `Decoder` instance is need to convert the fixed `Xml` type of
-    * the `Cursor` to the free `T` type of the [[FreeCursor]].
+    * the `Cursor` to the free `T` type of the `FreeCursor`.
     *
-    * So, practically speaking, when the [[FreeCursor]] is applied this [[Cursor]] is applied and
-    * the result is decoded using the specified [[Decoder]] for type `T`.
+    * So, practically speaking, when the `FreeCursor` is applied this `Cursor` is applied and
+    * the result is decoded using the specified `Decoder` for type `T`.
     *
     * @tparam T
     *   free type in which decode the current cursor result
     * @return
-    *   A new [[FreeCursor]]
+    *   A new `FreeCursor`
     */
   def as[T: Decoder]: FreeCursor[Xml, T] =
     FreeCursor[T](this)
 
-  /** A string representation of the cursor.
+  /** A String representation of the cursor.
     *
     * @return
-    *   a [[String]] which represent the cursor path
+    *   a String which represent the cursor path
     */
   def path: String
 
