@@ -1,14 +1,16 @@
 package cats.xml.cursor
 
+import cats.{Endo, Eq, Show}
+import cats.data.Validated
 import cats.xml.{XmlData, XmlNode}
-import cats.xml.codec.DataEncoder
+import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.modifier.{Modifier, ModifierFailure}
-import cats.{Eq, Show}
 
 /** Vertical cursor for node Text
   */
 final class TextCursor(protected[xml] val lastCursor: NodeCursor)
-    extends VCursor[XmlData, NodeCursor] {
+    extends VCursor[XmlData, NodeCursor]
+    with WithDataModifierSupport[XmlData] {
   $this =>
 
   import cats.implicits.*
@@ -16,13 +18,16 @@ final class TextCursor(protected[xml] val lastCursor: NodeCursor)
   override lazy val path: String = lastCursor.path
 
   // modify
-  def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =
+  override def modify(modifier: Endo[XmlData]): Modifier[XmlNode] =
+    modify[XmlData, XmlData](modifier)
+
+  override def modify[T: Decoder, U: DataEncoder](f: T => U): Modifier[XmlNode] =
     Modifier(node =>
-      $this.focus(node) match {
-        case Right(textValue) =>
+      $this.as[T].focus(node) match {
+        case Validated.Valid(textValue) =>
           lastCursor.modifyIfNode(_.withText(f(textValue)))(node)
-        case Left(failure) =>
-          ModifierFailure.CursorFailed(failure).asLeft
+        case Validated.Invalid(failures) =>
+          ModifierFailure.CursorFailed(failures).asLeft
       }
     )
 
