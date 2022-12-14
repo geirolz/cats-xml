@@ -1,4 +1,3 @@
-
 import cats.xml.codec.{Decoder, Encoder}
 import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 import cats.xml.generic.decoder.auto._

@@ -1,8 +1,10 @@
 package cats.xml.cursor
 
-import cats.{Eq, Show}
-import cats.xml.{XmlAttribute, XmlData, XmlNode}
-import cats.xml.codec.DataEncoder
+import cats.{Endo, Eq, Show}
+import cats.data.NonEmptyList
+import cats.data.Validated.{Invalid, Valid}
+import cats.xml.{XmlAttribute, XmlNode}
+import cats.xml.codec.{DataEncoder, Decoder, DecoderFailure}
 import cats.xml.cursor.AttrCursor.Op
 import cats.xml.cursor.Cursor.CursorOp
 import cats.xml.modifier.{Modifier, ModifierFailure}
@@ -10,22 +12,40 @@ import cats.xml.modifier.{Modifier, ModifierFailure}
 /** Horizontal cursor for node attributes
   */
 final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
-    extends HCursor[XmlAttribute, NodeCursor, AttrCursor] { $this =>
+    extends HCursor[XmlAttribute, NodeCursor, AttrCursor]
+    with WithDataModifierSupport[XmlAttribute] { $this =>
 
   import cats.implicits.*
 
   lazy val path: String = s"${vCursor.path}$op"
 
   // modify
-  def modify[T: DataEncoder](f: XmlData => T): Modifier[XmlNode] =
+  override def modify(modifier: Endo[XmlAttribute]): Modifier[XmlNode] =
+    Modifier(node =>
+      $this.focus(node) match {
+        case Right(attr: XmlAttribute) =>
+          vCursor
+            .modifyIfNode(_.updateAttr(attr.key)(modifier))
+            .apply(node)
+        case Left(failure) =>
+          ModifierFailure.CursorFailed(NonEmptyList.one(failure)).asLeft
+      }
+    )
+
+  override def modify[T: Decoder, U: DataEncoder](f: T => U): Modifier[XmlNode] =
     Modifier(node =>
       $this.focus(node) match {
         case Right(attr) =>
-          vCursor
-            .modifyIfNode(_.updateAttr(attr.key)(_ => attr.map(f)))
-            .apply(node)
+          attr.mapDecode(f) match {
+            case Valid(newAttrValue) =>
+              vCursor
+                .modifyIfNode(_.updateAttr(attr.key)(_ => newAttrValue))
+                .apply(node)
+            case Invalid(failures: NonEmptyList[DecoderFailure]) =>
+              ModifierFailure.DecoderFailed(failures).asLeft
+          }
         case Left(failure) =>
-          ModifierFailure.CursorFailed(failure).asLeft
+          ModifierFailure.CursorFailed(NonEmptyList.one(failure)).asLeft
       }
     )
 

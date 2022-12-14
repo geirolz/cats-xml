@@ -4,7 +4,7 @@ lazy val prjName                = "cats-xml"
 lazy val prjPackageName         = prjName.replaceAll("[^\\p{Alpha}\\d]+", ".")
 lazy val prjDescription         = "A purely functional XML library"
 lazy val org                    = "com.github.geirolz"
-lazy val scala213               = "2.13.9"
+lazy val scala213               = "2.13.10"
 lazy val scala32                = "3.2.1"
 lazy val supportedScalaVersions = List(scala213, scala32)
 
