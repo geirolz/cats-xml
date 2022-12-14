@@ -4,7 +4,7 @@ import cats.Monoid
 
 /** Create a modified copy of input 'XmlNode'
   */
-trait Modifier[T] { $this =>
+trait Modifier[T] extends (T => Modifier.Result[T]) { $this =>
 
   /** Apply a transformation to the input value `T`
     * @param value
@@ -13,7 +13,7 @@ trait Modifier[T] { $this =>
     *   an `Either[ModifierFailure, T]` that represent the modification result. `Left` failed,
     *   `Right` succeed
     */
-  def apply(value: T): Modifier.Result[T]
+  override def apply(value: T): Modifier.Result[T]
 
   /** Like `flatMap` but doesn't allow type transformation. Just combines two `Modifier` for the
     * same type `T`.

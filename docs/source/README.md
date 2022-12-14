@@ -20,7 +20,7 @@ This library is not production ready yet. There is a lot of work to do to comple
 ~~- Creates macro to derive `Decoder` and `Encoder`. This is not straightforward, distinguish between a Node and an Attribute ca
   can be done in some way thinking about attributes with primitives and value classes BUT distinguish between a Node/Attribute and Text 
   is hard, probably an annotation or a custom Decoder/Encoder is required.~~ 
-- Reach a good code coverage with the tests (using munit)
+- ~~Reach a good code coverage with the tests (using munit)~~
 - Improve documentation
 - Literal macros to check XML strings at compile time
 
@@ -34,7 +34,7 @@ Contributions are more than welcome 💪
 
 ## Example
 Given
-```scala mdoc:silent
+```scala mdoc:reset:silent
 case class Foo(
     foo: Option[String], 
     bar: Int, 
@@ -42,9 +42,8 @@ case class Foo(
 )
 ```
 
-### Decoder
-```scala mdoc:silent
-
+### Decoding
+```scala mdoc:nest:silent
 import cats.xml.codec.Decoder
 import cats.xml.implicits.*
 import cats.implicits.*
@@ -59,9 +58,8 @@ val decoder: Decoder[Foo] =
   )
 ```
 
-
-### Encoder
-```scala mdoc:silent
+### Encoding
+```scala mdoc:nest:silent
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
 
@@ -75,10 +73,33 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 )
 ```
 
-### Modify XML
-```scala mdoc
+### Navigating
+```scala mdoc:reset
+import cats.xml.XmlNode
+import cats.xml.cursor.Cursor
+import cats.xml.cursor.FreeCursor
+
+val node: XmlNode =
+  XmlNode("wrapper")
+    .withChildren(
+      XmlNode("root")
+        .withChildren(
+          XmlNode("foo").withText(1),
+          XmlNode("baz").withText(2),
+          XmlNode("bar").withText(3)
+        )
+    )
+
+val fooNode: Cursor.Result[XmlNode] = node.focus(_.root.foo)
+val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
+```
+
+### Modifying
+```scala mdoc:reset
+import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor.Root
 import cats.xml.modifier.Modifier
+import cats.xml.implicits.*
 
 val node: XmlNode = XmlNode("Foo")
   .withAttributes(
