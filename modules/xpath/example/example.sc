@@ -9,13 +9,11 @@ import cats.xml.cursor.Cursor
 val cursor1: Either[XPathError, NodeCursor] = NodeCursor.fromXPath("/root[@id='1']")
 val cursor2: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 
-
 val data = XmlNode("wrapper").withChildren(
   XmlNode("root").withAttributes("id" := 1)
 )
 val result: Either[Throwable, XmlNode] =
-  cursor1
-    .leftMapThrowable
+  cursor1.leftMapThrowable
     .flatMap(_.focus(data).leftMap(_.asException))
 
 val result2: Cursor.Result[XmlNode] =
