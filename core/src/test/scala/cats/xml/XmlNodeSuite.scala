@@ -1,7 +1,5 @@
 package cats.xml
 
-import cats.xml.cursor.FreeCursor
-import cats.xml.cursor.FreeCursor.Result
 import cats.xml.cursor.NodeCursor.Root
 
 class XmlNodeSuite extends munit.FunSuite {
@@ -396,15 +394,16 @@ class XmlNodeSuite extends munit.FunSuite {
   // ################### FOCUS ###################
   test("XmlNode.focus with Cursor") {
 
-    val data: XmlNode.Node = XmlNode("wrapper")
-      .withChildren(
-        XmlNode("root")
-          .withChildren(
-            XmlNode("foo").withText(1),
-            XmlNode("baz").withText(2),
-            XmlNode("bar").withText(3)
-          )
-      )
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1),
+              XmlNode("baz").withText(2),
+              XmlNode("bar").withText(3)
+            )
+        )
 
     assertEquals(
       obtained = data.focus(_.root.foo),
@@ -414,19 +413,46 @@ class XmlNodeSuite extends munit.FunSuite {
 
   test("XmlNode.focus with FreeCursor") {
 
-    val data: XmlNode.Node = XmlNode("wrapper")
-      .withChildren(
-        XmlNode("root")
-          .withChildren(
-            XmlNode("foo").withText(1),
-            XmlNode("baz").withText(2),
-            XmlNode("bar").withText(3)
-          )
-      )
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1),
+              XmlNode("baz").withText(2),
+              XmlNode("bar").withText(3)
+            )
+        )
 
     assertEquals(
       obtained = data.focus(_.root.foo.text.as[Int]),
       expected = Root.root.foo.text.as[Int].focus(data)
+    )
+  }
+
+  // ################### MODIFY ###################
+  test("XmlNode.modify with FreeCursor") {
+
+    val data: XmlNode =
+      XmlNode("wrapper")
+        .withChildren(
+          XmlNode("root")
+            .withChildren(
+              XmlNode("foo").withText(1)
+            )
+        )
+
+    assertEquals(
+      obtained = data.modify(_.root.foo.text.set("UPDATED")),
+      expected = Right(
+        XmlNode("wrapper")
+          .withChildren(
+            XmlNode("root")
+              .withChildren(
+                XmlNode("foo").withText("UPDATED")
+              )
+          )
+      )
     )
   }
 }

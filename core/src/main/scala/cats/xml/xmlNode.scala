@@ -7,6 +7,7 @@ import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.Xml.unsafeRequireValidXmlName
 import cats.xml.cursor.{Cursor, FreeCursor, NodeCursor}
 import cats.xml.cursor.NodeCursor.Root
+import cats.xml.modifier.Modifier
 import cats.xml.utils.impure
 import cats.xml.utils.UnsafeValidator.unsafeRequireNotNull
 
@@ -655,6 +656,9 @@ sealed trait XmlNodeSyntax {
       */
     def focus[T](f: NodeCursor.Root.type => FreeCursor[Xml, T]): FreeCursor.Result[T] =
       f(Root).focus(node)
+
+    def modify(f: NodeCursor.Root.type => Modifier[XmlNode]): Modifier.Result[XmlNode] =
+      f(Root).apply(node)
   }
 }
 sealed trait XmlNodeInstances {
