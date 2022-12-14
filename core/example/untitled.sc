@@ -32,11 +32,9 @@ import cats.xml.modifier.Modifier
 //         </foo>
 //       </root>"""
 
-
 //node.findDeepChild("roar")
 
 val group: XmlNode = XmlNode.group(
-
   xml"""
        <foo>
            <bar>
@@ -56,7 +54,7 @@ val group: XmlNode = XmlNode.group(
                </foo>
              </root>
            </bar>
-         </foo>""",
+         </foo>"""
 //  xml"<Foo a='3'/>",
 )
 //val result1: FreeCursor.Result[Int] =
@@ -161,6 +159,5 @@ val result1: Modifier.Result[XmlNode] =
 
 //
 //ORIGINAL
-
 
 XmlNode("Tst").unsa
