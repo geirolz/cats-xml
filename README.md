@@ -11,13 +11,15 @@
 A functional library to work with XML in Scala using cats core.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.4"
+libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.5"
 ```
 
 This library is not production ready yet. There is a lot of work to do to complete it:
 - [X] Macros to derive `Encoder` and `Decoder` for Scala 2
 - [X] Reach a good code coverage with the tests (using munit) above 60%
 - [X] Support XPath
+- [X] `Decoder` and `Encoder` for primitives with error accumulating
+- [X] Good error handling and messaging 
 - [X] Integration with standard scala xml library
 - [X] Integration with cats-effect to load files effectfully
 - [ ] Macros to derive `Encoder` and `Decoder` for Scala 2
