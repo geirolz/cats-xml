@@ -24,6 +24,7 @@ This library is not production ready yet. There is a lot of work to do to comple
 - [ ] Performance benchmarks
 - [ ] Integration with Tapir and Http4s
 - [ ] Literal macros to check XML strings at compile time
+
 Contributions are more than welcome 💪
 
 ## Modules
