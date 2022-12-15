@@ -16,7 +16,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = NodeCursor.fromXPath("/root[@id='1']")
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$85169/0x00000008066c5428@58549ffa]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$91280/0x00000008031e0798@26f614eb]
 // )
 ```
 
@@ -28,7 +28,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$85169/0x00000008066c5428@221278ee]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$91280/0x00000008031e0798@5f021656]
 // )
 ```
 
@@ -45,7 +45,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$85169/0x00000008066c5428@7e6ea7ba]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$91280/0x00000008031e0798@35bf243b]
 // )
 
 val data = XmlNode("wrapper").withChildren(
