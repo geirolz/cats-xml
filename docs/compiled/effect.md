@@ -7,7 +7,7 @@ libraryDependencies += "com.github.geirolz" %% "cats-xml-effect" % "0.0.4"
 ```     
 
 Use 
-```scala
+```scala mdoc:nest:to-string
 import cats.xml.effect.implicits.*
 ```
 

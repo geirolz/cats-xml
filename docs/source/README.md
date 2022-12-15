@@ -81,17 +81,16 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
+import cats.xml.implicits.*
 
-val node: XmlNode =
-  XmlNode("wrapper")
-    .withChildren(
-      XmlNode("root")
-        .withChildren(
-          XmlNode("foo").withText(1),
-          XmlNode("baz").withText(2),
-          XmlNode("bar").withText(3)
-        )
-    )
+val node = xml"""
+     <wrapper>
+         <root>
+           <foo>1</foo>
+           <baz>2</baz>
+           <bar>3</bar>
+         </root>
+     </wrapper>"""
 
 val fooNode: Cursor.Result[XmlNode] = node.focus(_.root.foo)
 val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
@@ -104,14 +103,18 @@ import cats.xml.cursor.NodeCursor.Root
 import cats.xml.modifier.Modifier
 import cats.xml.implicits.*
 
-val node: XmlNode = XmlNode("Foo")
-  .withAttributes(
-    "name" := "Foo",
-    "age"  := 10
-  )
-  .withText("ORIGINAL")
-  
-val result: Modifier.Result[XmlNode] = Root
-  .modifyIfNode(_.withText("NEW"))
-  .apply(node)  
+val node = xml"""
+     <wrapper>
+         <root>
+           <foo>
+             <baz>
+               <bar>
+                 <value>1</value>
+               </bar>
+             </baz>
+           </foo>
+         </root>
+       </wrapper>"""
+
+val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyIfNode(_.withText(2)))
 ```

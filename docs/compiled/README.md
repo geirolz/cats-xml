@@ -18,6 +18,8 @@ This library is not production ready yet. There is a lot of work to do to comple
 - [X] Macros to derive `Encoder` and `Decoder` for Scala 2
 - [X] Reach a good code coverage with the tests (using munit) above 60%
 - [X] Support XPath
+- [X] `Decoder` and `Encoder` for primitives with error accumulating
+- [X] Good error handling and messaging 
 - [X] Integration with standard scala xml library
 - [X] Integration with cats-effect to load files effectfully
 - [ ] Macros to derive `Encoder` and `Decoder` for Scala 2
