@@ -11,15 +11,15 @@
 A functional library to work with XML in Scala using cats core.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.5"
+libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.4"
 ```
 
 This library is not production ready yet. There is a lot of work to do to complete it:
 - ~~There are some performance issues loading xml from strings or files due the fact that there is a double
   conversion, We need to parse bytes directly into `cats-xml` classes.~~
-  ~~- Creates macro to derive `Decoder` and `Encoder`. This is not straightforward, distinguish between a Node and an Attribute ca
-  can be done in some way thinking about attributes with primitives and value classes BUT distinguish between a Node/Attribute and Text
-  is hard, probably an annotation or a custom Decoder/Encoder is required.~~
+~~- Creates macro to derive `Decoder` and `Encoder`. This is not straightforward, distinguish between a Node and an Attribute ca
+  can be done in some way thinking about attributes with primitives and value classes BUT distinguish between a Node/Attribute and Text 
+  is hard, probably an annotation or a custom Decoder/Encoder is required.~~ 
 - ~~Reach a good code coverage with the tests (using munit)~~
 - Improve documentation
 - Literal macros to check XML strings at compile time
@@ -36,10 +36,10 @@ Contributions are more than welcome 💪
 Given
 ```scala
 case class Foo(
-                      foo: Option[String],
-                      bar: Int,
-                      text: Boolean
-              )
+    foo: Option[String], 
+    bar: Int, 
+    text: Boolean
+)
 ```
 
 ### Decoding
@@ -51,9 +51,9 @@ import cats.implicits.*
 val decoder: Decoder[Foo] =
   Decoder.fromCursor(c =>
     (
-            c.attr("name").as[Option[String]],
-            c.attr("bar").as[Int],
-            c.text.as[Boolean]
+      c.attr("name").as[Option[String]],
+      c.attr("bar").as[Int],
+      c.text.as[Boolean]
     ).mapN(Foo.apply)
   )
 ```
@@ -65,11 +65,11 @@ import cats.xml.codec.Encoder
 
 val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
-          .withAttributes(
-            "foo"  := t.foo.getOrElse("ERROR"),
-            "bar"  := t.bar
-          )
-          .withText(t.text)
+    .withAttributes(
+      "foo"  := t.foo.getOrElse("ERROR"),
+      "bar"  := t.bar
+    )
+    .withText(t.text)
 )
 ```
 
@@ -81,14 +81,14 @@ import cats.xml.cursor.FreeCursor
 
 val node: XmlNode =
   XmlNode("wrapper")
-          .withChildren(
-            XmlNode("root")
-                    .withChildren(
-                      XmlNode("foo").withText(1),
-                      XmlNode("baz").withText(2),
-                      XmlNode("bar").withText(3)
-                    )
-          )
+    .withChildren(
+      XmlNode("root")
+        .withChildren(
+          XmlNode("foo").withText(1),
+          XmlNode("baz").withText(2),
+          XmlNode("bar").withText(3)
+        )
+    )
 // node: XmlNode = <wrapper>
 //  <root>
 //   <foo>1</foo>
@@ -111,16 +111,16 @@ import cats.xml.modifier.Modifier
 import cats.xml.implicits.*
 
 val node: XmlNode = XmlNode("Foo")
-        .withAttributes(
-          "name" := "Foo",
-          "age"  := 10
-        )
-        .withText("ORIGINAL")
+  .withAttributes(
+    "name" := "Foo",
+    "age"  := 10
+  )
+  .withText("ORIGINAL")
 // node: XmlNode = <Foo name="Foo" age="10">ORIGINAL</Foo>
-
+  
 val result: Modifier.Result[XmlNode] = Root
-        .modifyIfNode(_.withText("NEW"))
-        .apply(node)
+  .modifyIfNode(_.withText("NEW"))
+  .apply(node)  
 // result: Modifier.Result[XmlNode] = Right(
 //   value = <Foo name="Foo" age="10">NEW</Foo>
 // )
