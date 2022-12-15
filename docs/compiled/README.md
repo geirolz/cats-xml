@@ -11,7 +11,7 @@
 A functional library to work with XML in Scala using cats core.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.4"
+libraryDependencies += "com.github.geirolz" %% "cats-xml" % "0.0.5"
 ```
 
 This library is not production ready yet. There is a lot of work to do to complete it:
@@ -28,7 +28,7 @@ Contributions are more than welcome 💪
 
 ## Modules
 - [Effect](docs/compiled/effect.md)
-- [Generic](docs/compiled/generic.md)
+- [Generic (scala 2 only so far)](docs/compiled/generic.md)
 - [Standard](docs/compiled/standard.md)
 - [XPath](docs/compiled/xpath.md)
 

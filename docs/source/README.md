@@ -28,7 +28,7 @@ Contributions are more than welcome 💪
 
 ## Modules
 - [Effect](@DOC_OUT@/effect.md)
-- [Generic](@DOC_OUT@/generic.md)
+- [Generic (scala 2 only so far)](@DOC_OUT@/generic.md)
 - [Standard](@DOC_OUT@/standard.md)
 - [XPath](@DOC_OUT@/xpath.md)
 

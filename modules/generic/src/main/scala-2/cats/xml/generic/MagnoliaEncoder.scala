@@ -104,7 +104,7 @@ object MagnoliaEncoder {
        |Unable to handle an Xml element.
        |
        |Try to change your `XmlTypeInterpreter` implementation for type `${p.typeName.full}` in order to 
-       |let the field `${p.label}` falls in one of the following supported cases:
+       |let the field `${p.label}` fall in one of the following supported cases:
        |
        |- XmlNode as XmlElemType.Child
        |- XmlData as XmlElemType.Attribute

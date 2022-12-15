@@ -43,7 +43,7 @@ object MagnoliaDecoder {
                     case XmlElemType.Null      => None
                   }
 
-                  // use fault parameter in case of missing element
+                  // use default parameter in case of missing element
                   if (config.useDefaults)
                     result.map(
                       _.recoverWith(
