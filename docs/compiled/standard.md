@@ -3,11 +3,11 @@
 Add standard scala XML interop support.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-standard" % "0.0.4"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-standard" % "0.0.5"
 ```
 
 Use
-```scala mdoc:nest:to-string
+```scala
 import cats.xml.std.implicits.*
 ```
 

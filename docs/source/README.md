@@ -99,7 +99,6 @@ val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
 ### Modifying
 ```scala mdoc:reset
 import cats.xml.XmlNode
-import cats.xml.cursor.NodeCursor.Root
 import cats.xml.modifier.Modifier
 import cats.xml.implicits.*
 

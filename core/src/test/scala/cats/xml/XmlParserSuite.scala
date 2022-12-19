@@ -80,12 +80,12 @@ class XmlParserSuite extends munit.FunSuite {
               XmlNode("Group").withChildren(
                 XmlNode("A").withText(1),
                 XmlNode("B").withText(2),
-                XmlNode("C").withText(3),
+                XmlNode("C").withText(3)
               ),
               XmlNode("Group").withChildren(
                 XmlNode("A").withText(4),
                 XmlNode("B").withText(5),
-                XmlNode("C").withText(6),
+                XmlNode("C").withText(6)
               )
             )
         )
