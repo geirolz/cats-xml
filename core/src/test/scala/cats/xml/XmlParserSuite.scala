@@ -39,7 +39,17 @@ class XmlParserSuite extends munit.FunSuite {
                 "emptyAttr" := ""
               )
               .withChildren(
-                XmlNode("Baz").withText(100)
+                XmlNode("Baz").withText(100),
+                XmlNode("Group").withChildren(
+                  XmlNode("A").withText(1),
+                  XmlNode("B").withText(2),
+                  XmlNode("C").withText(3)
+                ),
+                XmlNode("Group").withChildren(
+                  XmlNode("A").withText(4),
+                  XmlNode("B").withText(5),
+                  XmlNode("C").withText(6)
+                )
               )
           )
       )
