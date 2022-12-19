@@ -37,16 +37,10 @@ sealed trait NodeCursor
 
   // modify
   def modifyIfNode(modifier: Endo[XmlNode.Node]): Modifier[XmlNode] =
-    modify {
-      case node: XmlNode.Node   => modifier(node)
-      case group: XmlNode.Group => group
-    }
+    modify(_.fold(ifNode = modifier, ifGroup = identity))
 
   def modifyIfGroup(modifier: Endo[XmlNode.Group]): Modifier[XmlNode] =
-    modify {
-      case node: XmlNode.Node   => node
-      case group: XmlNode.Group => modifier(group)
-    }
+    modify(_.fold(ifNode = identity, ifGroup = modifier))
 
   override def modify(modifier: Endo[XmlNode]): Modifier[XmlNode] =
     Modifier(node => {

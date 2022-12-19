@@ -18,6 +18,8 @@ This library is not production ready yet. There is a lot of work to do to comple
 - [X] Macros to derive `Encoder` and `Decoder` for Scala 2
 - [X] Reach a good code coverage with the tests (using munit) above 60%
 - [X] Support XPath
+- [X] `Decoder` and `Encoder` for primitives with error accumulating
+- [X] Good error handling and messaging 
 - [X] Integration with standard scala xml library
 - [X] Integration with cats-effect to load files effectfully
 - [ ] Macros to derive `Encoder` and `Decoder` for Scala 2
@@ -79,17 +81,16 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
+import cats.xml.implicits.*
 
-val node: XmlNode =
-  XmlNode("wrapper")
-    .withChildren(
-      XmlNode("root")
-        .withChildren(
-          XmlNode("foo").withText(1),
-          XmlNode("baz").withText(2),
-          XmlNode("bar").withText(3)
-        )
-    )
+val node = xml"""
+     <wrapper>
+         <root>
+           <foo>1</foo>
+           <baz>2</baz>
+           <bar>3</bar>
+         </root>
+     </wrapper>"""
 // node: XmlNode = <wrapper>
 //  <root>
 //   <foo>1</foo>
@@ -107,22 +108,45 @@ val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
 ### Modifying
 ```scala
 import cats.xml.XmlNode
-import cats.xml.cursor.NodeCursor.Root
 import cats.xml.modifier.Modifier
 import cats.xml.implicits.*
 
-val node: XmlNode = XmlNode("Foo")
-  .withAttributes(
-    "name" := "Foo",
-    "age"  := 10
-  )
-  .withText("ORIGINAL")
-// node: XmlNode = <Foo name="Foo" age="10">ORIGINAL</Foo>
-  
-val result: Modifier.Result[XmlNode] = Root
-  .modifyIfNode(_.withText("NEW"))
-  .apply(node)  
+val node = xml"""
+     <wrapper>
+         <root>
+           <foo>
+             <baz>
+               <bar>
+                 <value>1</value>
+               </bar>
+             </baz>
+           </foo>
+         </root>
+       </wrapper>"""
+// node: XmlNode = <wrapper>
+//  <root>
+//   <foo>
+//    <baz>
+//     <bar>
+//      <value>2</value>
+//     </bar>
+//    </baz>
+//   </foo>
+//  </root>
+// </wrapper>
+
+val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyIfNode(_.withText(2)))
 // result: Modifier.Result[XmlNode] = Right(
-//   value = <Foo name="Foo" age="10">NEW</Foo>
+//   value = <wrapper>
+//  <root>
+//   <foo>
+//    <baz>
+//     <bar>
+//      <value>2</value>
+//     </bar>
+//    </baz>
+//   </foo>
+//  </root>
+// </wrapper>
 // )
 ```

@@ -45,11 +45,9 @@ private[xml] trait XmlParserInstances {
   implicit val xmlParserForTry: XmlParser[Try] = (inputStream: InputStream) =>
     Try {
 
-      @impure
-      var initNode: XmlNode.Node = XmlNode("TEMP_NODE")
+      var documentNode: XmlNode = null
       val handler: DefaultHandler = new DefaultHandler {
 
-        var depth: Int           = 0
         var nodes: List[XmlNode] = Nil
 
         @impure
@@ -70,27 +68,21 @@ private[xml] trait XmlParserInstances {
               )
             )
 
-          val node: XmlNode = if (depth == 0) {
-            initNode = newNode
-            newNode
-          } else {
-            nodes(depth - 1).unsafeMute(_.appendChildren(newNode))
-            newNode
-          }
+          if (nodes.isEmpty)
+            documentNode = newNode
+          else
+            nodes.last.unsafeMute(_.appendChildren(newNode))
 
-          nodes = nodes :+ node
-          depth = depth + 1
+          nodes = nodes :+ newNode
         }
 
-        override def endElement(uri: String, localName: String, qName: String): Unit = {
-          depth = depth - 1
-          nodes = nodes.drop(depth);
-        }
+        override def endElement(uri: String, localName: String, qName: String): Unit =
+          nodes = nodes.dropRight(1)
 
         override def characters(ch: Array[Char], start: Int, length: Int): Unit = {
           val value = new String(ch, start, length).trim
           if (value != null & value.nonEmpty)
-            nodes(depth - 1).unsafeMute(
+            nodes.last.unsafeMute(
               _.unsafeNarrowNode.withText(
                 DataEncoder.stringParsedEncoder.encode(value)
               )
@@ -100,7 +92,7 @@ private[xml] trait XmlParserInstances {
 
       synchronized {
         defaultSaxParser.parse(inputStream, handler)
-        initNode
+        documentNode
       }
     }
 
