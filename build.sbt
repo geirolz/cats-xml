@@ -37,13 +37,13 @@ lazy val `cats-xml`: Project = project
   .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
-  .aggregate(core, docs, metrics, utils, generic, effect, scalaxml, xpath)
+  .aggregate(core, docs, metrics, utils, generic, effect, scalaxml, xpath, literal)
 
 lazy val docs: Project =
   project
     .in(file("docs"))
     .enablePlugins(MdocPlugin)
-    .dependsOn(core, effect, generic, scalaxml, xpath)
+    .dependsOn(core, effect, generic, scalaxml, xpath, literal)
     .settings(
       baseSettings,
       noPublishSettings,
@@ -81,7 +81,7 @@ lazy val metrics: Project =
     prjModuleName = "metrics",
     toPublish     = false,
     folder        = "."
-  ).dependsOn(core, utils, effect, scalaxml, generic)
+  ).dependsOn(core, utils, generic, effect, scalaxml, xpath, literal)
     .settings(
       libraryDependencies ++= ProjectDependencies.Metrics.dedicated
     )
@@ -131,6 +131,16 @@ lazy val xpath: Project =
   ).dependsOn(core, utils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Xpath.dedicated
+    )
+
+lazy val literal: Project =
+  buildModule(
+    prjModuleName = "literal",
+    toPublish     = true,
+    folder        = "modules"
+  ).dependsOn(core, utils)
+    .settings(
+      libraryDependencies ++= ProjectDependencies.Literal.dedicated
     )
 
 //=============================== MODULES UTILS ===============================

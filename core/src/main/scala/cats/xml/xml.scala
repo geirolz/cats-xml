@@ -5,6 +5,8 @@ import cats.xml.Xml.XmlNull
 import cats.xml.codec.Decoder
 import cats.xml.utils.{impure, Debug, UnsafeValidator}
 
+import java.io.InputStream
+import java.nio.charset.{Charset, StandardCharsets}
 import scala.reflect.ClassTag
 
 trait Xml {
@@ -59,6 +61,15 @@ object Xml {
 
   final lazy val Null: Xml & XmlData = XmlNull
   final lazy val Data: XmlData.type  = xml.XmlData
+
+  def fromString[F[_]: XmlParser](
+    text: String,
+    charset: Charset = StandardCharsets.UTF_8
+  ): F[XmlNode] =
+    XmlParser[F].parseString(text, charset)
+
+  def parseInputStream[F[_]: XmlParser](inputStream: InputStream): F[XmlNode] =
+    XmlParser[F].parseInputStream(inputStream)
 
   /*
    * https://www.w3.org/TR/REC-xml/#NT-NameChar

@@ -78,19 +78,20 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 
 ### Navigating
 ```scala mdoc:reset
+import cats.xml.Xml
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
-import cats.xml.implicits.*
+import scala.util.Try
 
-val node = xml"""
-     <wrapper>
-         <root>
-           <foo>1</foo>
-           <baz>2</baz>
-           <bar>3</bar>
-         </root>
-     </wrapper>"""
+val node = Xml.fromString[Try](
+  """<wrapper>
+    |    <root>
+    |        <foo>1</foo>
+    |        <bar>2</bar>
+    |        <baz>2</baz>
+    |    </root>
+    |</wrapper>""".stripMargin).get
 
 val fooNode: Cursor.Result[XmlNode] = node.focus(_.root.foo)
 val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
@@ -98,22 +99,23 @@ val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])
 
 ### Modifying
 ```scala mdoc:reset
+import cats.xml.Xml
 import cats.xml.XmlNode
 import cats.xml.modifier.Modifier
-import cats.xml.implicits.*
+import scala.util.Try
 
-val node = xml"""
-     <wrapper>
-         <root>
-           <foo>
-             <baz>
-               <bar>
-                 <value>1</value>
-               </bar>
-             </baz>
-           </foo>
-         </root>
-       </wrapper>"""
+val data = Xml.fromString[Try](
+  """<wrapper>
+    |  <root>
+    |    <foo>
+    |      <bar>
+    |        <baz>
+    |          <value>1</value>
+    |        </baz>
+    |      </bar>
+    |    </foo>
+    |  </root>
+    |</wrapper>""".stripMargin).get
 
 val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyIfNode(_.withText(2)))
 ```

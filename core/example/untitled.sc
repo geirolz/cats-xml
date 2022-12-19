@@ -1,6 +1,6 @@
+import cats.xml.Xml
 import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor.Root
-import cats.xml.implicits._
 import cats.xml.modifier.Modifier
 
 ////
@@ -34,26 +34,26 @@ import cats.xml.modifier.Modifier
 //node.findDeepChild("roar")
 
 val group: XmlNode = XmlNode.group(
-  xml"""
-       <foo>
-           <bar>
-             <root>
-               <foo>
-                 <bar>
-                   <root>
-                     <foo>
-                       <bar>
-                         <roar a="1" b="2" c="3">
-                           LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA
-                         </roar>
-                       </bar>
-                     </foo>
-                   </root>
-                 </bar>
-               </foo>
-             </root>
-           </bar>
-         </foo>"""
+  Xml.fromString(
+    """<foo>
+      |  <bar>
+      |    <root>
+      |      <foo>
+      |        <bar>
+      |          <root>
+      |            <foo>
+      |              <bar>
+      |                <roar a="1" b="2" c="3">
+      |                  LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA LOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREALOREA
+      |                </roar>
+      |              </bar>
+      |            </foo>
+      |          </root>
+      |        </bar>
+      |      </foo>
+      |    </root>
+      |  </bar>
+      |</foo>""".stripMargin).get
 //  xml"<Foo a='3'/>",
 )
 //val result1: FreeCursor.Result[Int] =

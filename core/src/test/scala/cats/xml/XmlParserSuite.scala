@@ -58,22 +58,23 @@ class XmlParserSuite extends munit.FunSuite {
 
   test("XmlParser.parseString with String interpolation") {
     assertEquals(
-      obtained = xml"""
-           <Foo intAttr="1" boolAttr="true">
-              <Bar intAttr="2" emptyAttr="">
-                  <Baz>100</Baz>
-                  <Group>
-                    <A>1</A>
-                    <B>2</B>
-                    <C>3</C>
-                  </Group>  
-                  <Group>
-                    <A>4</A>
-                    <B>5</B>
-                    <C>6</C>
-                  </Group>
-              </Bar>
-          </Foo>""",
+      obtained = Xml
+        .fromString[Try]("""<Foo intAttr="1" boolAttr="true">
+          |    <Bar intAttr="2" emptyAttr="">
+          |        <Baz>100</Baz>
+          |        <Group>
+          |          <A>1</A>
+          |          <B>2</B>
+          |          <C>3</C>
+          |        </Group>
+          |        <Group>
+          |          <A>4</A>
+          |          <B>5</B>
+          |          <C>6</C>
+          |        </Group>
+          |    </Bar>
+          |</Foo>""".stripMargin)
+        .get,
       expected = XmlNode("Foo")
         .withAttributes(
           "intAttr"  := 1,

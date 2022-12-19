@@ -1,16 +1,17 @@
+import cats.xml.Xml
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
-import cats.xml.implicits._
+import scala.util.Try
 
-val node = xml"""
-     <wrapper>
-        <root>
-            <foo>1</foo>
-            <bar>2</bar>
-            <baz>2</baz>
-        </root>
-    </wrapper>"""
+val node = Xml.fromString[Try](
+  """<wrapper>
+    |    <root>
+    |        <foo>1</foo>
+    |        <bar>2</bar>
+    |        <baz>2</baz>
+    |    </root>
+    |</wrapper>""".stripMargin).get
 
 
 val fooNode: Cursor.Result[XmlNode] = node.focus(_.root.foo)
