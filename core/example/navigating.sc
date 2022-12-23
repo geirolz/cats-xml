@@ -9,7 +9,7 @@ val node = Xml.fromString[Try](
     |    <root>
     |        <foo>1</foo>
     |        <bar>2</bar>
-    |        <baz>2</baz>
+    |        <baz>3</baz>
     |    </root>
     |</wrapper>""".stripMargin).get
 

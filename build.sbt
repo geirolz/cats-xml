@@ -62,8 +62,8 @@ lazy val docs: Project =
 
 lazy val utils: Project =
   buildModule(
-    prjModuleName = "utils",
-    toPublish     = false,
+    prjModuleName = "internal-utils",
+    toPublish     = true,
     folder        = "."
   ).settings(
     libraryDependencies ++= ProjectDependencies.Utils.dedicated
