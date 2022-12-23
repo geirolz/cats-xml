@@ -37,7 +37,7 @@ lazy val `cats-xml`: Project = project
   .settings(
     copyReadMe := IO.copyFile(file("docs/compiled/README.md"), file("README.md"))
   )
-  .aggregate(core, docs, metrics, utils, generic, effect, scalaxml, xpath)
+  .aggregate(core, docs, metrics, internalUtils, generic, effect, scalaxml, xpath)
 
 lazy val docs: Project =
   project
@@ -60,10 +60,10 @@ lazy val docs: Project =
       )
     )
 
-lazy val utils: Project =
+lazy val internalUtils: Project =
   buildModule(
-    prjModuleName = "utils",
-    toPublish     = false,
+    prjModuleName = "internal-utils",
+    toPublish     = true,
     folder        = "."
   ).settings(
     libraryDependencies ++= ProjectDependencies.Utils.dedicated
@@ -74,14 +74,14 @@ lazy val core: Project =
     prjModuleName = "core",
     toPublish     = true,
     folder        = "."
-  ).dependsOn(utils)
+  ).dependsOn(internalUtils)
 
 lazy val metrics: Project =
   buildModule(
     prjModuleName = "metrics",
     toPublish     = false,
     folder        = "."
-  ).dependsOn(core, utils, effect, scalaxml, generic)
+  ).dependsOn(core, internalUtils, effect, scalaxml, generic)
     .settings(
       libraryDependencies ++= ProjectDependencies.Metrics.dedicated
     )
@@ -92,7 +92,7 @@ lazy val generic: Project =
     prjModuleName = "generic",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core, utils)
+  ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= {
         CrossVersion.partialVersion(scalaVersion.value) match {
@@ -108,7 +108,7 @@ lazy val effect: Project =
     prjModuleName = "effect",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core, utils)
+  ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Effect.dedicated
     )
@@ -118,7 +118,7 @@ lazy val scalaxml: Project =
     prjModuleName = "standard",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core, utils)
+  ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
@@ -128,7 +128,7 @@ lazy val xpath: Project =
     prjModuleName = "xpath",
     toPublish     = true,
     folder        = "modules"
-  ).dependsOn(core, utils)
+  ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Xpath.dedicated
     )
