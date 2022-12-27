@@ -3,7 +3,7 @@ import sbt.project
 lazy val prjName                = "cats-xml"
 lazy val prjPackageName         = prjName.replaceAll("[^\\p{Alpha}\\d]+", ".")
 lazy val prjDescription         = "A purely functional XML library"
-lazy val org                    = "com.github.geirolz"
+lazy val prjOrg                 = "com.github.geirolz"
 lazy val scala213               = "2.13.10"
 lazy val scala32                = "3.2.1"
 lazy val supportedScalaVersions = List(scala213, scala32)
@@ -15,7 +15,6 @@ lazy val `cats-xml`: Project = project
   .settings(
     inThisBuild(
       List(
-        organization := org,
         homepage     := Some(url(s"https://github.com/geirolz/$prjName")),
         licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
         developers := List(
@@ -136,12 +135,11 @@ lazy val xpath: Project =
 //=============================== MODULES UTILS ===============================
 def buildModule(prjModuleName: String, toPublish: Boolean, folder: String): Project = {
   val keys       = prjModuleName.split("-")
-  val id         = keys.reduce(_ + _.capitalize)
   val docName    = keys.mkString(" ")
   val prjFile    = file(s"$folder/$prjModuleName")
   val docNameStr = s"$prjName $docName"
 
-  Project(id, prjFile)
+  Project(prjModuleName, prjFile)
     .settings(
       description    := moduleName.value,
       moduleName     := s"$prjName-$prjModuleName",
@@ -163,7 +161,7 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   // project
   name         := prjName,
   description  := prjDescription,
-  organization := org,
+  organization := prjOrg,
 //  idePackagePrefix := Some(prjPackageName),
   // scala
   crossScalaVersions := supportedScalaVersions,

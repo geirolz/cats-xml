@@ -7,8 +7,6 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param, SealedTrait, Subtype}
 
-import scala.annotation.unused
-
 object MagnoliaDecoder {
 
   import cats.implicits.*
@@ -62,7 +60,7 @@ object MagnoliaDecoder {
 
   private[generic] def split[T](
     ctx: SealedTrait[Decoder, T],
-    @unused config: Configuration
+    config: Configuration
   ): Decoder[T] =
     Decoder.fromXml(xml => {
 
