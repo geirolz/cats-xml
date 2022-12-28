@@ -90,6 +90,43 @@ class XmlPrinterSuite extends munit.FunSuite {
     )
   }
 
+  test("XmlPrinter.default with Null nodes") {
+
+    val optNode: Option[XmlNode] = None
+    val node: XmlNode =
+      XmlNode("Wrapper")
+        .withAttributes(
+          "a" := 1,
+          "b" := "test",
+          "c" := Some(2),
+          "d" := None
+        )
+        .withChildren(
+          XmlNode("Root").withChildren(
+            XmlNode.group(
+              XmlNode("A").withText(1),
+              XmlNode("B").withText("2"),
+              XmlNode("C").withText(Some(3)),
+              XmlNode("D").withText(None),
+              optNode.orXmlNull
+            )
+          )
+        )
+
+    // assert
+    assertEquals(
+      obtained = XmlPrinter.default.prettyString(node),
+      expected = """<Wrapper a="1" b="test" c="2" >
+                   | <Root>
+                   |  <A>1</A>
+                   |  <B>2</B>
+                   |  <C>3</C>
+                   |  <D/>
+                   | </Root>
+                   |</Wrapper>""".stripMargin
+    )
+  }
+
   test(
     "XmlPrinter.default.prettyString convert XmlNodeGroup inside a node to well formatted XML string"
   ) {

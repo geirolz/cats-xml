@@ -47,24 +47,24 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeOption") {
     forAll { (value: Option[Int]) =>
       assertEquals(
-        obtained = Encoder.encodeOption[Int].encode(value),
-        expected = value.fold(Xml.Null)(XmlData.fromInt)
+        obtained = Encoder[Option[Int]].encode(value),
+        expected = value.fold[XmlData](Xml.Null)(XmlData.fromInt)
       )
     }
   }
 
-  property(s"Encoder.encodeSomeOption") {
+  property(s"Encoder.encodeOption - Some") {
     forAll { (value: Some[Int]) =>
       assertEquals(
-        obtained = Encoder.encodeSomeOption[Int].encode(value),
+        obtained = Encoder[Some[Int]].encode(value),
         expected = XmlData.fromInt(value.value)
       )
     }
   }
 
-  test("Encoder.encodeNoneOption") {
+  test("DataEncoder.encodeOption - None") {
     assertEquals(
-      obtained = Encoder.encodeNoneOption.encode(None),
+      obtained = Encoder[None.type].encode(None),
       expected = Xml.Null
     )
   }
@@ -72,31 +72,31 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.dataEncodeOption") {
     forAll { (value: Option[Int]) =>
       assertEquals(
-        obtained = Encoder.dataEncodeOption[Int].encode(value),
-        expected = value.fold(Xml.Null)(XmlData.fromInt)
+        obtained = Encoder[Option[Int]].encode(value),
+        expected = value.fold[XmlData](Xml.Null)(XmlData.fromInt)
       )
     }
   }
 
-  property(s"Encoder.dataEncodeSomeOption") {
+  property(s"Encoder.dataEncodeOption - Some") {
     forAll { (value: Some[Int]) =>
       assertEquals(
-        obtained = Encoder.dataEncodeSomeOption[Int].encode(value),
+        obtained = Encoder[Some[Int]].encode(value),
         expected = XmlData.fromInt(value.value)
       )
     }
   }
 
-  test("DataEncoder.dataEncodeNoneOption") {
+  test("DataEncoder.dataEncodeOption - None") {
     assertEquals(
-      obtained = Encoder.dataEncodeNoneOption.encode(None),
+      obtained = Encoder[None.type].encode(None),
       expected = Xml.Null
     )
   }
 
   test("Encoder.encodeUnit") {
     assertEquals(
-      obtained = Encoder.encodeUnit.encode(()),
+      obtained = Encoder[Unit].encode(()),
       expected = Xml.Null
     )
   }
@@ -104,7 +104,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encoderXmlData") {
     forAll { (value: XmlData) =>
       assertEquals(
-        obtained = Encoder.encodeXmlData.encode(value),
+        obtained = Encoder[XmlData].encode(value),
         expected = value
       )
     }
@@ -113,7 +113,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeString") {
     forAll { (value: String) =>
       assertEquals(
-        obtained = Encoder.encodeString.encode(value),
+        obtained = Encoder[String].encode(value),
         expected = XmlData.fromString(value)
       )
     }
@@ -122,7 +122,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeChar") {
     forAll { (value: Char) =>
       assertEquals(
-        obtained = Encoder.encodeChar.encode(value),
+        obtained = Encoder[Char].encode(value),
         expected = XmlData.fromChar(value)
       )
     }
@@ -131,7 +131,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeBoolean") {
     forAll { (value: Boolean) =>
       assertEquals(
-        obtained = Encoder.encodeBoolean.encode(value),
+        obtained = Encoder[Boolean].encode(value),
         expected = XmlData.fromBoolean(value)
       )
     }
@@ -140,7 +140,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeInt") {
     forAll { (value: Int) =>
       assertEquals(
-        obtained = Encoder.encodeInt.encode(value),
+        obtained = Encoder[Int].encode(value),
         expected = XmlData.fromInt(value)
       )
     }
@@ -149,7 +149,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeLong") {
     forAll { (value: Long) =>
       assertEquals(
-        obtained = Encoder.encodeLong.encode(value),
+        obtained = Encoder[Long].encode(value),
         expected = XmlData.fromLong(value)
       )
     }
@@ -158,7 +158,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeFloat") {
     forAll { (value: Float) =>
       assertEquals(
-        obtained = Encoder.encodeFloat.encode(value),
+        obtained = Encoder[Float].encode(value),
         expected = XmlData.fromFloat(value)
       )
     }
@@ -167,7 +167,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeDouble") {
     forAll { (value: Double) =>
       assertEquals(
-        obtained = Encoder.encodeDouble.encode(value),
+        obtained = Encoder[Double].encode(value),
         expected = XmlData.fromDouble(value)
       )
     }
@@ -176,7 +176,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeBigDecimal") {
     forAll { (value: BigDecimal) =>
       assertEquals(
-        obtained = Encoder.encodeBigDecimal.encode(value),
+        obtained = Encoder[BigDecimal].encode(value),
         expected = XmlData.fromBigDecimal(value)
       )
     }
@@ -185,7 +185,7 @@ class EncoderInstancesSuite extends munit.ScalaCheckSuite {
   property(s"Encoder.encodeBigInt") {
     forAll { (value: BigInt) =>
       assertEquals(
-        obtained = Encoder.encodeBigInt.encode(value),
+        obtained = Encoder[BigInt].encode(value),
         expected = XmlData.fromBigInt(value)
       )
     }

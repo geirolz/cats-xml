@@ -12,4 +12,9 @@ private[xml] sealed trait AllSyntax
     with XmlParserSyntax
     with EncoderSyntax
     with DecoderSyntax
-    with DebugSyntax
+    with DebugSyntax {
+
+  implicit class XmlDataOptionOps[X <: Xml](opt: Option[X]) {
+    def orXmlNull: X = opt.getOrElse(Xml.Null).asInstanceOf[X]
+  }
+}

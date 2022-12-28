@@ -44,7 +44,7 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
               res.update(idx, fromNodeSeq(neChild(idx)))
             }
 
-            NodeContent.childrenSeq(res.toList).getOrElse(NodeContent.empty)
+            NodeContent.children(res.toList).getOrElse(NodeContent.empty)
           }
 
         } else NodeContent.empty

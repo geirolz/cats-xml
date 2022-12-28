@@ -10,8 +10,8 @@ import scala.reflect.ClassTag
 trait Xml {
 
   final lazy val isNull: Boolean = this match {
-    case XmlNull => true
-    case _       => false
+    case Xml.Null => true
+    case _        => false
   }
 
   final lazy val isData: Boolean =
@@ -55,10 +55,12 @@ object Xml {
 
   import cats.syntax.all.*
 
-  case object XmlNull extends Xml with XmlData
+  case object XmlNull extends Xml with XmlNode.Null with XmlData {
+    override def isEmpty: Boolean = true
+  }
 
-  final lazy val Null: Xml & XmlData = XmlNull
-  final lazy val Data: XmlData.type  = xml.XmlData
+  final lazy val Null: Xml & XmlNode & XmlData = XmlNull
+  final lazy val Data: XmlData.type            = xml.XmlData
 
   /*
    * https://www.w3.org/TR/REC-xml/#NT-NameChar

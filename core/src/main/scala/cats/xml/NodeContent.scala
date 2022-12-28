@@ -50,17 +50,17 @@ object NodeContent {
   def parseTextOrEmpty(data: String): NodeContent =
     parseText(data).getOrElse(NodeContent.empty)
 
-  def childrenSeq(childrenLs: Seq[XmlNode]): Option[NodeContent] =
-    NonEmptyList.fromList(childrenLs.toList).map(children)
+  def children(childrenLs: Seq[XmlNode]): Option[NodeContent] =
+    NonEmptyList.fromList(childrenLs.toList.filterNot(_.isNull)).map(Children(_))
 
   def children(node: XmlNode, nodes: XmlNode*): NodeContent =
     Children(NonEmptyList.of(node, nodes*))
 
-  def children(childrenNel: NonEmptyList[XmlNode]): NodeContent =
-    Children(childrenNel)
+  def childrenNel(childrenNel: NonEmptyList[XmlNode]): NodeContent =
+    childrenOrEmpty(childrenNel.toList)
 
   def childrenOrEmpty(childrenLs: Seq[XmlNode]): NodeContent =
-    childrenSeq(childrenLs).getOrElse(NodeContent.empty)
+    children(childrenLs).getOrElse(NodeContent.empty)
 
   case object Empty extends NodeContent
   final case class Text private[NodeContent] (data: XmlData) extends NodeContent

@@ -51,29 +51,17 @@ private[xml] trait EncoderPrimitivesInstances {
 
   implicit val encoderXml: Encoder[Xml] = Encoder.id
 
-  implicit def encodeSomeOption[T: Encoder]: Encoder[Some[T]] =
-    Encoder[T].contramap(_.value)
-
-  implicit val encodeNoneOption: Encoder[None.type] =
+  implicit def encoderNoneOption: Encoder[None.type] =
     Encoder.of(_ => Xml.Null)
 
-  implicit def encodeOption[T: Encoder]: Encoder[Option[T]] =
-    Encoder.of[Option[T]] {
-      case some @ Some(_) => Encoder[Some[T]].encode(some)
-      case _              => encodeNoneOption.encode(None)
-    }
+  implicit def encodeOption[F[X] <: Option[X], T: Encoder]: Encoder[F[T]] =
+    Encoder.of[F[T]](_.fold[Xml](Xml.Null)(Encoder[T].encode(_)))
 
-  implicit def dataEncodeSomeOption[T: DataEncoder]: DataEncoder[Some[T]] =
-    DataEncoder[T].contramap(_.value)
-
-  implicit val dataEncodeNoneOption: DataEncoder[None.type] =
+  implicit def dataEncodeNoneOption: DataEncoder[None.type] =
     DataEncoder.of(_ => Xml.Null)
 
-  implicit def dataEncodeOption[T: DataEncoder]: DataEncoder[Option[T]] =
-    DataEncoder.of[Option[T]] {
-      case some @ Some(_) => DataEncoder[Some[T]].encode(some)
-      case _              => dataEncodeNoneOption.encode(None)
-    }
+  implicit def dataEncodeOption[F[X] <: Option[X], T: DataEncoder]: DataEncoder[F[T]] =
+    DataEncoder.of[F[T]](_.fold[XmlData](Xml.Null)(DataEncoder[T].encode(_)))
 
   implicit val encodeXmlData: DataEncoder[XmlData]       = DataEncoder.of(identity)
   implicit val encodeUnit: DataEncoder[Unit]             = DataEncoder.of(_ => Xml.Null)
@@ -96,6 +84,7 @@ trait DataEncoder[T] extends Encoder[T] {
     DataEncoder.of(f.andThen(encode))
 }
 object DataEncoder {
+
   def apply[T: DataEncoder]: DataEncoder[T] = implicitly[DataEncoder[T]]
 
   def of[T](f: T => XmlData): DataEncoder[T] = (t: T) => f(t)

@@ -10,6 +10,7 @@ import cats.xml.cursor.NodeCursor.Root
 import cats.xml.modifier.Modifier
 import cats.xml.utils.impure
 import cats.xml.utils.UnsafeValidator.unsafeRequireNotNull
+import cats.xml.XmlNode.emptyGroup
 
 import scala.annotation.tailrec
 import scala.util.Try
@@ -26,6 +27,7 @@ sealed trait XmlNode extends Xml {
   lazy val isGroup: Boolean = this match {
     case _: XmlNode.Group => true
     case _: XmlNode.Node  => false
+    case _: XmlNode.Null  => false
   }
 
   /** Get the node label value
@@ -143,6 +145,7 @@ sealed trait XmlNode extends Xml {
   final def toGroup: XmlNode.Group = this match {
     case node: XmlNode.Node   => XmlNode.group(node.children)
     case group: XmlNode.Group => group
+    case _: XmlNode.Null      => XmlNode.emptyGroup
   }
 
   /** @param ifNode
@@ -158,6 +161,7 @@ sealed trait XmlNode extends Xml {
     this match {
       case node: XmlNode.Node   => ifNode(node)
       case group: XmlNode.Group => ifGroup(group)
+      case nll: XmlNode.Null    => ifGroup(nll.toGroup)
     }
 
   /** Update current node content
@@ -189,6 +193,11 @@ sealed trait XmlNode extends Xml {
         src.toGroup.unsafeMutableCopycat(upd)
       case (src: XmlNode.Group, upd: XmlNode.Node) =>
         src.toNode(upd.label, upd.attributes).unsafeMutableCopycat(upd)
+      case (_: XmlNode.Null, upd: XmlNode.Group) =>
+        emptyGroup.unsafeMutableCopycat(upd)
+      case (_: XmlNode.Null, upd: XmlNode.Node) =>
+        emptyGroup.unsafeMutableCopycat(XmlNode.group(upd))
+      case (_, _: XmlNode.Null) => ()
     }
   /* ################################################ */
   /* ############### !! BE CAREFUL !! ############### */
@@ -200,6 +209,15 @@ sealed trait XmlNode extends Xml {
     }
 }
 object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
+
+  private[xml] trait Null extends XmlNode {
+    override type Self = Null
+    override def label: String                                          = ""
+    override def attributes: List[XmlAttribute]                         = Nil
+    override def content: NodeContent                                   = NodeContent.empty
+    override def duplicate: Self                                        = this
+    override private[xml] def updateContent(f: Endo[NodeContent]): Self = this
+  }
 
   lazy val emptyGroup: XmlNode.Group = new Group(NodeContent.empty)
 
@@ -531,7 +549,7 @@ sealed trait XmlNodeSyntax {
       withChildren(child +: children)
 
     def withChildren(children: Seq[XmlNode]): Self =
-      withContent(NodeContent.childrenSeq(children).getOrElse(NodeContent.empty))
+      withContent(NodeContent.children(children).getOrElse(NodeContent.empty))
 
     def appendChildren(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => currentChildren ++ List(child) ++ children)
@@ -542,7 +560,7 @@ sealed trait XmlNodeSyntax {
     def updateChildren(f: Endo[Seq[XmlNode]]): Self =
       genericNode.updateContent(currentContent =>
         NonEmptyList.fromFoldable(f(currentContent.children)) match {
-          case Some(newChildrenNel) => NodeContent.children(newChildrenNel)
+          case Some(newChildrenNel) => NodeContent.childrenNel(newChildrenNel)
           case None                 => NodeContent.empty
         }
       )
@@ -676,6 +694,12 @@ sealed trait XmlNodeInstances {
           XmlNode.fromSeq(x1.children :+ x2)
         case (x1: XmlNode.Node, x2: XmlNode.Node) =>
           XmlNode.fromSeq(Seq(x1, x2))
+        case (_: XmlNode.Null, _: XmlNode.Null) =>
+          Xml.Null
+        case (x1: XmlNode, _: XmlNode.Null) =>
+          x1
+        case (_: XmlNode.Null, x2: XmlNode) =>
+          x2
       }
   }
 
@@ -688,8 +712,8 @@ sealed trait XmlNodeInstances {
           a.content == b.content
         case (a: XmlNode.Group, b: XmlNode.Group) =>
           a.content == b.content
-        case (_: XmlNode.Node, _: XmlNode.Group) => false
-        case (_: XmlNode.Group, _: XmlNode.Node) => false
+        case (_: XmlNode.Null, _: XmlNode.Null) => true
+        case (_, _)                             => false
       }
 
   implicit def showXmlNode[T <: XmlNode](implicit

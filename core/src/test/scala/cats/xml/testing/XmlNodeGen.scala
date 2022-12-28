@@ -1,6 +1,5 @@
 package cats.xml.testing
 
-import cats.data.NonEmptyList
 import cats.xml.{NodeContent, XmlAttribute, XmlNode}
 import cats.xml.testing.GenUtils.getNonEmptyString
 import org.scalacheck.Gen
@@ -81,7 +80,7 @@ object XmlNodeGen {
                 )
               )
             )
-            .map(NonEmptyList.fromList(_).map(NodeContent.children(_)))
+            .map(NodeContent.children(_))
         )
       else
         Gen.const(None)

@@ -155,7 +155,7 @@ object XmlPrinter {
               append(s">")
 
             // append content
-            node.content match {
+            nodeContent match {
               case NodeContent.Empty => ()
               case NodeContent.Text(data) =>
                 recAppend(

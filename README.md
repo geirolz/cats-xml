@@ -51,6 +51,8 @@ import cats.xml.XmlNode
 import cats.xml.implicits.*
 import cats.implicits.*
 
+val optNode: Option[XmlNode] = None
+// optNode: Option[XmlNode] = None
 val node: XmlNode = 
   XmlNode("Wrapper")
     .withAttributes(
@@ -66,6 +68,7 @@ val node: XmlNode =
           XmlNode("B").withText("2"),
           XmlNode("C").withText(Some(3)),
           XmlNode("D").withText(None),
+          optNode.orXmlNull
         )
       )
     )
@@ -74,7 +77,7 @@ val node: XmlNode =
 //   <A>1</A>
 //   <B>2</B>
 //   <C>3</C>
-//   <D></D>
+//   <D/>
 //  </Root>
 // </Wrapper>
 ```

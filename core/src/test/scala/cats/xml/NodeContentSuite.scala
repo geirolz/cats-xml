@@ -29,7 +29,7 @@ class NodeContentSuite extends munit.ScalaCheckSuite {
 
   test("NodeContent.children with 1 child is NOT empty") {
     assert(
-      NodeContent.children(NonEmptyList.of(XmlNode("Foo"))).nonEmpty
+      NodeContent.childrenNel(NonEmptyList.of(XmlNode("Foo"))).nonEmpty
     )
   }
 
