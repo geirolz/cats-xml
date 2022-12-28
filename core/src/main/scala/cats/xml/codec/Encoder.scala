@@ -51,23 +51,41 @@ private[xml] trait EncoderPrimitivesInstances {
 
   implicit val encoderXml: Encoder[Xml] = Encoder.id
 
-  implicit def encoderOption[T: Encoder]: Encoder[Option[T]] =
+  implicit def encodeSomeOption[T: Encoder]: Encoder[Some[T]] =
+    Encoder[T].contramap(_.value)
+
+  implicit val encodeNoneOption: Encoder[None.type] =
+    Encoder.of(_ => Xml.Null)
+
+  implicit def encodeOption[T: Encoder]: Encoder[Option[T]] =
     Encoder.of[Option[T]] {
-      case Some(value) => Encoder[T].encode(value)
-      case None        => Xml.Null
+      case some @ Some(_) => Encoder[Some[T]].encode(some)
+      case _              => encodeNoneOption.encode(None)
     }
 
-  implicit val encoderXmlData: DataEncoder[XmlData]       = DataEncoder.of(identity)
-  implicit val encoderUnit: DataEncoder[Unit]             = DataEncoder.of(_ => Xml.Null)
-  implicit val encoderString: DataEncoder[String]         = DataEncoder.of(XmlData.fromString(_))
-  implicit val encoderChar: DataEncoder[Char]             = DataEncoder.of(XmlData.fromChar)
-  implicit val encoderBoolean: DataEncoder[Boolean]       = DataEncoder.of(XmlData.fromBoolean)
-  implicit val encoderInt: DataEncoder[Int]               = DataEncoder.of(XmlData.fromInt)
-  implicit val encoderLong: DataEncoder[Long]             = DataEncoder.of(XmlData.fromLong)
-  implicit val encoderFloat: DataEncoder[Float]           = DataEncoder.of(XmlData.fromFloat)
-  implicit val encoderDouble: DataEncoder[Double]         = DataEncoder.of(XmlData.fromDouble)
-  implicit val encoderBigDecimal: DataEncoder[BigDecimal] = DataEncoder.of(XmlData.fromBigDecimal)
-  implicit val encoderBigInt: DataEncoder[BigInt]         = DataEncoder.of(XmlData.fromBigInt)
+  implicit def dataEncodeSomeOption[T: DataEncoder]: DataEncoder[Some[T]] =
+    DataEncoder[T].contramap(_.value)
+
+  implicit val dataEncodeNoneOption: DataEncoder[None.type] =
+    DataEncoder.of(_ => Xml.Null)
+
+  implicit def dataEncodeOption[T: DataEncoder]: DataEncoder[Option[T]] =
+    DataEncoder.of[Option[T]] {
+      case some @ Some(_) => DataEncoder[Some[T]].encode(some)
+      case _              => dataEncodeNoneOption.encode(None)
+    }
+
+  implicit val encodeXmlData: DataEncoder[XmlData]       = DataEncoder.of(identity)
+  implicit val encodeUnit: DataEncoder[Unit]             = DataEncoder.of(_ => Xml.Null)
+  implicit val encodeString: DataEncoder[String]         = DataEncoder.of(XmlData.fromString(_))
+  implicit val encodeChar: DataEncoder[Char]             = DataEncoder.of(XmlData.fromChar)
+  implicit val encodeBoolean: DataEncoder[Boolean]       = DataEncoder.of(XmlData.fromBoolean)
+  implicit val encodeInt: DataEncoder[Int]               = DataEncoder.of(XmlData.fromInt)
+  implicit val encodeLong: DataEncoder[Long]             = DataEncoder.of(XmlData.fromLong)
+  implicit val encodeFloat: DataEncoder[Float]           = DataEncoder.of(XmlData.fromFloat)
+  implicit val encodeDouble: DataEncoder[Double]         = DataEncoder.of(XmlData.fromDouble)
+  implicit val encodeBigDecimal: DataEncoder[BigDecimal] = DataEncoder.of(XmlData.fromBigDecimal)
+  implicit val encodeBigInt: DataEncoder[BigInt]         = DataEncoder.of(XmlData.fromBigInt)
 
 }
 

@@ -191,7 +191,7 @@ class DecoderInstancesSuite extends munit.DisciplineSuite {
 
   import cats.implicits.*
   import cats.laws.discipline.arbitrary.*
-  import cats.xml.testing.codec.arbitrary.*
+  import cats.xml.testing.arbitrary.CodecArbitrary.*
 
   // TODO TO FIX
   implicit def eqDecoder[T]: Eq[Decoder[T]] = Eq.allEqual

@@ -10,5 +10,4 @@ object GenUtils {
         .choose(1, maxSize)
         .flatMap(Gen.stringOfN(_, Gen.alphaChar))
     )
-
 }

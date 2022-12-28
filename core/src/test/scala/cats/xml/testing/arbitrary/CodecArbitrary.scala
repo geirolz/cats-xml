@@ -1,4 +1,4 @@
-package cats.xml.testing.codec
+package cats.xml.testing.arbitrary
 
 import cats.xml.codec.{Decoder, DecoderFailure, Encoder}
 import cats.xml.cursor.CursorFailure
@@ -6,7 +6,7 @@ import cats.xml.XmlNode
 import cats.xml.testing.Ops
 import org.scalacheck.{Arbitrary, Cogen, Gen}
 
-object arbitrary {
+object CodecArbitrary {
 
   import cats.implicits.*
   import cats.xml.implicits.*
