@@ -12,6 +12,13 @@ class XmlPrinterSuite extends munit.FunSuite {
   import cats.implicits.*
   import cats.xml.implicits.*
 
+  test("XmlPrinter.default.prettyString  Xml.Null") {
+    assertEquals(
+      obtained = XmlPrinter.default.prettyString(Xml.Null),
+      expected = ""
+    )
+  }
+
   test("XmlPrinter.default.prettyString convert XmlData to string") {
 
     val tree: Xml = XmlData.fromString("VALUE")
