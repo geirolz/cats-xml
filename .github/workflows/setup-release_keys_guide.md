@@ -82,3 +82,5 @@ Like this one:
 - Copy the **PRIVATE KEY** in _Base64_
 - Create a secret in github named `PGP_SECRET` and store the base64 *PRIVATE KEY*
 - Create a secret in github named `PGP_PASSPHRASE` and store the base64 *PRIVATE KEY* passphrase
+- Create a secret in github named `PGP_SECRET` and store the base64 *PRIVATE KEY*
+- Create a secret in github named `PGP_PASSPHRASE` and store the base64 *PRIVATE KEY* passphrase
