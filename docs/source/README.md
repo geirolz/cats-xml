@@ -22,7 +22,7 @@ This library is not production ready yet. There is a lot of work to do to comple
 - [X] Good error handling and messaging 
 - [X] Integration with standard scala xml library
 - [X] Integration with cats-effect to load files effectfully
-- [ ] Macros to derive `Encoder` and `Decoder` for Scala 2
+- [ ] Macros to derive `Encoder` and `Decoder` for Scala 3
 - [ ] Performance benchmarks
 - [ ] Integration with Tapir and Http4s
 - [ ] Literal macros to check XML strings at compile time
