@@ -39,7 +39,7 @@ jobs:
           #          # Author email address to use in commits. If set it will
           #          # override any email retrieved from GitHub.
           #          author-email: ''
-          #
+
           # Author name to use in commits. If set it will override
           # any name retrieved from GitHub.
           author-name: 'scala-steward'
