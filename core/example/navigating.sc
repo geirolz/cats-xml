@@ -12,6 +12,5 @@ val node = xml"""
         </root>
     </wrapper>"""
 
-
-val fooNode: Cursor.Result[XmlNode] = node.focus(_.root.foo)
+val fooNode: Cursor.Result[XmlNode]      = node.focus(_.root.foo)
 val fooTextValue: FreeCursor.Result[Int] = node.focus(_.root.foo.text.as[Int])

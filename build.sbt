@@ -15,8 +15,8 @@ lazy val `cats-xml`: Project = project
   .settings(
     inThisBuild(
       List(
-        homepage     := Some(url(s"https://github.com/geirolz/$prjName")),
-        licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+        homepage := Some(url(s"https://github.com/geirolz/$prjName")),
+        licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
         developers := List(
           Developer(
             "DavidGeirola",

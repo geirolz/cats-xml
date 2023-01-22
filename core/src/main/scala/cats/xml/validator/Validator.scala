@@ -183,7 +183,7 @@ private[validator] sealed trait ValidatorBuilders {
     )
 
   private def iterableToStr[T](itOnce: IterableOnce[T], limit: Int = 10)(implicit
-    s: Show[T]                                                     = Show.fromToString[T]
+    s: Show[T] = Show.fromToString[T]
   ): String = {
     if (itOnce.iterator.size <= limit)
       itOnce.iterator.map(_.show).mkString("[", ", ", "]")
