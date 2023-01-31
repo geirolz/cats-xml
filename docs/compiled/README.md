@@ -29,6 +29,8 @@ This library is not production ready yet. There is a lot of work to do to comple
 
 Contributions are more than welcome 💪
 
+Please, drop a ⭐️ if you are interested in this project and you want to support it 
+
 ## Modules
 - [Effect](docs/compiled/effect.md)
 - [Generic (scala 2 only so far)](docs/compiled/generic.md)
