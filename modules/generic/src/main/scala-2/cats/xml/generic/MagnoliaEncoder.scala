@@ -2,7 +2,6 @@ package cats.xml.generic
 
 import cats.xml.*
 import cats.xml.codec.Encoder
-import cats.xml.Xml.XmlNull
 import cats.xml.utils.generic.ParamName
 import cats.xml.utils.impure
 import magnolia1.{CaseClass, Param, SealedTrait}

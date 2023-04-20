@@ -22,7 +22,7 @@ final case class XmlAttribute private (key: String, value: XmlData) extends Xml 
     exists(_ == key, _ == value)
 
   def exists(key: String, value: String): Boolean =
-    exists(key, XmlData.parseString(value))
+    exists(key, Xml.fromDataString(value))
 
   def exists(key: String, valuep: XmlData => Boolean): Boolean =
     exists(_ == key, (data: XmlData) => valuep(data))

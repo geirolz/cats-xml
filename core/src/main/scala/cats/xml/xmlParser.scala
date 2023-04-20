@@ -1,7 +1,6 @@
 package cats.xml
 
 import cats.MonadThrow
-import cats.xml.codec.DataEncoder
 import cats.xml.utils.impure
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
@@ -11,6 +10,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import javax.xml.parsers.{SAXParser, SAXParserFactory}
 import scala.util.Try
 
+//TODO: Rethink the design of this class to return `F[Xml]` instead of `F[XmlNode]` so, parsing XmlData too.
 trait XmlParser[F[_]] {
 
   def parseInputStream(inputStream: InputStream): F[XmlNode]
@@ -18,11 +18,7 @@ trait XmlParser[F[_]] {
   def parseString(text: String, charset: Charset = StandardCharsets.UTF_8): F[XmlNode] =
     parseInputStream(new ByteArrayInputStream(text.getBytes(charset)))
 }
-object XmlParser extends XmlParserInstances {
-  def apply[F[_]](implicit parser: XmlParser[F]): XmlParser[F] = parser
-}
-
-private[xml] trait XmlParserInstances {
+object XmlParser extends XmlParserSyntax {
 
   import cats.implicits.*
 
@@ -42,64 +38,68 @@ private[xml] trait XmlParserInstances {
     parserFactory.newSAXParser()
   }
 
-  implicit val xmlParserForTry: XmlParser[Try] = (inputStream: InputStream) =>
-    Try {
+  def apply[F[_]](implicit parser: XmlParser[F]): XmlParser[F] = parser
 
-      var documentNode: XmlNode = null
-      val handler: DefaultHandler = new DefaultHandler {
+  def fromSAXParser[F[_]: MonadThrow](
+    saxParser: SAXParser
+  ): XmlParser[F] =
+    (inputStream: InputStream) =>
+      Try {
 
-        var nodes: List[XmlNode] = Nil
+        var documentNode: XmlNode = null
+        val handler: DefaultHandler = new DefaultHandler {
 
-        @impure
-        override def startElement(
-          uri: String,
-          localName: String,
-          qName: String,
-          attributes: Attributes
-        ): Unit = {
+          var nodes: List[XmlNode] = Nil
 
-          val newNode: XmlNode.Node = XmlNode(qName)
-            .withAttributes(
-              (0 until attributes.getLength).map(i =>
-                XmlAttribute(
-                  attributes.getLocalName(i),
-                  DataEncoder.stringParsedEncoder.encode(attributes.getValue(i))
+          @impure
+          override def startElement(
+            uri: String,
+            localName: String,
+            qName: String,
+            attributes: Attributes
+          ): Unit = {
+
+            val newNode: XmlNode.Node = XmlNode(qName)
+              .withAttributes(
+                (0 until attributes.getLength).map(i =>
+                  XmlAttribute(
+                    attributes.getLocalName(i),
+                    Xml.fromDataString(attributes.getValue(i))
+                  )
                 )
               )
-            )
 
-          if (nodes.isEmpty)
-            documentNode = newNode
-          else
-            nodes.last.unsafeMute(_.appendChildren(newNode))
+            if (nodes.isEmpty)
+              documentNode = newNode
+            else
+              nodes.last.unsafeMute(_.appendChildren(newNode))
 
-          nodes = nodes :+ newNode
-        }
+            nodes = nodes :+ newNode
+          }
 
-        override def endElement(uri: String, localName: String, qName: String): Unit =
-          nodes = nodes.dropRight(1)
+          override def endElement(uri: String, localName: String, qName: String): Unit =
+            nodes = nodes.dropRight(1)
 
-        override def characters(ch: Array[Char], start: Int, length: Int): Unit = {
-          val value = new String(ch, start, length).trim
-          if (value != null & value.nonEmpty)
-            nodes.last.unsafeMute(
-              _.unsafeNarrowNode.withText(
-                DataEncoder.stringParsedEncoder.encode(value)
+          override def characters(ch: Array[Char], start: Int, length: Int): Unit = {
+            val value = new String(ch, start, length).trim
+            if (value != null & value.nonEmpty)
+              nodes.last.unsafeMute(
+                _.unsafeNarrowNode.withText(
+                  Xml.fromDataString(value)
+                )
               )
-            )
+          }
         }
-      }
 
-      synchronized {
-        defaultSaxParser.parse(inputStream, handler)
-        documentNode
-      }
-    }
+        synchronized {
+          saxParser.parse(inputStream, handler)
+          documentNode
+        }
+      }.liftTo[F]
 
-  implicit def xmlParserOfMonadThrow[F[_]: MonadThrow]: XmlParser[F] =
-    (inputStream: InputStream) => xmlParserForTry.parseInputStream(inputStream).liftTo[F]
+  implicit def defaultXmlSAXParser[F[_]: MonadThrow]: XmlParser[F] =
+    fromSAXParser[F](defaultSaxParser)
 }
-
 private[xml] trait XmlParserSyntax {
 
   implicit class XmlParserInputStreamOps(inputStream: InputStream) {

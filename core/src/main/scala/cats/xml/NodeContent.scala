@@ -42,7 +42,7 @@ object NodeContent {
   }
 
   def parseText(data: String): Option[NodeContent] =
-    text(Xml.Data.parseString(data))
+    text(Xml.fromDataString(data))
 
   def textOrEmpty[T: DataEncoder](data: T): NodeContent =
     text[T](data).getOrElse(NodeContent.empty)

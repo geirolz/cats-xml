@@ -427,7 +427,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = Root.foo.text.focus(node),
-      expected = Right(Xml.Data.fromString("TEST"))
+      expected = Right(Xml.ofString("TEST"))
     )
 
     assertEquals(

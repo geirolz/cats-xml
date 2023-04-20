@@ -18,8 +18,8 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeDataIso[Float]
   testAttributeDataIso[Boolean]
   testAttributeDataIso[String]
-  testAttributeDataIso[BigDecimal]
   testAttributeDataIso[BigInt]
+  testAttributeDataIso[BigDecimal]
 
   // equality
   testAttributeEquality[Unit]
@@ -28,8 +28,8 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeEquality[Float]
   testAttributeEquality[Boolean]
   testAttributeEquality[String]
-  testAttributeEquality[BigDecimal]
   testAttributeEquality[BigInt]
+  testAttributeEquality[BigDecimal]
 
   test("XmlAttribute.normalizeAttrs") {
 

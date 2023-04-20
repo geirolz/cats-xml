@@ -1,10 +1,9 @@
 package cats.xml.codec
 
-import cats.{Alternative, ApplicativeThrow, Eq}
+import cats.{Alternative, ApplicativeThrow}
 import cats.data.NonEmptyList
 import cats.data.Validated.Valid
-import cats.laws.discipline.MonadErrorTests
-import cats.xml.{Xml, XmlData, XmlNode}
+import cats.xml.{Xml, XmlData, XmlNode, XmlNull}
 import cats.xml.XmlData.*
 import cats.xml.cursor.CursorFailure
 import cats.xml.testing.Samples.dummyNode
@@ -189,18 +188,122 @@ class DecoderSuite extends munit.FunSuite {
 
 class DecoderInstancesSuite extends munit.DisciplineSuite {
 
-  import cats.implicits.*
-  import cats.laws.discipline.arbitrary.*
-  import cats.xml.testing.arbitrary.CodecArbitrary.*
+  import cats.xml.testing.arbitrary.XmlDataArbitrary.*
 
-  // TODO TO FIX
-  implicit def eqDecoder[T]: Eq[Decoder[T]] = Eq.allEqual
+  test("Decoder.decodeUnit") {
+    assertEquals(
+      obtained = Decoder[Unit].decode(XmlNull),
+      expected = Valid(())
+    )
+  }
 
-  checkAll(
-    "Decoder.MonadErrorLaws",
-    MonadErrorTests[Decoder, NonEmptyList[DecoderFailure]]
-      .monadError[Int, Int, String]
-  )
+  property(s"Decoder.decodeXmlData") {
+    forAll { (value: XmlData) =>
+      assertEquals(
+        obtained = Decoder[XmlData].decode(value),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.decodeString") {
+    forAll { (value: XmlString) =>
+      assertEquals(
+        obtained = Decoder[String].decode(value),
+        expected = Valid(value.value)
+      )
+    }
+  }
+
+  property(s"Decoder.decodeChar") {
+    forAll { (value: XmlChar) =>
+      assertEquals(
+        obtained = Decoder[Char].decode(value),
+        expected = Valid(value.value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeBoolean") {
+    forAll { (value: XmlBool) =>
+      assertEquals(
+        obtained = Decoder[Boolean].decode(value),
+        expected = Valid(value.value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeByte") {
+    forAll { (value: Byte) =>
+      assertEquals(
+        obtained = Decoder[Byte].decode(Xml.ofByte(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeShort") {
+    forAll { (value: Short) =>
+      assertEquals(
+        obtained = Decoder[Short].decode(Xml.ofShort(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeInt") {
+    forAll { (value: Int) =>
+      assertEquals(
+        obtained = Decoder[Int].decode(Xml.ofInt(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeLong") {
+    forAll { (value: Long) =>
+      assertEquals(
+        obtained = Decoder[Long].decode(Xml.ofLong(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeFloat") {
+    forAll { (value: Float) =>
+      assertEquals(
+        obtained = Decoder[Float].decode(Xml.ofFloat(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeDouble") {
+    forAll { (value: Double) =>
+      assertEquals(
+        obtained = Decoder[Double].decode(Xml.ofDouble(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeBigInt") {
+    forAll { (value: BigInt) =>
+      assertEquals(
+        obtained = Decoder[BigInt].decode(Xml.ofBigInt(value)),
+        expected = Valid(value)
+      )
+    }
+  }
+
+  property(s"Decoder.encodeBigDecimal") {
+    forAll { (value: BigDecimal) =>
+      assertEquals(
+        obtained = Decoder[BigDecimal].decode(Xml.ofBigDecimal(value)),
+        expected = Valid(value)
+      )
+    }
+  }
 }
 
 class DecoderLifterSuite extends munit.ScalaCheckSuite {
@@ -239,7 +342,7 @@ class DecoderLifterSuite extends munit.ScalaCheckSuite {
     property(s"Decoder[${tag.runtimeClass.getSimpleName}] with Cursor success") {
       forAll { (value: T) =>
         assertEquals(
-          obtained = Decoder[F[T]].decodeCursorResult(Right(Xml.Data.fromString(value.toString))),
+          obtained = Decoder[F[T]].decodeCursorResult(Right(Xml.ofString(value.toString))),
           expected = Valid(F.pure(value))
         )
       }
@@ -370,8 +473,6 @@ class DecoderCompanionSuite extends munit.FunSuite {
   test("Decoder.fromCursor accumulating errors - Decoding") {
 
     case class Foo(a: Int, b: Int, c: Int)
-
-    val ex = new NumberFormatException("For input string: \"INVALID\"")
     val decoder: Decoder[Foo] = Decoder
       .fromCursor(c =>
         (
@@ -391,9 +492,18 @@ class DecoderCompanionSuite extends munit.FunSuite {
       ),
       expected = NonEmptyList
         .of(
-          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@a", DecoderFailure.Error(ex))),
-          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@b", DecoderFailure.Error(ex))),
-          DecoderFailure.CursorFailed(CursorFailure.DecoderFailed("/@c", DecoderFailure.Error(ex)))
+          DecoderFailure.CursorFailed(
+            CursorFailure
+              .DecoderFailed("/@a", DecoderFailure.UnableToDecodeType[Int](XmlString("INVALID")))
+          ),
+          DecoderFailure.CursorFailed(
+            CursorFailure
+              .DecoderFailed("/@b", DecoderFailure.UnableToDecodeType[Int](XmlString("INVALID")))
+          ),
+          DecoderFailure.CursorFailed(
+            CursorFailure
+              .DecoderFailed("/@c", DecoderFailure.UnableToDecodeType[Int](XmlString("INVALID")))
+          )
         )
         .invalid
     )
@@ -410,7 +520,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           Decoder.decodeBoolean,
           Decoder.decodeString
         )
-        .decode(XmlData.fromInt(100))
+        .decode(Xml.ofInt(100))
         .map(_.asInstanceOf[Int]),
       expected = Valid(100)
     )
@@ -424,7 +534,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           Decoder.decodeBoolean,
           Decoder.decodeString
         )
-        .decode(XmlData.fromFloat(100.99f))
+        .decode(Xml.ofFloat(100.99f))
         .map(_.asInstanceOf[Float]),
       expected = Valid(100.99f)
     )
@@ -438,7 +548,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           Decoder.decodeBoolean,
           Decoder.decodeString
         )
-        .decode(XmlData.fromBoolean(true))
+        .decode(Xml.ofBoolean(true))
         .map(_.asInstanceOf[Boolean]),
       expected = Valid(true)
     )
@@ -452,7 +562,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           Decoder.decodeBoolean,
           Decoder.decodeString
         )
-        .decode(XmlData.fromString("foo"))
+        .decode(Xml.ofString("foo"))
         .map(_.asInstanceOf[String]),
       expected = Valid("foo")
     )
@@ -465,7 +575,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
           Decoder.decodeBoolean,
           Decoder.decodeString
         )
-        .decode(XmlData.fromString("100.99"))
+        .decode(Xml.ofString("100.99"))
         .map(_.asInstanceOf[Float]),
       expected = Valid(100.99f)
     )
