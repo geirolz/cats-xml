@@ -38,8 +38,6 @@ object XmlData {
    */
   sealed trait XmlNumber extends XmlData with Serializable {
 
-    /** Return this number as a [[scala.math.BigDecimal]].
-      */
     final def toBigDecimal: Option[BigDecimal] = this match {
       case XmlLong(value)       => Some(BigDecimal(value))
       case XmlFloat(value)      => Some(new JavaBigDecimal(java.lang.Float.toString(value)))
@@ -47,8 +45,6 @@ object XmlData {
       case XmlBigDecimal(value) => Some(value)
     }
 
-    /** Return this number as a [[scala.math.BigInt]] if it's a sufficiently small whole number.
-      */
     final def toBigInt: Option[BigInt] = this match {
       case XmlLong(value) => Some(BigInt(value))
       case XmlFloat(value) =>
@@ -62,11 +58,6 @@ object XmlData {
       case XmlBigDecimal(value) => value.toBigIntExact
     }
 
-    /** Convert this number to its best [[scala.Double]] approximation.
-      *
-      * Anything over `Double.MaxValue` will be rounded to `Double.PositiveInfinity` and anything
-      * below `Double.MinValue` is rounded to `Double.NegativeInfinity`.
-      */
     final def toDouble: Double = this match {
       case XmlLong(value)       => value.toDouble
       case XmlFloat(value)      => new JavaBigDecimal(java.lang.Float.toString(value)).doubleValue
@@ -74,11 +65,6 @@ object XmlData {
       case XmlBigDecimal(value) => value.doubleValue
     }
 
-    /** Convert this number to its best [[scala.Float]] approximation.
-      *
-      * Anything over `Float.MaxValue` will be rounded to `Float.PositiveInfinity` and anything
-      * below `Float.MinValue` is rounded to `Float.NegativeInfinity`.
-      */
     final def toFloat: Float = this match {
       case XmlLong(value)       => value.toFloat
       case XmlFloat(value)      => value
@@ -86,8 +72,6 @@ object XmlData {
       case XmlBigDecimal(value) => value.floatValue
     }
 
-    /** Return this number as a [[scala.Byte]] if it's a valid [[scala.Byte]].
-      */
     final def toByte: Option[Byte] = toLong match {
       case Some(n) =>
         val asByte: Byte = n.toByte
@@ -95,8 +79,6 @@ object XmlData {
       case None => None
     }
 
-    /** Return this number as a [[scala.Short]] if it's a valid [[scala.Short]].
-      */
     final def toShort: Option[Short] = toLong match {
       case Some(n) =>
         val asShort: Short = n.toShort
@@ -104,8 +86,6 @@ object XmlData {
       case None => None
     }
 
-    /** Return this number as an [[scala.Int]] if it's a valid [[scala.Int]].
-      */
     final def toInt: Option[Int] = toLong match {
       case Some(n) =>
         val asInt: Int = n.toInt
@@ -113,8 +93,6 @@ object XmlData {
       case None => None
     }
 
-    /** Return this number as a [[scala.Long]] if it's a valid [[scala.Long]].
-      */
     final def toLong: Option[Long] = this match {
       case XmlLong(value) => Some(value)
       case XmlFloat(value) =>
