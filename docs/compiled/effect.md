@@ -3,7 +3,7 @@
 Add cats-effect support.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-effect" % "0.0.8"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-effect" % "0.0.9"
 ```     
 
 Use 
