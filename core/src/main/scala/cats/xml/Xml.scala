@@ -59,6 +59,7 @@ object Xml {
   final lazy val Null: Xml & XmlNode & XmlData = XmlNull
   final lazy val True: XmlData                 = ofBoolean(true)
   final lazy val False: XmlData                = ofBoolean(false)
+  final lazy val emptyString: XmlData          = ofString("")
 
   def ofString(value: String): XmlString                        = XmlString(value)
   def ofChar(value: Char): XmlChar                              = XmlChar(value)
