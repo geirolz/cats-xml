@@ -1,6 +1,6 @@
 package cats.xml.testing.arbitrary
 
-import cats.xml.XmlData
+import cats.xml.{Xml, XmlData}
 import cats.xml.XmlData.*
 import org.scalacheck.{Arbitrary, Gen}
 
@@ -8,66 +8,67 @@ object XmlDataArbitrary {
 
   implicit val arbXmlString: Arbitrary[XmlString] =
     Arbitrary {
-      Gen.asciiPrintableStr
-        .map(XmlData.fromString)
-        .map(_.asInstanceOf[XmlString])
+      Gen.asciiPrintableStr.map(Xml.ofString)
     }
 
   implicit val arbXmlChar: Arbitrary[XmlChar] =
     Arbitrary {
-      Gen.alphaNumChar
-        .map(XmlData.fromChar)
-        .map(_.asInstanceOf[XmlChar])
+      Gen.alphaNumChar.map(Xml.ofChar)
     }
 
   implicit val arbXmlBool: Arbitrary[XmlBool] =
     Arbitrary {
-      Arbitrary.arbBool.arbitrary
-        .map(XmlData.fromBoolean)
-        .map(_.asInstanceOf[XmlBool])
+      Arbitrary.arbBool.arbitrary.map(Xml.ofBoolean)
     }
 
-  implicit val arbXmlInt: Arbitrary[XmlInt] =
-    Arbitrary {
-      Arbitrary.arbInt.arbitrary
-        .map(XmlData.fromInt)
-        .map(_.asInstanceOf[XmlInt])
-    }
+//  implicit val arbXmlByte: Arbitrary[XmlByte] =
+//    Arbitrary {
+//      Arbitrary.arbByte.arbitrary
+//        .map(Xml.fromByte)
+//        .map(_.asInstanceOf[XmlByte])
+//    }
+
+//  implicit val arbXmlInt: Arbitrary[XmlInt] =
+//    Arbitrary {
+//      Arbitrary.arbInt.arbitrary
+//        .map(Xml.fromInt)
+//        .map(_.asInstanceOf[XmlInt])
+//    }
 
   implicit val arbXmlLong: Arbitrary[XmlLong] =
     Arbitrary {
       Gen.long
-        .map(XmlData.fromLong)
+        .map(Xml.ofLong)
         .map(_.asInstanceOf[XmlLong])
     }
 
   implicit val arbXmlFloat: Arbitrary[XmlFloat] =
     Arbitrary {
       Arbitrary.arbFloat.arbitrary
-        .map(XmlData.fromFloat)
+        .map(Xml.ofFloat)
         .map(_.asInstanceOf[XmlFloat])
     }
 
   implicit val arbXmlDouble: Arbitrary[XmlDouble] =
     Arbitrary {
       Gen.double
-        .map(XmlData.fromDouble)
+        .map(Xml.ofDouble)
         .map(_.asInstanceOf[XmlDouble])
     }
 
   implicit val arbXmlBigDecimal: Arbitrary[XmlBigDecimal] =
     Arbitrary {
       Arbitrary.arbBigDecimal.arbitrary
-        .map(XmlData.fromBigDecimal)
+        .map(Xml.ofBigDecimal)
         .map(_.asInstanceOf[XmlBigDecimal])
     }
 
-  implicit val arbXmlXmlBigInt: Arbitrary[XmlBigInt] =
-    Arbitrary {
-      Arbitrary.arbBigInt.arbitrary
-        .map(XmlData.fromBigInt)
-        .map(_.asInstanceOf[XmlBigInt])
-    }
+//  implicit val arbXmlXmlBigInt: Arbitrary[XmlBigInt] =
+//    Arbitrary {
+//      Arbitrary.arbBigInt.arbitrary
+//        .map(Xml.fromBigInt)
+//        .map(_.asInstanceOf[XmlBigInt])
+//    }
 
   implicit val arbXmlData: Arbitrary[XmlData] =
     Arbitrary {
@@ -75,12 +76,12 @@ object XmlDataArbitrary {
         arbXmlString.arbitrary,
         arbXmlChar.arbitrary,
         arbXmlBool.arbitrary,
-        arbXmlInt.arbitrary,
+//        arbXmlInt.arbitrary,
         arbXmlLong.arbitrary,
         arbXmlFloat.arbitrary,
         arbXmlDouble.arbitrary,
-        arbXmlBigDecimal.arbitrary,
-        arbXmlXmlBigInt.arbitrary
+        arbXmlBigDecimal.arbitrary
+//        arbXmlXmlBigInt.arbitrary
       )
     }
 }

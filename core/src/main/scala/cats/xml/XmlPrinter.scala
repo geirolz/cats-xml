@@ -1,6 +1,5 @@
 package cats.xml
 
-import cats.xml.Xml.XmlNull
 import cats.xml.utils.format.Indentator
 import cats.xml.utils.Debug
 import cats.Show
@@ -98,7 +97,7 @@ object XmlPrinter {
           acc.append(transform(str))
 
         xml match {
-          case XmlNull => acc
+          case Xml.Null => acc
           case attr: XmlAttribute =>
             if (Debug.enabledAnd(_.xmlPrinterPrintTypesName)) {
               attr.value match {

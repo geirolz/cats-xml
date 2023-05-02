@@ -8,7 +8,7 @@ import scala.xml.{MetaData, Null}
 private[std] object XmlAttributeConverter {
 
   def fromMetaData(metaData: MetaData): List[XmlAttribute] =
-    metaData.iterator.map(m => XmlAttribute(m.key, Xml.Data.parseString(m.value.text))).toList
+    metaData.iterator.map(m => XmlAttribute(m.key, Xml.fromDataString(m.value.text))).toList
 
   def toMetaData(attr: XmlAttribute): MetaData =
     new scala.xml.UnprefixedAttribute(attr.key, attr.value.asString, Null)

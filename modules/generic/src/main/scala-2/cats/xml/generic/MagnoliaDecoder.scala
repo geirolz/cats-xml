@@ -62,7 +62,7 @@ object MagnoliaDecoder {
     ctx: SealedTrait[Decoder, T],
     config: Configuration
   ): Decoder[T] =
-    Decoder.fromXml(xml => {
+    Decoder.instance(xml => {
 
       val subtypeTypeClass: Option[Subtype[Decoder, T]] = xml match {
         case node: XmlNode =>

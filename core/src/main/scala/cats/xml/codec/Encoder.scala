@@ -2,7 +2,6 @@ package cats.xml.codec
 
 import cats.xml.{Xml, XmlData}
 import cats.Contravariant
-import cats.data.Validated
 
 // T => XML
 trait Encoder[T] {
@@ -65,15 +64,17 @@ private[xml] trait EncoderPrimitivesInstances {
 
   implicit val encodeXmlData: DataEncoder[XmlData]       = DataEncoder.of(identity)
   implicit val encodeUnit: DataEncoder[Unit]             = DataEncoder.of(_ => Xml.Null)
-  implicit val encodeString: DataEncoder[String]         = DataEncoder.of(XmlData.fromString(_))
-  implicit val encodeChar: DataEncoder[Char]             = DataEncoder.of(XmlData.fromChar)
-  implicit val encodeBoolean: DataEncoder[Boolean]       = DataEncoder.of(XmlData.fromBoolean)
-  implicit val encodeInt: DataEncoder[Int]               = DataEncoder.of(XmlData.fromInt)
-  implicit val encodeLong: DataEncoder[Long]             = DataEncoder.of(XmlData.fromLong)
-  implicit val encodeFloat: DataEncoder[Float]           = DataEncoder.of(XmlData.fromFloat)
-  implicit val encodeDouble: DataEncoder[Double]         = DataEncoder.of(XmlData.fromDouble)
-  implicit val encodeBigDecimal: DataEncoder[BigDecimal] = DataEncoder.of(XmlData.fromBigDecimal)
-  implicit val encodeBigInt: DataEncoder[BigInt]         = DataEncoder.of(XmlData.fromBigInt)
+  implicit val encodeString: DataEncoder[String]         = DataEncoder.of(Xml.ofString(_))
+  implicit val encodeChar: DataEncoder[Char]             = DataEncoder.of(Xml.ofChar)
+  implicit val encodeBoolean: DataEncoder[Boolean]       = DataEncoder.of(Xml.ofBoolean)
+  implicit val encodeByte: DataEncoder[Byte]             = DataEncoder.of(Xml.ofByte)
+  implicit val encodeShort: DataEncoder[Short]           = DataEncoder.of(Xml.ofShort)
+  implicit val encodeInt: DataEncoder[Int]               = DataEncoder.of(Xml.ofInt)
+  implicit val encodeLong: DataEncoder[Long]             = DataEncoder.of(Xml.ofLong)
+  implicit val encodeFloat: DataEncoder[Float]           = DataEncoder.of(Xml.ofFloat)
+  implicit val encodeDouble: DataEncoder[Double]         = DataEncoder.of(Xml.ofDouble)
+  implicit val encodeBigDecimal: DataEncoder[BigDecimal] = DataEncoder.of(Xml.ofBigDecimal)
+  implicit val encodeBigInt: DataEncoder[BigInt]         = DataEncoder.of(Xml.ofBigInt)
 
 }
 
@@ -88,43 +89,4 @@ object DataEncoder {
   def apply[T: DataEncoder]: DataEncoder[T] = implicitly[DataEncoder[T]]
 
   def of[T](f: T => XmlData): DataEncoder[T] = (t: T) => f(t)
-
-  def stringParsedEncoder: DataEncoder[String] = {
-
-    def fromValue[T](value: T): Either[DecoderFailure, XmlData] =
-      value match {
-        case v: String     => Right(XmlData.fromString(v))
-        case v: Char       => Right(XmlData.fromChar(v))
-        case v: Boolean    => Right(XmlData.fromBoolean(v))
-        case v: Int        => Right(XmlData.fromInt(v))
-        case v: Long       => Right(XmlData.fromLong(v))
-        case v: Float      => Right(XmlData.fromFloat(v))
-        case v: Double     => Right(XmlData.fromDouble(v))
-        case v: BigDecimal => Right(XmlData.fromBigDecimal(v))
-        case v: BigInt     => Right(XmlData.fromBigInt(v))
-        case _             => Left(DecoderFailure.Custom("Cannot decode specified type."))
-      }
-
-    DataEncoder.of[String](strValue => {
-
-      val res = Decoder
-        .oneOf(
-          Decoder.decodeBoolean.emap(fromValue),
-          Decoder.decodeInt.emap(fromValue),
-          Decoder.decodeLong.emap(fromValue),
-          Decoder.decodeFloat.emap(fromValue),
-          Decoder.decodeDouble.emap(fromValue),
-          Decoder.decodeBigInt.emap(fromValue),
-          Decoder.decodeBigDecimal.emap(fromValue),
-          Decoder.decodeCharArray.emap(fromValue),
-          Decoder.decodeString.emap(fromValue)
-        )
-        .decode(XmlData.fromString(strValue))
-
-      res match {
-        case Validated.Valid(a)   => a
-        case Validated.Invalid(_) => XmlData.fromString(strValue)
-      }
-    })
-  }
 }

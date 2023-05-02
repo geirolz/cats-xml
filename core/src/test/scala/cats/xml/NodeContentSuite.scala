@@ -39,8 +39,8 @@ class NodeContentSuite extends munit.ScalaCheckSuite {
   testContentTextIso[Float]
   testContentTextIso[Boolean]
   testContentTextIso[String]
-  testContentTextIso[BigDecimal]
   testContentTextIso[BigInt]
+  testContentTextIso[BigDecimal]
 
   private def testContentTextIso[T: Arbitrary: DataEncoder: Decoder](implicit
     c: ClassTag[T]
