@@ -57,9 +57,9 @@ object Xml {
   import cats.syntax.all.*
 
   final lazy val Null: Xml & XmlNode & XmlData = XmlNull
-  final lazy val True: XmlData                 = ofBoolean(true)
-  final lazy val False: XmlData                = ofBoolean(false)
-  final lazy val emptyString: XmlData          = ofString("")
+  final lazy val True: XmlBool                 = ofBoolean(true)
+  final lazy val False: XmlBool                = ofBoolean(false)
+  final lazy val emptyString: XmlString        = ofString("")
 
   def ofString(value: String): XmlString                        = XmlString(value)
   def ofChar(value: Char): XmlChar                              = XmlChar(value)
