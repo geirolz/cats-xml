@@ -87,22 +87,17 @@ object Xml {
     }
 
   def fromDataString(value: String): XmlData = {
-    val strData = Xml.ofString(value)
-    Decoder
-      .oneOf(
-        Decoder.decodeBoolean.map(Xml.ofBoolean),
-        Decoder.decodeByte.map(Xml.ofByte),
-        Decoder.decodeShort.map(Xml.ofShort),
-        Decoder.decodeInt.map(Xml.ofInt),
-        Decoder.decodeLong.map(Xml.ofLong),
-        Decoder.decodeFloat.map(Xml.ofFloat),
-        Decoder.decodeDouble.map(Xml.ofDouble),
-        Decoder.decodeBigInt.map(Xml.ofBigInt),
-        Decoder.decodeBigDecimal.map(Xml.ofBigDecimal),
-        Decoder.decodeChar.map(Xml.ofChar)
-      )
-      .decode(strData)
-      .getOrElse(strData)
+    fromNumberString(value)
+      .getOrElse {
+        val strData = Xml.ofString(value)
+        Decoder
+          .oneOf(
+            Decoder.decodeBoolean.map(Xml.ofBoolean),
+            Decoder.decodeChar.map(Xml.ofChar)
+          )
+          .decode(strData)
+          .getOrElse(strData)
+      }
   }
 
   /*

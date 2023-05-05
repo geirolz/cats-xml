@@ -101,4 +101,17 @@ class XmlParserSuite extends munit.FunSuite {
         )
     )
   }
+
+  test("XmlParser.parseString with long number that should be parsed as String") {
+    val xml: XmlNode =
+      xml"""<Data value="5340595900475325933418219074917"/>"""
+
+    assertEquals(
+      obtained = xml,
+      expected = XmlNode("Data")
+        .withAttributes(
+          "value" := "5340595900475325933418219074917"
+        )
+    )
+  }
 }
