@@ -39,14 +39,21 @@ object XmlData {
   sealed trait XmlNumber extends XmlData with Serializable {
 
     final def toBigDecimal: Option[BigDecimal] = this match {
+      case XmlByte(value)       => Some(BigDecimal(value.toInt))
+      case XmlShort(value)      => Some(BigDecimal(value.toInt))
+      case XmlInt(value)        => Some(BigDecimal(value))
       case XmlLong(value)       => Some(BigDecimal(value))
       case XmlFloat(value)      => Some(new JavaBigDecimal(java.lang.Float.toString(value)))
       case XmlDouble(value)     => Some(JavaBigDecimal.valueOf(value))
+      case XmlBigInt(value)     => Some(BigDecimal(value))
       case XmlBigDecimal(value) => Some(value)
     }
 
     final def toBigInt: Option[BigInt] = this match {
-      case XmlLong(value) => Some(BigInt(value))
+      case XmlByte(value)  => Some(BigInt(value.toInt))
+      case XmlShort(value) => Some(BigInt(value.toInt))
+      case XmlInt(value)   => Some(BigInt(value))
+      case XmlLong(value)  => Some(BigInt(value))
       case XmlFloat(value) =>
         Option(new JavaBigDecimal(java.lang.Float.toString(value)))
           .filter(XmlNumber.bigDecimalIsWhole)
@@ -55,20 +62,29 @@ object XmlData {
         Option(JavaBigDecimal.valueOf(value))
           .filter(XmlNumber.bigDecimalIsWhole)
           .map(bd => new BigInt(bd.toBigInteger))
+      case XmlBigInt(value)     => Some(value)
       case XmlBigDecimal(value) => value.toBigIntExact
     }
 
     final def toDouble: Double = this match {
+      case XmlByte(value)       => value.toDouble
+      case XmlShort(value)      => value.toDouble
+      case XmlInt(value)        => value.toDouble
       case XmlLong(value)       => value.toDouble
       case XmlFloat(value)      => new JavaBigDecimal(java.lang.Float.toString(value)).doubleValue
       case XmlDouble(value)     => value
+      case XmlBigInt(value)     => value.doubleValue
       case XmlBigDecimal(value) => value.doubleValue
     }
 
     final def toFloat: Float = this match {
+      case XmlByte(value)       => value.toFloat
+      case XmlShort(value)      => value.toFloat
+      case XmlInt(value)        => value.toFloat
       case XmlLong(value)       => value.toFloat
       case XmlFloat(value)      => value
       case XmlDouble(value)     => value.toFloat
+      case XmlBigInt(value)     => value.floatValue
       case XmlBigDecimal(value) => value.floatValue
     }
 
@@ -94,7 +110,10 @@ object XmlData {
     }
 
     final def toLong: Option[Long] = this match {
-      case XmlLong(value) => Some(value)
+      case XmlByte(value)  => Some(value.toLong)
+      case XmlShort(value) => Some(value.toLong)
+      case XmlInt(value)   => Some(value.toLong)
+      case XmlLong(value)  => Some(value)
       case XmlFloat(value) =>
         Option(new JavaBigDecimal(java.lang.Float.toString(value)))
           .filter(XmlNumber.bigDecimalIsValidLong)
@@ -103,6 +122,7 @@ object XmlData {
         Option(JavaBigDecimal.valueOf(value))
           .filter(XmlNumber.bigDecimalIsValidLong)
           .map(_.longValue)
+      case XmlBigInt(value)     => Try(value.toLong).toOption
       case XmlBigDecimal(value) => Try(value.toLongExact).toOption
     }
   }
@@ -120,9 +140,13 @@ object XmlData {
       ) <= 0
   }
 
+  private[xml] final case class XmlByte(value: Byte) extends XmlNumber
+  private[xml] final case class XmlShort(value: Short) extends XmlNumber
+  private[xml] final case class XmlInt(value: Int) extends XmlNumber
   private[xml] final case class XmlLong(value: Long) extends XmlNumber
   private[xml] final case class XmlFloat(value: Float) extends XmlNumber
   private[xml] final case class XmlDouble(value: Double) extends XmlNumber
+  private[xml] final case class XmlBigInt(value: BigInt) extends XmlNumber
   private[xml] final case class XmlBigDecimal(value: BigDecimal) extends XmlNumber
 
   // ------------------------------------//
@@ -132,14 +156,21 @@ object XmlData {
     case XmlChar(value)       => value.toString
     case XmlBool(value)       => value.toString
     case XmlArray(value)      => value.mkString(",")
+    case XmlByte(value)       => value.toString
+    case XmlShort(value)      => value.toString
+    case XmlInt(value)        => value.toString
     case XmlLong(value)       => value.toString
     case XmlFloat(value)      => value.toString
     case XmlDouble(value)     => value.toString
+    case XmlBigInt(value)     => value.toString
     case XmlBigDecimal(value) => value.toString
   }
 
   implicit val order: Order[XmlNumber] = {
     Order.from {
+      case (XmlByte(x), XmlByte(y))             => x.compareTo(y)
+      case (XmlShort(x), XmlShort(y))           => x.compareTo(y)
+      case (XmlInt(x), XmlInt(y))               => x.compareTo(y)
       case (XmlLong(x), XmlLong(y))             => x.compareTo(y)
       case (XmlDouble(x), XmlDouble(y))         => java.lang.Double.compare(x, y)
       case (XmlFloat(x), XmlFloat(y))           => java.lang.Float.compare(x, y)
