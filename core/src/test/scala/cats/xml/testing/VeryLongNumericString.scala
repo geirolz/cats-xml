@@ -10,6 +10,6 @@ object VeryLongNumericString {
 
   implicit val arb: Arbitrary[VeryLongNumericString] =
     Arbitrary(
-      Gen.numStr.suchThat(_.length > 31).map(VeryLongNumericString(_))
+      Gen.numStr.suchThat(_.length >= 31).map(VeryLongNumericString(_))
     )
 }
