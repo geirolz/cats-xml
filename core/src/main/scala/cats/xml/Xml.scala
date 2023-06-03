@@ -64,27 +64,32 @@ object Xml {
   def ofString(value: String): XmlString                        = XmlString(value)
   def ofChar(value: Char): XmlChar                              = XmlChar(value)
   def ofBoolean(value: Boolean): XmlBool                        = XmlBool(value)
-  def ofByte(value: Byte): XmlNumber                            = XmlLong(value.toLong)
-  def ofShort(value: Short): XmlNumber                          = XmlLong(value.toLong)
-  def ofInt(value: Int): XmlNumber                              = XmlLong(value.toLong)
+  def ofByte(value: Byte): XmlNumber                            = XmlByte(value)
+  def ofShort(value: Short): XmlNumber                          = XmlShort(value)
+  def ofInt(value: Int): XmlNumber                              = XmlInt(value)
   def ofLong(value: Long): XmlNumber                            = XmlLong(value)
   def ofFloat(value: Float): XmlNumber                          = XmlFloat(value)
   def ofDouble(value: Double): XmlNumber                        = XmlDouble(value)
-  def ofBigInt(value: BigInt): XmlNumber                        = XmlBigDecimal(BigDecimal(value))
+  def ofBigInt(value: BigInt): XmlNumber                        = XmlBigInt(value)
   def ofBigDecimal(value: BigDecimal): XmlNumber                = XmlBigDecimal(value)
   def ofArray[T <: XmlData](value: Array[T]): XmlArray[T]       = XmlArray(value)
   def ofSeq[T <: XmlData: ClassTag](value: Seq[T]): XmlArray[T] = XmlArray(value.toArray)
   def ofValues[T <: XmlData: ClassTag](value: T*): XmlArray[T]  = XmlArray(value.toArray)
-  def fromNumberString(str: String): Option[XmlNumber] =
+  def fromNumberString(str: String): Option[XmlNumber] = {
     Try(BigDecimal.exact(str)).toOption.map {
-      case db if db.isValidByte     => ofLong(db.toByteExact.toLong)
-      case db if db.isValidShort    => ofLong(db.toShortExact.toLong)
-      case db if db.isValidInt      => ofLong(db.toIntExact.toLong)
+      case db if db.isValidByte     => ofByte(db.toByteExact)
+      case db if db.isValidShort    => ofShort(db.toShortExact)
+      case db if db.isValidInt      => ofInt(db.toIntExact)
       case bd if bd.isValidLong     => ofLong(bd.toLongExact)
       case db if db.isDecimalFloat  => ofFloat(db.floatValue)
       case db if db.isDecimalDouble => ofDouble(db.doubleValue)
-      case bd                       => ofBigDecimal(bd)
+      case bd =>
+        bd.toBigIntExact match {
+          case Some(bi) => ofBigInt(bi)
+          case None     => ofBigDecimal(bd)
+        }
     }
+  }
 
   def fromDataString(value: String): XmlData = {
     fromNumberString(value)
