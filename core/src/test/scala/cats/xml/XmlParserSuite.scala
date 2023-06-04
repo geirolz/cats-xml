@@ -1,10 +1,16 @@
 package cats.xml
 
+import cats.xml.utils.Debug
+
 import scala.util.{Success, Try}
 
 class XmlParserSuite extends munit.FunSuite {
 
   import cats.xml.implicits.*
+
+  Debug.enable(
+    xmlPrinterPrintTypesName = true
+  )
 
   test("XmlParser.parseString") {
     assertEquals(
@@ -102,15 +108,14 @@ class XmlParserSuite extends munit.FunSuite {
     )
   }
 
-  test("XmlParser.parseString with long number that should be parsed as String") {
-    val xml: XmlNode =
-      xml"""<Data value="5340595900475325933418219074917"/>"""
+  test("XmlParser.parseString with long number that should be parsed as BigDecimal") {
+    val xml: XmlNode = xml"""<Data value="5340595900475325933418219074917123456789123456789"/>"""
 
     assertEquals(
       obtained = xml,
       expected = XmlNode("Data")
         .withAttributes(
-          "value" := "5340595900475325933418219074917"
+          "value" := BigDecimal("5340595900475325933418219074917123456789123456789")
         )
     )
   }
