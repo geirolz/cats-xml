@@ -5,8 +5,8 @@ lazy val prjPackageName         = prjName.replaceAll("[^\\p{Alpha}\\d]+", ".")
 lazy val prjDescription         = "A purely functional XML library"
 lazy val prjOrg                 = "com.github.geirolz"
 lazy val scala213               = "2.13.10"
-lazy val scala32                = "3.3.0"
-lazy val supportedScalaVersions = List(scala213, scala32)
+lazy val scala33                = "3.3.0"
+lazy val supportedScalaVersions = List(scala213, scala33)
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
