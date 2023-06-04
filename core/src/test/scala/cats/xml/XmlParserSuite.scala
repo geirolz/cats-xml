@@ -1,16 +1,10 @@
 package cats.xml
 
-import cats.xml.utils.Debug
-
 import scala.util.{Success, Try}
 
 class XmlParserSuite extends munit.FunSuite {
 
   import cats.xml.implicits.*
-
-  Debug.enable(
-    xmlPrinterPrintTypesName = true
-  )
 
   test("XmlParser.parseString") {
     assertEquals(
