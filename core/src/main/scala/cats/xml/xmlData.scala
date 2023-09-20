@@ -28,10 +28,22 @@ object XmlData {
 
   import cats.syntax.all.*
 
-  final case class XmlString private[xml] (value: String) extends XmlData
-  final case class XmlChar private[xml] (value: Char) extends XmlData
-  final case class XmlBool private[xml] (value: Boolean) extends XmlData
-  final case class XmlArray[T <: XmlData] private[xml] (value: Array[T]) extends XmlData
+  final case class XmlString(value: String) extends XmlData
+  object XmlString {
+    private[xml] def apply(value: String): XmlString = new XmlString(value)
+  }
+  final case class XmlChar(value: Char) extends XmlData
+  object XmlChar {
+    private[xml] def apply(value: Char): XmlChar = new XmlChar(value)
+  }
+  final case class XmlBool(value: Boolean) extends XmlData
+  object XmlBool {
+    private[xml] def apply(value: Boolean): XmlBool = new XmlBool(value)
+  }
+  final case class XmlArray[T <: XmlData](value: Array[T]) extends XmlData
+  object XmlArray {
+    private[xml] def apply[T <: XmlData](value: Array[T]): XmlArray[T] = new XmlArray(value)
+  }
 
   /* Inspired by Circe library
    * https://github.com/circe/circe

@@ -4,7 +4,7 @@ import cats.xml.Xml
 
 /** Isomorphism
   */
-case class Codec[T] private (
+case class Codec[T](
   decoder: Decoder[T],
   encoder: Encoder[T]
 ) {
@@ -18,11 +18,14 @@ case class Codec[T] private (
 
 object Codec extends DecoderSyntax with EncoderSyntax {
 
+  private def apply[T](decoder: Decoder[T], encoder: Encoder[T]): Codec[T] =
+    new Codec(decoder, encoder)
+
   def apply[T: Codec]: Codec[T] =
     implicitly[Codec[T]]
 
   def of[T](decoder: Decoder[T], encoder: Encoder[T]): Codec[T] =
-    new Codec[T](decoder, encoder)
+    Codec[T](decoder, encoder)
 
   implicit def codecToDecoder[T: Codec]: Decoder[T] =
     Codec[T].decoder

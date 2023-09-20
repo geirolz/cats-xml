@@ -4,7 +4,7 @@ import cats.{Endo, Eq, Show}
 import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.utils.impure
 
-final case class XmlAttribute private (key: String, value: XmlData) extends Xml with Serializable {
+final case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
 
   def mapDecode[T: Decoder, U: DataEncoder](f: T => U): Decoder.Result[XmlAttribute] =
     value.as[T].map(value => XmlAttribute(key, f(value)))
@@ -37,6 +37,9 @@ final case class XmlAttribute private (key: String, value: XmlData) extends Xml 
       .isInstanceOf[XmlAttribute] && Eq[XmlAttribute].eqv(this, obj.asInstanceOf[XmlAttribute])
 }
 object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
+
+  private[XmlAttribute] def apply(key: String, value: XmlData): XmlAttribute =
+    new XmlAttribute(key, value)
 
   @impure
   def apply[T: DataEncoder](key: String, value: T): XmlAttribute =

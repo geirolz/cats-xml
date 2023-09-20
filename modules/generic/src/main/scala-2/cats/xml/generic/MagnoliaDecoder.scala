@@ -23,7 +23,7 @@ object MagnoliaDecoder {
       Decoder
         .fromCursor(c => {
           ctx.parameters
-            .mapFilter { param: Param[Decoder, T] =>
+            .mapFilter { (param: Param[Decoder, T]) =>
               implicit val pdec: Decoder[param.PType] = param.typeclass
 
               interpreter

@@ -63,7 +63,14 @@ object NodeContent {
     children(childrenLs).getOrElse(NodeContent.empty)
 
   case object Empty extends NodeContent
-  final case class Text private[NodeContent] (data: XmlData) extends NodeContent
-  final case class Children private[NodeContent] (childrenNel: NonEmptyList[XmlNode])
-      extends NodeContent
+  final case class Text(data: XmlData) extends NodeContent
+  object Text {
+    private[NodeContent] def apply(data: XmlData): Text = new Text(data)
+  }
+  final case class Children(childrenNel: NonEmptyList[XmlNode]) extends NodeContent
+  object Children {
+    private[NodeContent] def apply(childrenNel: NonEmptyList[XmlNode]): Children = new Children(
+      childrenNel
+    )
+  }
 }

@@ -2,7 +2,7 @@ package cats.xml.utils.generic
 
 import cats.Show
 
-case class TypeInfo[T] private (
+case class TypeInfo[T](
   isString: Boolean,
   isPrimitiveWrapper: Boolean,
   isPrimitive: Boolean,
@@ -16,7 +16,7 @@ object TypeInfo extends TypeInfoInstances {
 
   def apply[T: TypeInfo]: TypeInfo[T] = implicitly[TypeInfo[T]]
 
-  def of[T](
+  private def apply[T](
     isString: Boolean,
     isPrimitiveWrapper: Boolean,
     isPrimitive: Boolean,
@@ -24,6 +24,22 @@ object TypeInfo extends TypeInfoInstances {
     isOptionOfAnyPrimitiveOrString: Boolean,
     accessorsInfo: Map[ParamName[T], TypeInfo[?]]
   ): TypeInfo[T] = new TypeInfo[T](
+    isString,
+    isPrimitiveWrapper,
+    isPrimitive,
+    isValueClass,
+    isOptionOfAnyPrimitiveOrString,
+    accessorsInfo
+  )
+
+  def of[T](
+    isString: Boolean,
+    isPrimitiveWrapper: Boolean,
+    isPrimitive: Boolean,
+    isValueClass: Boolean,
+    isOptionOfAnyPrimitiveOrString: Boolean,
+    accessorsInfo: Map[ParamName[T], TypeInfo[?]]
+  ): TypeInfo[T] = TypeInfo[T](
     isString,
     isPrimitiveWrapper,
     isPrimitive,
