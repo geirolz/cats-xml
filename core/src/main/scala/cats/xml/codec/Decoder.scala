@@ -40,6 +40,12 @@ trait Decoder[T] {
 
   def flatMap[U](f: T => Decoder[U]): Decoder[U] =
     Decoder.of(ns => decodeCursorResult(ns).andThen(t => f(t).decodeCursorResult(ns)))
+
+  def or(other: Decoder[? <: T]): Decoder[T] =
+    this.attempt.flatMap {
+      case Left(_)  => other.widen[T]
+      case Right(t) => Decoder.pure(t)
+    }
 }
 
 object Decoder extends DecoderInstances with DecoderSyntax {
@@ -66,27 +72,14 @@ object Decoder extends DecoderInstances with DecoderSyntax {
   def const[T](r: => Decoder.Result[T]): Decoder[T] =
     Decoder.of(_ => r)
 
-  def oneOf[T <: Any](
+  def oneOf[T](
     d: Decoder[? <: T],
     d1: Decoder[? <: T],
     dn: Decoder[? <: T]*
-  ): Decoder[? <: T] =
-    Decoder.instance(xml => {
-      NonEmptyList
-        .of(d, (d1 +: dn)*)
-        .foldLeft[Decoder.Result[T]](
-          DecoderFailure.Custom("Cannot decode the value.").invalidNel[T]
-        )((err, decoder) => {
-          err match {
-            case v @ Validated.Valid(_) => v
-            case Validated.Invalid(errors1) =>
-              decoder.decode(xml) match {
-                case v @ Validated.Valid(_)     => v
-                case Validated.Invalid(errors2) => errors2.concatNel(errors1).invalid[T]
-              }
-          }
-        })
-    })
+  ): Decoder[T] =
+    (List(d, d1)  ++ dn.toList)
+      .map(_.widen[T])
+      .reduceLeft(_ or _)
 
   def fromCursor[U](
     f: NodeCursor => FreeCursor[Xml, U]

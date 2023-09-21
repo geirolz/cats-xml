@@ -184,6 +184,28 @@ class DecoderSuite extends munit.FunSuite {
       expected = DecoderFailure.Custom("ERROR 1").invalidNel
     )
   }
+
+  test("Decoder.or - fail or success") {
+
+    val decoderStr1: Decoder[String] = Decoder.failure(DecoderFailure.Custom("ERROR"))
+    val decoderStr2: Decoder[String] = Decoder.decodeString
+
+    assertEquals(
+      obtained = decoderStr1.or(decoderStr2).decode(Xml.ofString("test")),
+      expected = Valid("test")
+    )
+  }
+
+  test("Decoder.or - success or fail") {
+
+    val decoderStr1: Decoder[String] = Decoder.decodeString
+    val decoderStr2: Decoder[String] = Decoder.failure(DecoderFailure.Custom("ERROR"))
+
+    assertEquals(
+      obtained = decoderStr1.or(decoderStr2).decode(Xml.ofString("test")),
+      expected = Valid("test")
+    )
+  }
 }
 
 class DecoderInstancesSuite extends munit.DisciplineSuite {
