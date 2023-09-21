@@ -3,7 +3,7 @@ package cats.xml.testing
 import cats.xml.Xml
 import org.scalacheck.{Arbitrary, Gen}
 
-case class XmlValidName private (value: String) extends AnyVal
+case class XmlValidName(value: String) extends AnyVal
 object XmlValidName {
 
   private def apply(value: String): XmlValidName =

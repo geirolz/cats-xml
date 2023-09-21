@@ -2,7 +2,7 @@ package cats.xml.testing
 
 import org.scalacheck.{Arbitrary, Gen}
 
-case class VeryLongNumericString private (str: String) extends AnyVal
+case class VeryLongNumericString(str: String) extends AnyVal
 object VeryLongNumericString {
 
   private[VeryLongNumericString] def apply(str: String): VeryLongNumericString =
