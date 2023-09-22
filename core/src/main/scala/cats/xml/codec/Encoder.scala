@@ -64,17 +64,17 @@ private[xml] trait EncoderPrimitivesInstances {
 
   implicit def encodeXmlData[D <: XmlData]: DataEncoder[D] = DataEncoder.of(identity)
   implicit val encodeUnit: DataEncoder[Unit]               = DataEncoder.of(_ => Xml.Null)
-  implicit val encodeString: DataEncoder[String]           = DataEncoder.of(Xml.ofString(_))
-  implicit val encodeChar: DataEncoder[Char]               = DataEncoder.of(Xml.ofChar)
-  implicit val encodeBoolean: DataEncoder[Boolean]         = DataEncoder.of(Xml.ofBoolean)
-  implicit val encodeByte: DataEncoder[Byte]               = DataEncoder.of(Xml.ofByte)
-  implicit val encodeShort: DataEncoder[Short]             = DataEncoder.of(Xml.ofShort)
-  implicit val encodeInt: DataEncoder[Int]                 = DataEncoder.of(Xml.ofInt)
-  implicit val encodeLong: DataEncoder[Long]               = DataEncoder.of(Xml.ofLong)
-  implicit val encodeFloat: DataEncoder[Float]             = DataEncoder.of(Xml.ofFloat)
-  implicit val encodeDouble: DataEncoder[Double]           = DataEncoder.of(Xml.ofDouble)
-  implicit val encodeBigDecimal: DataEncoder[BigDecimal]   = DataEncoder.of(Xml.ofBigDecimal)
-  implicit val encodeBigInt: DataEncoder[BigInt]           = DataEncoder.of(Xml.ofBigInt)
+  implicit val encodeString: DataEncoder[String]           = DataEncoder.of(Xml.string(_))
+  implicit val encodeChar: DataEncoder[Char]               = DataEncoder.of(Xml.char)
+  implicit val encodeBoolean: DataEncoder[Boolean]         = DataEncoder.of(Xml.boolean)
+  implicit val encodeByte: DataEncoder[Byte]               = DataEncoder.of(Xml.byte)
+  implicit val encodeShort: DataEncoder[Short]             = DataEncoder.of(Xml.short)
+  implicit val encodeInt: DataEncoder[Int]                 = DataEncoder.of(Xml.int)
+  implicit val encodeLong: DataEncoder[Long]               = DataEncoder.of(Xml.long)
+  implicit val encodeFloat: DataEncoder[Float]             = DataEncoder.of(Xml.float)
+  implicit val encodeDouble: DataEncoder[Double]           = DataEncoder.of(Xml.double)
+  implicit val encodeBigDecimal: DataEncoder[BigDecimal]   = DataEncoder.of(Xml.bigDecimal)
+  implicit val encodeBigInt: DataEncoder[BigInt]           = DataEncoder.of(Xml.bigInt)
 }
 
 // #################### DATA ENCODER ####################

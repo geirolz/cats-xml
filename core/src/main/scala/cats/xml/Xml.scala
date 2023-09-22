@@ -1,28 +1,24 @@
 package cats.xml
 
-import cats.{Eq, Show}
-import cats.xml.utils.{impure, Debug, UnsafeValidator}
 import cats.xml.XmlData.*
-import cats.xml.codec.Decoder
+import cats.xml.utils.{impure, Debug, UnsafeValidator}
+import cats.{Eq, Show}
 
 import scala.reflect.ClassTag
-import scala.util.Try
 
 trait Xml {
 
-  final lazy val isNull: Boolean = this match {
-    case Xml.Null => true
-    case _        => false
-  }
+  final lazy val isNull: Boolean =
+    this.isInstanceOf[XmlNull.type]
 
   final lazy val isData: Boolean =
-    asData.isDefined
+    this.isInstanceOf[XmlData]
 
   final lazy val isAttribute: Boolean =
-    asAttribute.isDefined
+    this.isInstanceOf[XmlAttribute]
 
   final lazy val isNode: Boolean =
-    asNode.isDefined
+    this.isInstanceOf[XmlNode]
 
   final def asData: Option[XmlData] = this match {
     case value: XmlData => Some(value)
@@ -44,12 +40,16 @@ trait Xml {
     case _                    => None
   }
 
-  final def asString: String = Show[Xml].show(this)
+  override def equals(obj: Any): Boolean =
+    obj match {
+      case obj: Xml => Xml.eqXml.eqv(this, obj)
+      case _        => false
+    }
 
   override final def toString: String =
     Debug.ifEnabledAnd(_.doNotOverrideXmlToString)(
       ifTrue  = super.toString,
-      ifFalse = asString
+      ifFalse = Show[Xml].show(this)
     )
 }
 object Xml {
@@ -57,53 +57,40 @@ object Xml {
   import cats.syntax.all.*
 
   final lazy val Null: Xml & XmlNode & XmlData = XmlNull
-  final lazy val True: XmlBool                 = ofBoolean(true)
-  final lazy val False: XmlBool                = ofBoolean(false)
-  final lazy val emptyString: XmlString        = ofString("")
+  final lazy val True: XmlBool                 = boolean(true)
+  final lazy val False: XmlBool                = boolean(false)
+  final lazy val emptyString: XmlString        = string("")
 
-  def ofString(value: String): XmlString                        = XmlString(value)
-  def ofChar(value: Char): XmlChar                              = XmlChar(value)
-  def ofBoolean(value: Boolean): XmlBool                        = XmlBool(value)
-  def ofByte(value: Byte): XmlNumber                            = XmlLong(value.toLong)
-  def ofShort(value: Short): XmlNumber                          = XmlLong(value.toLong)
-  def ofInt(value: Int): XmlNumber                              = XmlLong(value.toLong)
-  def ofLong(value: Long): XmlNumber                            = XmlLong(value)
-  def ofFloat(value: Float): XmlNumber                          = XmlFloat(value)
-  def ofDouble(value: Double): XmlNumber                        = XmlDouble(value)
-  def ofBigInt(value: BigInt): XmlNumber                        = XmlBigDecimal(BigDecimal(value))
-  def ofBigDecimal(value: BigDecimal): XmlNumber                = XmlBigDecimal(value)
-  def ofArray[T <: XmlData](value: Array[T]): XmlArray[T]       = XmlArray(value)
-  def ofSeq[T <: XmlData: ClassTag](value: Seq[T]): XmlArray[T] = XmlArray(value.toArray)
-  def ofValues[T <: XmlData: ClassTag](value: T*): XmlArray[T]  = XmlArray(value.toArray)
-  def fromNumberString(str: String): Option[XmlNumber] = {
-    Try(BigDecimal.exact(str)).toOption.map {
-      case db if db.isValidByte     => ofByte(db.toByteExact)
-      case db if db.isValidShort    => ofShort(db.toShortExact)
-      case db if db.isValidInt      => ofInt(db.toIntExact)
-      case bd if bd.isValidLong     => ofLong(bd.toLongExact)
-      case db if db.isDecimalFloat  => ofFloat(db.floatValue)
-      case db if db.isDecimalDouble => ofDouble(db.doubleValue)
-      case bd =>
-        bd.toBigIntExact match {
-          case Some(bi) => ofBigInt(bi)
-          case None     => ofBigDecimal(bd)
-        }
+  def data[T](value: T): XmlData =
+    value match {
+      case value: String     => string(value)
+      case value: Char       => char(value)
+      case value: Boolean    => boolean(value)
+      case value: Byte       => byte(value)
+      case value: Short      => short(value)
+      case value: Int        => int(value)
+      case value: Long       => long(value)
+      case value: Float      => float(value)
+      case value: Double     => double(value)
+      case value: BigInt     => bigInt(value)
+      case value: BigDecimal => bigDecimal(value)
+      case value             => string(value.toString)
     }
-  }
 
-  def fromDataString(value: String): XmlData = {
-    fromNumberString(value)
-      .getOrElse {
-        val strData = Xml.ofString(value)
-        Decoder
-          .oneOf(
-            Decoder.decodeBoolean.map(Xml.ofBoolean),
-            Decoder.decodeChar.map(Xml.ofChar)
-          )
-          .decode(strData)
-          .getOrElse(strData)
-      }
-  }
+  def data[F[X] <: Iterable[X], T <: XmlData: ClassTag](iterable: F[T]): XmlData =
+    XmlArray(iterable.toArray[T])
+
+  def string(value: String): XmlString         = XmlString(value)
+  def char(value: Char): XmlChar               = XmlChar(value)
+  def boolean(value: Boolean): XmlBool         = XmlBool(value)
+  def byte(value: Byte): XmlNumber             = XmlLong(value.toLong)
+  def short(value: Short): XmlNumber           = XmlLong(value.toLong)
+  def int(value: Int): XmlNumber               = XmlLong(value.toLong)
+  def long(value: Long): XmlNumber             = XmlLong(value)
+  def float(value: Float): XmlNumber           = XmlFloat(value)
+  def double(value: Double): XmlNumber         = XmlDouble(value)
+  def bigInt(value: BigInt): XmlNumber         = XmlBigDecimal(BigDecimal(value))
+  def bigDecimal(value: BigDecimal): XmlNumber = XmlBigDecimal(value)
 
   /*
    * https://www.w3.org/TR/REC-xml/#NT-NameChar
@@ -135,7 +122,6 @@ object Xml {
   implicit val eqXml: Eq[Xml] =
     (x: Xml, y: Xml) =>
       (x, y) match {
-        case (XmlNull, XmlNull)                 => true
         case (a: XmlAttribute, b: XmlAttribute) => a.eqv(b)
         case (a: XmlData, b: XmlData)           => a.eqv(b)
         case (a: XmlNode, b: XmlNode)           => a.eqv(b)

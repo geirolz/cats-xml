@@ -1,8 +1,8 @@
 package cats.xml
 
-import cats.{Endo, Eq, Show}
 import cats.xml.codec.{DataEncoder, Decoder}
 import cats.xml.utils.impure
+import cats.{Endo, Eq, Show}
 
 final case class XmlAttribute(key: String, value: XmlData) extends Xml with Serializable {
 
@@ -22,7 +22,7 @@ final case class XmlAttribute(key: String, value: XmlData) extends Xml with Seri
     exists(_ == key, _ == value)
 
   def exists(key: String, value: String): Boolean =
-    exists(key, Xml.fromDataString(value))
+    exists(key, Xml.string(value))
 
   def exists(key: String, valuep: XmlData => Boolean): Boolean =
     exists(_ == key, (data: XmlData) => valuep(data))
@@ -31,10 +31,6 @@ final case class XmlAttribute(key: String, value: XmlData) extends Xml with Seri
     dummyImplicit: DummyImplicit
   ): Boolean =
     exists(_ == key, (data: XmlData) => valuep(data.asString))
-
-  override def equals(obj: Any): Boolean =
-    obj != null && obj
-      .isInstanceOf[XmlAttribute] && Eq[XmlAttribute].eqv(this, obj.asInstanceOf[XmlAttribute])
 }
 object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 
@@ -86,6 +82,8 @@ private[xml] trait XmlAttributeSyntax {
 }
 private[xml] sealed trait XmlAttributeInstances {
 
+  import cats.implicits.catsSyntaxEq
+
   implicit def showXmlAttribute(implicit
     printer: XmlPrinter,
     config: XmlPrinter.Config
@@ -93,5 +91,5 @@ private[xml] sealed trait XmlAttributeInstances {
     printer.prettyString(_)
 
   implicit val eqXmlAttribute: Eq[XmlAttribute] = (x: XmlAttribute, y: XmlAttribute) =>
-    x.key == y.key && x.value == y.value
+    x.key === y.key && x.value === y.value
 }

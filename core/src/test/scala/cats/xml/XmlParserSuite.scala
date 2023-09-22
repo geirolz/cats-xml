@@ -1,5 +1,8 @@
 package cats.xml
 
+import cats.data.Validated.Valid
+import cats.xml.codec.Decoder
+
 import scala.util.{Success, Try}
 
 class XmlParserSuite extends munit.FunSuite {
@@ -111,6 +114,29 @@ class XmlParserSuite extends munit.FunSuite {
         .withAttributes(
           "value" := BigDecimal("5340595900475325933418219074917123456789123456789")
         )
+    )
+  }
+
+  test("XmlParser preserve zero in front of number") {
+
+    val x =
+      xml"""
+        <foo>
+          <bar>01</bar>
+        </foo>
+      """
+
+    case class Bar(v: String)
+
+    implicit val barDecoder: Decoder[Bar] = Decoder.fromCursor { c =>
+      c.down("bar")
+        .as[String]
+        .map(Bar.apply)
+    }
+
+    assertEquals(
+      obtained = x.as[Bar],
+      expected = Valid(Bar("01"))
     )
   }
 }

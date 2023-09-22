@@ -26,8 +26,7 @@ sealed trait XmlNode extends Xml {
     */
   lazy val isGroup: Boolean = this match {
     case _: XmlNode.Group => true
-    case _: XmlNode.Node  => false
-    case _: XmlNode.Null  => false
+    case _                => false
   }
 
   /** Get the node label value
@@ -145,7 +144,7 @@ sealed trait XmlNode extends Xml {
   final def toGroup: XmlNode.Group = this match {
     case node: XmlNode.Node   => XmlNode.group(node.children)
     case group: XmlNode.Group => group
-    case _: XmlNode.Null      => XmlNode.emptyGroup
+    case _                    => XmlNode.emptyGroup
   }
 
   /** @param ifNode
@@ -202,11 +201,6 @@ sealed trait XmlNode extends Xml {
   /* ################################################ */
   /* ############### !! BE CAREFUL !! ############### */
   /* ################################################ */
-  override final def equals(obj: Any): Boolean =
-    obj match {
-      case that: XmlNode => Eq[XmlNode].eqv(this, that)
-      case _             => false
-    }
 }
 object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
@@ -455,7 +449,7 @@ sealed trait XmlNodeSyntax {
     def findAttr(key: String): Option[String] =
       genericNode.attributes
         .find(_.key == key)
-        .map(_.value.asString)
+        .map(_.value.toString)
 
     def findAttr[T: Decoder](key: String): Option[T] =
       genericNode.attributes
@@ -681,6 +675,8 @@ sealed trait XmlNodeSyntax {
 }
 sealed trait XmlNodeInstances {
 
+  import cats.implicits.catsSyntaxEq
+
   implicit val monoidXmlNodeGroup: Monoid[XmlNode] = new Monoid[XmlNode] {
     override def empty: XmlNode = XmlNode.emptyGroup
 
@@ -707,13 +703,12 @@ sealed trait XmlNodeInstances {
     (x: XmlNode, y: XmlNode) =>
       (x, y) match {
         case (a: XmlNode.Node, b: XmlNode.Node) =>
-          a.label == b.label &&
-          a.attributes == b.attributes &&
-          a.content == b.content
+          a.label === b.label &&
+          a.attributes === b.attributes &&
+          a.content === b.content
         case (a: XmlNode.Group, b: XmlNode.Group) =>
-          a.content == b.content
-        case (_: XmlNode.Null, _: XmlNode.Null) => true
-        case (_, _)                             => false
+          a.content === b.content
+        case (_, _) => false
       }
 
   implicit def showXmlNode[T <: XmlNode](implicit
