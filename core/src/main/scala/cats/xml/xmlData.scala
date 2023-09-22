@@ -25,7 +25,7 @@ sealed trait XmlData extends Xml with Serializable {
   }
 }
 case object XmlNull extends Xml with XmlNode.Null with XmlData {
-  override final def isEmpty: Boolean          = true
+  override final def isEmpty: Boolean = true
   // To avoid stackoverflow since the XmlPrinter used by the Eq instance uses patter matching.
   override final def equals(obj: Any): Boolean = obj.isInstanceOf[XmlNull.type]
 }
