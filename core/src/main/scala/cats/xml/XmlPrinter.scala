@@ -2,7 +2,7 @@ package cats.xml
 
 import cats.xml.utils.format.Indentator
 import cats.xml.utils.Debug
-import cats.Show
+import cats.xml.XmlData.*
 import cats.xml.XmlPrinter.Config
 
 import scala.annotation.tailrec
@@ -47,6 +47,29 @@ object XmlPrinter {
 
       def exceedTextMaxSize(textSize: Int): Boolean =
         config.maxTextSize.exists(_ < textSize)
+
+      def showXmlData[T <: XmlData](data: T): String = {
+        val strValue = data match {
+          case XmlNull =>
+            Debug.ifEnabledAnd(_.xmlPrinterPrintTypesName)(
+              ifTrue  = "NULL",
+              ifFalse = ""
+            )
+          case XmlString(value)     => value
+          case XmlChar(value)       => value.toString
+          case XmlBool(value)       => value.toString
+          case XmlArray(value)      => value.mkString(",")
+          case XmlLong(value)       => value.toString
+          case XmlFloat(value)      => value.toString
+          case XmlDouble(value)     => value.toString
+          case XmlBigDecimal(value) => value.toString
+        }
+
+        Debug.ifEnabledAnd(_.xmlPrinterPrintTypesName)(
+          ifTrue  = s"$strValue:${data.getClass.getTypeName}",
+          ifFalse = strValue
+        )
+      }
 
       @tailrec
       def recAppendXml(
@@ -99,27 +122,12 @@ object XmlPrinter {
         xml match {
           case Xml.Null => acc
           case attr: XmlAttribute =>
-            if (Debug.enabledAnd(_.xmlPrinterPrintTypesName)) {
-              attr.value match {
-                case Xml.Null => append(s"${attr.key}=\"NULL\"")
-                case _ =>
-                  append(
-                    s"${attr.key}=\"${Show[XmlData].show(attr.value)}:${attr.value.getClass.getTypeName}\""
-                  )
-              }
-            } else {
-              attr.value match {
-                case Xml.Null => acc
-                case _        => append(s"${attr.key}=\"${Show[XmlData].show(attr.value)}\"")
-              }
+            attr.value match {
+              case Xml.Null => acc
+              case _        => append(s"${attr.key}=\"${showXmlData(attr.value)}\"")
             }
           case data: XmlData =>
-            append(
-              Debug.ifEnabledAnd(_.xmlPrinterPrintTypesName)(
-                ifTrue  = s"${data.asString}:${data.getClass.getTypeName}",
-                ifFalse = data.asString
-              )
-            )
+            append(showXmlData(data))
           case group: XmlNode.Group =>
             recAppendXml(
               ls               = group.children.toList,

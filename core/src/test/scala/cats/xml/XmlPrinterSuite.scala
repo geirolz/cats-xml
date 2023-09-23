@@ -21,7 +21,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
   test("XmlPrinter.default.prettyString convert XmlData to string") {
 
-    val tree: Xml = Xml.ofString("VALUE")
+    val tree: Xml = Xml.string("VALUE")
 
     // assert
     assertEquals(

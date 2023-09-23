@@ -8,17 +8,17 @@ object XmlDataArbitrary {
 
   implicit val arbXmlString: Arbitrary[XmlString] =
     Arbitrary {
-      Gen.asciiPrintableStr.map(Xml.ofString)
+      Gen.asciiPrintableStr.map(Xml.string)
     }
 
   implicit val arbXmlChar: Arbitrary[XmlChar] =
     Arbitrary {
-      Gen.alphaNumChar.map(Xml.ofChar)
+      Gen.alphaNumChar.map(Xml.char)
     }
 
   implicit val arbXmlBool: Arbitrary[XmlBool] =
     Arbitrary {
-      Arbitrary.arbBool.arbitrary.map(Xml.ofBoolean)
+      Arbitrary.arbBool.arbitrary.map(Xml.boolean)
     }
 
 //  implicit val arbXmlByte: Arbitrary[XmlByte] =
@@ -38,28 +38,28 @@ object XmlDataArbitrary {
   implicit val arbXmlLong: Arbitrary[XmlLong] =
     Arbitrary {
       Gen.long
-        .map(Xml.ofLong)
+        .map(Xml.long)
         .map(_.asInstanceOf[XmlLong])
     }
 
   implicit val arbXmlFloat: Arbitrary[XmlFloat] =
     Arbitrary {
       Arbitrary.arbFloat.arbitrary
-        .map(Xml.ofFloat)
+        .map(Xml.float)
         .map(_.asInstanceOf[XmlFloat])
     }
 
   implicit val arbXmlDouble: Arbitrary[XmlDouble] =
     Arbitrary {
       Gen.double
-        .map(Xml.ofDouble)
+        .map(Xml.double)
         .map(_.asInstanceOf[XmlDouble])
     }
 
   implicit val arbXmlBigDecimal: Arbitrary[XmlBigDecimal] =
     Arbitrary {
       Arbitrary.arbBigDecimal.arbitrary
-        .map(Xml.ofBigDecimal)
+        .map(Xml.bigDecimal)
         .map(_.asInstanceOf[XmlBigDecimal])
     }
 

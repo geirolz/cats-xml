@@ -64,7 +64,7 @@ object XmlParser extends XmlParserSyntax {
                 (0 until attributes.getLength).map(i =>
                   XmlAttribute(
                     attributes.getLocalName(i),
-                    Xml.fromDataString(attributes.getValue(i))
+                    Xml.string(attributes.getValue(i))
                   )
                 )
               )
@@ -85,7 +85,7 @@ object XmlParser extends XmlParserSyntax {
             if (value != null & value.nonEmpty)
               nodes.last.unsafeMute(
                 _.unsafeNarrowNode.withText(
-                  Xml.fromDataString(value)
+                  Xml.string(value)
                 )
               )
           }

@@ -22,12 +22,14 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
   testAttributeDataIso[BigDecimal]
 
   // equality
-  testAttributeEquality[Unit]
+  testAttributeEquality[String]
+  testAttributeEquality[Char]
+  testAttributeEquality[Boolean]
   testAttributeEquality[Int]
+  testAttributeEquality[Short]
   testAttributeEquality[Long]
   testAttributeEquality[Float]
-  testAttributeEquality[Boolean]
-  testAttributeEquality[String]
+  testAttributeEquality[Double]
   testAttributeEquality[BigInt]
   testAttributeEquality[BigDecimal]
 
@@ -91,7 +93,7 @@ class XmlAttributeSuite extends munit.ScalaCheckSuite {
       forAll { (key: XmlValidName, value: T) =>
         assertEquals(
           obtained = XmlAttribute(key.value, value),
-          expected = XmlAttribute(key.value, value)
+          expected = XmlAttribute(key.value, value.toString)
         )
       }
     }

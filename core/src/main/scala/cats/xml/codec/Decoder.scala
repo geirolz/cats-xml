@@ -77,7 +77,7 @@ object Decoder extends DecoderInstances with DecoderSyntax {
     d1: Decoder[? <: T],
     dn: Decoder[? <: T]*
   ): Decoder[T] =
-    (List(d, d1)  ++ dn.toList)
+    (List(d, d1) ++ dn.toList)
       .map(_.widen[T])
       .reduceLeft(_ or _)
 
@@ -104,21 +104,19 @@ object Decoder extends DecoderInstances with DecoderSyntax {
       case sbj => DecoderFailure.NoTextAvailable(sbj).invalidNel
     }
 
-  def numberRec[T: ClassTag](f: XmlNumber => Option[T]): Decoder[T] =
+  def numberRec[T: ClassTag](f: String => Option[T]): Decoder[T] =
     numberOrCharRec(f, char => DecoderFailure.UnableToDecodeType[T](char).invalidNel)
 
   def numberOrCharRec[T: ClassTag](
-    ifNumber: XmlNumber => Option[T],
+    ifNumberOrString: String => Option[T],
     ifChar: Char => Decoder.Result[T]
   ): Decoder[T] =
     dataRecursive {
-      case n: XmlNumber => ifNumber(n).toValidNel(DecoderFailure.UnableToDecodeType[T](n))
-      case c: XmlChar   => ifChar(c.value)
+      case n: XmlNumber =>
+        ifNumberOrString(n.toString).toValidNel(DecoderFailure.UnableToDecodeType[T](n))
+      case c: XmlChar => ifChar(c.value)
       case s: XmlString =>
-        Xml
-          .fromNumberString(s.value)
-          .map(numberOrCharRec(ifNumber, ifChar).decode(_))
-          .getOrElse(DecoderFailure.UnableToDecodeType[T](s).invalidNel)
+        ifNumberOrString(s.value).toValidNel(DecoderFailure.UnableToDecodeType[T](s))
       case v => DecoderFailure.UnableToDecodeType[T](v).invalidNel
     }
 
@@ -201,7 +199,7 @@ sealed private[xml] trait DecoderDataInstances {
       case XmlString(value) => value
       case XmlChar(value)   => value.toString
       case XmlBool(value)   => value.toString
-      case n: XmlNumber     => n.show
+      case n: XmlNumber     => n.stringValue
       case XmlArray(value)  => value.map(rec).mkString(",")
     }
 
@@ -229,14 +227,16 @@ sealed private[xml] trait DecoderDataInstances {
     case v => DecoderFailure.UnableToDecodeType[Char](v).invalidNel
   }
 
-  implicit val decodeByte: Decoder[Byte]   = Decoder.numberRec(_.toByte)
-  implicit val decodeShort: Decoder[Short] = Decoder.numberOrCharRec(_.toShort, _.toShort.validNel)
-  implicit val decodeInt: Decoder[Int]     = Decoder.numberOrCharRec(_.toInt, _.toInt.validNel)
-  implicit val decodeLong: Decoder[Long]   = Decoder.numberRec(_.toLong)
-  implicit val decodeFloat: Decoder[Float] = Decoder.numberRec(_.toFloat.some)
-  implicit val decodeDouble: Decoder[Double]         = Decoder.numberRec(_.toDouble.some)
-  implicit val decodeBigInt: Decoder[BigInt]         = Decoder.numberRec(_.toBigInt)
-  implicit val decodeBigDecimal: Decoder[BigDecimal] = Decoder.numberRec(_.toBigDecimal)
+  implicit val decodeByte: Decoder[Byte] = Decoder.numberRec(_.toByteOption)
+  implicit val decodeShort: Decoder[Short] =
+    Decoder.numberOrCharRec(_.toShortOption, _.toShort.validNel)
+  implicit val decodeInt: Decoder[Int]   = Decoder.numberOrCharRec(_.toIntOption, _.toInt.validNel)
+  implicit val decodeLong: Decoder[Long] = Decoder.numberRec(_.toLongOption)
+  implicit val decodeFloat: Decoder[Float]   = Decoder.numberRec(_.toFloatOption)
+  implicit val decodeDouble: Decoder[Double] = Decoder.numberRec(_.toDoubleOption)
+  implicit val decodeBigInt: Decoder[BigInt] = Decoder.numberRec(str => Try(BigInt(str)).toOption)
+  implicit val decodeBigDecimal: Decoder[BigDecimal] =
+    Decoder.numberRec(str => Try(BigDecimal(str)).toOption)
 }
 
 sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
@@ -266,7 +266,7 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
       .flatMapF(str => {
         str
           .split(",")
-          .map(s => Decoder[T].decode(Xml.ofString(s)))
+          .map(s => Decoder[T].decode(Xml.string(s)))
           .toVector
           .sequence
           .map(_.to(f))

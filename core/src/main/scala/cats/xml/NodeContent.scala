@@ -1,6 +1,7 @@
 package cats.xml
 
 import cats.data.NonEmptyList
+import cats.kernel.Eq
 import cats.xml.codec.DataEncoder
 
 /** Coproduct to define XML node content
@@ -32,7 +33,7 @@ sealed trait NodeContent {
     case _                              => Nil
   }
 }
-object NodeContent {
+object NodeContent extends NodeContentInstances {
 
   final val empty: NodeContent = Empty
 
@@ -41,14 +42,8 @@ object NodeContent {
     if (encData.isEmpty) None else Some(Text(encData))
   }
 
-  def parseText(data: String): Option[NodeContent] =
-    text(Xml.fromDataString(data))
-
   def textOrEmpty[T: DataEncoder](data: T): NodeContent =
     text[T](data).getOrElse(NodeContent.empty)
-
-  def parseTextOrEmpty(data: String): NodeContent =
-    parseText(data).getOrElse(NodeContent.empty)
 
   def children(childrenLs: Seq[XmlNode]): Option[NodeContent] =
     NonEmptyList.fromList(childrenLs.toList.filterNot(_.isNull)).map(Children(_))
@@ -72,5 +67,17 @@ object NodeContent {
     private[NodeContent] def apply(childrenNel: NonEmptyList[XmlNode]): Children = new Children(
       childrenNel
     )
+  }
+}
+sealed trait NodeContentInstances {
+
+  import cats.implicits.catsSyntaxEq
+
+  implicit val eqNodeContent: Eq[NodeContent] = Eq.instance {
+    case (NodeContent.Empty, NodeContent.Empty)             => true
+    case (NodeContent.Text(data1), NodeContent.Text(data2)) => data1 === data2
+    case (NodeContent.Children(children1), NodeContent.Children(children2)) =>
+      children1 === children2
+    case _ => false
   }
 }

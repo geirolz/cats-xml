@@ -1,7 +1,7 @@
 package cats.xml
 
-import cats.{Eq, Order, Show}
 import cats.xml.codec.Decoder
+import cats.{Eq, Order, Show}
 
 import java.math.BigDecimal as JavaBigDecimal
 import scala.util.Try
@@ -14,6 +14,10 @@ sealed trait XmlData extends Xml with Serializable {
 
   def as[T: Decoder]: Decoder.Result[T] = Decoder[T].decode(this)
 
+  def asString: String = as[String].getOrElse("")
+
+  def widen: XmlData = this
+
   def isEmpty: Boolean = this match {
     case XmlData.XmlString(value) => value.isEmpty
     case XmlData.XmlArray(value)  => value.isEmpty
@@ -21,7 +25,9 @@ sealed trait XmlData extends Xml with Serializable {
   }
 }
 case object XmlNull extends Xml with XmlNode.Null with XmlData {
-  override def isEmpty: Boolean = true
+  override final def isEmpty: Boolean = true
+  // To avoid stackoverflow since the XmlPrinter used by the Eq instance uses patter matching.
+  override final def equals(obj: Any): Boolean = obj.isInstanceOf[XmlNull.type]
 }
 
 object XmlData {
@@ -117,6 +123,13 @@ object XmlData {
           .map(_.longValue)
       case XmlBigDecimal(value) => Try(value.toLongExact).toOption
     }
+
+    final def stringValue: String = this match {
+      case XmlLong(value)       => value.toString
+      case XmlFloat(value)      => value.toString
+      case XmlDouble(value)     => value.toString
+      case XmlBigDecimal(value) => value.toString
+    }
   }
   object XmlNumber {
 
@@ -138,17 +151,12 @@ object XmlData {
   private[xml] final case class XmlBigDecimal(value: BigDecimal) extends XmlNumber
 
   // ------------------------------------//
-  implicit def showXmlData[T <: XmlData]: Show[T] = {
-    case XmlNull              => ""
-    case XmlString(value)     => value
-    case XmlChar(value)       => value.toString
-    case XmlBool(value)       => value.toString
-    case XmlArray(value)      => value.mkString(",")
-    case XmlLong(value)       => value.toString
-    case XmlFloat(value)      => value.toString
-    case XmlDouble(value)     => value.toString
-    case XmlBigDecimal(value) => value.toString
-  }
+
+  implicit def showXmlData[T <: XmlData](implicit
+    printer: XmlPrinter,
+    config: XmlPrinter.Config
+  ): Show[T] =
+    printer.prettyString(_)
 
   implicit val order: Order[XmlNumber] = {
     Order.from {
@@ -160,14 +168,6 @@ object XmlData {
     }
   }
 
-  implicit val eqXmlData: Eq[XmlData] = (x: XmlData, y: XmlData) =>
-    (x, y) match {
-      case (a, b) if a.isNull && b.isNull   => true
-      case (a: XmlString, b: XmlString)     => a.value == b.value
-      case (a: XmlChar, b: XmlChar)         => a.value == b.value
-      case (a: XmlBool, b: XmlBool)         => a.value == b.value
-      case (a: XmlNumber, b: XmlNumber)     => a.eqv(b)
-      case (a: XmlArray[?], b: XmlArray[?]) => a.value.sameElements(b.value)
-      case (_, _)                           => false
-    }
+  implicit val eqXmlData: Eq[XmlData] =
+    (a: XmlData, b: XmlData) => a.as[String] == b.as[String]
 }
