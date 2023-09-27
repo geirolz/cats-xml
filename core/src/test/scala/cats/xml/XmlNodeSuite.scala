@@ -48,7 +48,7 @@ class XmlNodeSuite extends munit.FunSuite {
 
   test("XmlNode.apply") {
     assertEquals(
-      obtained = XmlNode("Foo", List("A" := 1), NodeContent.textOrEmpty("Text")),
+      obtained = XmlNode("Foo", List("A" := 1), NodeContent.text("Text")),
       expected = XmlNode("Foo").withAttributes("A" := 1).withText("Text")
     )
     intercept[IllegalArgumentException](

@@ -262,15 +262,21 @@ sealed private[xml] trait DecoderLifterInstances { this: DecoderDataInstances =>
   implicit def decoderLiftToSeq[F[X] <: Seq[X], T: Decoder](implicit
     f: Factory[T, F[T]]
   ): Decoder[F[T]] =
-    decodeString
-      .flatMapF(str => {
-        str
-          .split(",")
-          .map(s => Decoder[T].decode(Xml.string(s)))
+    Decoder.instance {
+      case XmlArray(value) =>
+        value
+          .map(Decoder[T].decode)
           .toVector
           .sequence
           .map(_.to(f))
-      })
+      case group: XmlNode.Group =>
+        group.children
+          .map(Decoder[T].decode)
+          .toVector
+          .sequence
+          .map(_.to(f))
+      case other => Decoder[T].decode(other).map(Seq(_).to(f))
+    }
 
   implicit def decodeCatsNel[T: Decoder]: Decoder[NonEmptyList[T]] =
     decoderLiftToSeq[Vector, T].flatMapF {
