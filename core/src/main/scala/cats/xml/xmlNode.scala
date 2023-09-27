@@ -262,7 +262,7 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     elements.toList match {
       case Nil           => XmlNode.emptyGroup
       case ::(head, Nil) => head
-      case all           => new Group(NodeContent.childrenOrEmpty(all))
+      case all           => new Group(NodeContent.children(all))
     }
 
   /** Create a new [[XmlNode.Group]] instance with the specified [[XmlNode]]s
@@ -284,7 +284,7 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     *   A new [[XmlNode.Group]] instance with the specified [[XmlNode]]s
     */
   def group(elements: Seq[XmlNode]): XmlNode.Group =
-    new Group(NodeContent.childrenOrEmpty(elements))
+    new Group(NodeContent.children(elements))
 
   // --------------------- XML NODE ---------------------
   /** Represent a simple single XML node.
@@ -543,7 +543,7 @@ sealed trait XmlNodeSyntax {
       withChildren(child +: children)
 
     def withChildren(children: Seq[XmlNode]): Self =
-      withContent(NodeContent.children(children).getOrElse(NodeContent.empty))
+      withContent(NodeContent.children(children))
 
     def appendChildren(child: XmlNode, children: XmlNode*): Self =
       updateChildren(currentChildren => currentChildren ++ List(child) ++ children)
@@ -614,7 +614,7 @@ sealed trait XmlNodeSyntax {
     /** Set node content to Text with the specified data. All children nodes will be removed.
       */
     def withText[T: DataEncoder](data: T): XmlNode.Node =
-      node.withContent(NodeContent.textOrEmpty(data))
+      node.withContent(NodeContent.text(data))
 
     /** Decode and then update node text if content is text.
       *

@@ -18,7 +18,7 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
         XmlNode(
           label      = e.label,
           attributes = XmlAttribute.fromMetaData(e.attributes),
-          content    = NodeContent.textOrEmpty(e.text.trim)
+          content    = NodeContent.text(e.text.trim)
         )
       case e: Elem =>
         val tree = XmlNode(
@@ -36,7 +36,7 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
         val content = if (neChildLen > 0) {
           val head = neChild.head
           if (head.isAtom) {
-            NodeContent.textOrEmpty(head.asInstanceOf[Atom[?]].data.toString.trim)
+            NodeContent.text(head.asInstanceOf[Atom[?]].data.toString.trim)
           } else {
 
             val res: Array[XmlNode] = new Array[XmlNode](neChildLen)
@@ -44,7 +44,7 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
               res.update(idx, fromNodeSeq(neChild(idx)))
             }
 
-            NodeContent.children(res.toList).getOrElse(NodeContent.empty)
+            NodeContent.children(res.toList)
           }
 
         } else NodeContent.empty

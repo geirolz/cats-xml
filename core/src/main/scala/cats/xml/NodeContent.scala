@@ -37,25 +37,30 @@ object NodeContent extends NodeContentInstances {
 
   final val empty: NodeContent = Empty
 
-  def text[T: DataEncoder](data: T): Option[NodeContent] = {
+  def text[T: DataEncoder](data: T): NodeContent = {
     val encData = DataEncoder[T].encode(data)
-    if (encData.isEmpty) None else Some(Text(encData))
+    if (encData.isEmpty) NodeContent.empty else Text(encData)
   }
 
-  def textOrEmpty[T: DataEncoder](data: T): NodeContent =
-    text[T](data).getOrElse(NodeContent.empty)
-
-  def children(childrenLs: Seq[XmlNode]): Option[NodeContent] =
-    NonEmptyList.fromList(childrenLs.toList.filterNot(_.isNull)).map(Children(_))
-
   def children(node: XmlNode, nodes: XmlNode*): NodeContent =
-    Children(NonEmptyList.of(node, nodes*))
+    children(node +: nodes)
 
   def childrenNel(childrenNel: NonEmptyList[XmlNode]): NodeContent =
-    childrenOrEmpty(childrenNel.toList)
+    children(childrenNel.toList)
 
-  def childrenOrEmpty(childrenLs: Seq[XmlNode]): NodeContent =
-    children(childrenLs).getOrElse(NodeContent.empty)
+  def children(childrenLs: Seq[XmlNode]): NodeContent =
+    NonEmptyList
+      .fromList(
+        childrenLs
+          .flatMap(
+            _.fold(
+              ifNode  = Seq(_),
+              ifGroup = _.children
+            ).filterNot(_.isNull)
+          )
+          .toList
+      )
+      .fold(NodeContent.empty)(Children(_))
 
   case object Empty extends NodeContent
   final case class Text(data: XmlData) extends NodeContent
