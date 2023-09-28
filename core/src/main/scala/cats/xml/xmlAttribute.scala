@@ -31,6 +31,9 @@ final case class XmlAttribute(key: String, value: XmlData) extends Xml with Seri
     dummyImplicit: DummyImplicit
   ): Boolean =
     exists(_ == key, (data: XmlData) => valuep(data.asString))
+
+  def duplicate: XmlAttribute =
+    XmlAttribute(key, value.duplicate)
 }
 object XmlAttribute extends XmlAttributeSyntax with XmlAttributeInstances {
 

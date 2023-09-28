@@ -40,6 +40,13 @@ trait Xml {
     case _                    => None
   }
 
+  /** Create a new immutable instance with the same values of the current one
+    *
+    * @return
+    *   A new instance with the same values of the current one
+    */
+  def duplicate: Xml
+
   override def equals(obj: Any): Boolean =
     obj match {
       case obj: Xml => Xml.eqXml.eqv(this, obj)

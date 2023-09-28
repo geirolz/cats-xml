@@ -25,7 +25,7 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
       $this.focus(node) match {
         case Right(attr: XmlAttribute) =>
           vCursor
-            .modifyIfNode(_.updateAttr(attr.key)(modifier))
+            .modifyNode(_.updateAttr(attr.key)(modifier))
             .apply(node)
         case Left(failure) =>
           ModifierFailure.CursorFailed(NonEmptyList.one(failure)).asLeft
@@ -39,7 +39,7 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
           attr.mapDecode(f) match {
             case Valid(newAttrValue) =>
               vCursor
-                .modifyIfNode(_.updateAttr(attr.key)(_ => newAttrValue))
+                .modifyNode(_.updateAttr(attr.key)(_ => newAttrValue))
                 .apply(node)
             case Invalid(failures: NonEmptyList[DecoderFailure]) =>
               ModifierFailure.DecoderFailed(failures).asLeft

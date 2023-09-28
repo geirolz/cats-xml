@@ -32,6 +32,16 @@ sealed trait NodeContent {
     case NodeContent.Children(children) => children.toList
     case _                              => Nil
   }
+
+  final def duplicate: NodeContent =
+    this match {
+      case NodeContent.Empty =>
+        NodeContent.Empty
+      case NodeContent.Text(data) =>
+        NodeContent.Text(data)
+      case NodeContent.Children(children: NonEmptyList[XmlNode]) =>
+        NodeContent.Children(children.map(_.duplicate))
+    }
 }
 object NodeContent extends NodeContentInstances {
 

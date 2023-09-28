@@ -1,28 +1,25 @@
 package cats.xml.testing
 
-import cats.xml.{NodeContent, XmlAttribute, XmlNode}
+import cats.xml.XmlData.{XmlBigDecimal, XmlBool, XmlChar, XmlDouble, XmlFloat, XmlLong, XmlString}
 import cats.xml.testing.GenUtils.getNonEmptyString
-import org.scalacheck.Gen
+import cats.xml.*
+import org.scalacheck.{Arbitrary, Gen}
 
-object XmlNodeGen {
+object XmlGen {
 
   def genXmlNode(
     size: DataSize,
-    maxNodeName: Int      = 10,
-    maxAttrNameSize: Int  = 10,
-    maxAttrValueSize: Int = 10,
-    maxTextSize: Int      = 100
+    maxNodeName: Int     = 10,
+    maxAttrNameSize: Int = 10
   ): Gen[XmlNode] = {
 
     def compile(maxAttrs: Int, maxChildren: Int, maxDeep: Int): Gen[XmlNode] =
       _genXmlNode(
-        maxAttrs         = maxAttrs,
-        maxChildren      = maxChildren,
-        maxDeep          = maxDeep,
-        maxNodeName      = maxNodeName,
-        maxAttrNameSize  = maxAttrNameSize,
-        maxAttrValueSize = maxAttrValueSize,
-        maxTextSize      = maxTextSize
+        maxAttrs        = maxAttrs,
+        maxChildren     = maxChildren,
+        maxDeep         = maxDeep,
+        maxNodeName     = maxNodeName,
+        maxAttrNameSize = maxAttrNameSize
       )
 
     size match {
@@ -57,10 +54,8 @@ object XmlNodeGen {
     maxAttrs: Int,
     maxChildren: Int,
     maxDeep: Int,
-    maxNodeName: Int      = 10,
-    maxAttrNameSize: Int  = 10,
-    maxAttrValueSize: Int = 10,
-    maxTextSize: Int      = 100
+    maxNodeName: Int     = 10,
+    maxAttrNameSize: Int = 10
   ): Gen[XmlNode] = {
 
     def genChildren: Gen[NodeContent] =
@@ -87,11 +82,11 @@ object XmlNodeGen {
 
     for {
       nodeName   <- Gen.lzy(getNonEmptyString(maxNodeName))
-      attributes <- Gen.lzy(genXmlAttributes(maxAttrs, maxAttrNameSize, maxAttrValueSize))
+      attributes <- Gen.lzy(genXmlAttributes(maxAttrs, maxAttrNameSize))
       content <- Gen.lzy(
         Gen.frequency(
           2  -> Gen.const(NodeContent.empty),
-          18 -> Gen.lzy(getNonEmptyString(maxTextSize).map(NodeContent.text(_))),
+          18 -> Gen.lzy(genXmlData.map(NodeContent.text(_))),
           80 -> Gen.lzy(genChildren)
         )
       )
@@ -101,22 +96,63 @@ object XmlNodeGen {
   }
 
   def genXmlAttributes(
-    maxAttrs: Int         = 1,
-    maxAttrNameSize: Int  = 10,
-    maxAttrValueSize: Int = 10
+    maxAttrs: Int        = 1,
+    maxAttrNameSize: Int = 10
   ): Gen[List[XmlAttribute]] =
     for {
       size <- Gen.choose[Int](0, maxAttrs)
-      attributesNames <-
+      attributes <-
         if (size > 0)
-          Gen.listOfN(size, XmlValidName.genXmlValidName(maxAttrNameSize)).map(_.distinct)
+          Gen.listOfN(size, genAttribute(maxAttrNameSize)).map(_.distinct)
         else
           Gen.const(Nil)
-      values <-
-        if (attributesNames.nonEmpty)
-          Gen.listOfN(attributesNames.size, getNonEmptyString(maxAttrValueSize))
-        else
-          Gen.const(Nil)
-    } yield attributesNames.map(_.value).zip(values).map(t => XmlAttribute(t._1, t._2))
+    } yield attributes
 
+  def genAttribute(
+    maxAttrNameSize: Int = 10
+  ): Gen[XmlAttribute] =
+    for {
+      name  <- XmlValidName.genXmlValidName(maxAttrNameSize)
+      value <- genXmlData
+    } yield XmlAttribute(name.value, value)
+
+  def genXmlData: Gen[XmlData] =
+    Gen.oneOf[XmlData](
+      genXmlString,
+      genXmlChar,
+      genXmlBool,
+      genXmlLong,
+      genXmlFloat,
+      genXmlDouble,
+      genXmlBigDecimal
+    )
+
+  def genXmlString: Gen[XmlString] =
+    Gen.asciiPrintableStr.map(Xml.string)
+
+  def genXmlChar: Gen[XmlChar] =
+    Gen.alphaNumChar.map(Xml.char)
+
+  def genXmlBool: Gen[XmlBool] =
+    Gen.oneOf(true, false).map(Xml.boolean)
+
+  def genXmlLong: Gen[XmlLong] =
+    Gen.long
+      .map(Xml.long)
+      .map(_.asInstanceOf[XmlLong])
+
+  def genXmlFloat: Gen[XmlFloat] =
+    Arbitrary.arbFloat.arbitrary
+      .map(Xml.float)
+      .map(_.asInstanceOf[XmlFloat])
+
+  def genXmlDouble: Gen[XmlDouble] =
+    Gen.double
+      .map(Xml.double)
+      .map(_.asInstanceOf[XmlDouble])
+
+  def genXmlBigDecimal: Gen[XmlBigDecimal] =
+    Arbitrary.arbBigDecimal.arbitrary
+      .map(Xml.bigDecimal)
+      .map(_.asInstanceOf[XmlBigDecimal])
 }

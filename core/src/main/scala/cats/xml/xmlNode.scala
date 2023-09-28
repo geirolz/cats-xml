@@ -136,7 +136,7 @@ sealed trait XmlNode extends Xml {
     * @return
     *   A new instance with the same values of the current one
     */
-  def duplicate: Self
+  def duplicate: XmlNode
 
   /** Convert the node to a group. If this instance already is a group it will be returned the same
     * instance.
@@ -206,11 +206,11 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
   private[xml] trait Null extends XmlNode {
     override type Self = Null
-    override def label: String                                          = ""
-    override def attributes: List[XmlAttribute]                         = Nil
-    override def content: NodeContent                                   = NodeContent.empty
-    override def duplicate: Self                                        = this
-    override private[xml] def updateContent(f: Endo[NodeContent]): Self = this
+    override final def label: String                                          = ""
+    override final def attributes: List[XmlAttribute]                         = Nil
+    override final def content: NodeContent                                   = NodeContent.empty
+    override def duplicate: Self                                              = this
+    override final private[xml] def updateContent(f: Endo[NodeContent]): Self = this
   }
 
   lazy val emptyGroup: XmlNode.Group = new Group(NodeContent.empty)
@@ -311,7 +311,11 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
     override def content: NodeContent = mContent
 
-    override def duplicate: XmlNode.Node = safeCopy()
+    override def duplicate: XmlNode.Node = safeCopy(
+      label      = label,
+      attributes = attributes.map(_.duplicate),
+      content    = content.duplicate
+    )
 
     @impure
     private[xml] def updateLabel(f: Endo[String]): XmlNode.Node =
@@ -377,7 +381,9 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
 
     override def content: NodeContent = mContent
 
-    override def duplicate: XmlNode.Group = safeCopy()
+    override def duplicate: XmlNode.Group = safeCopy(
+      content = content.duplicate
+    )
 
     /** Convert current instance to a [[XmlNode.Node]].
       *
@@ -416,9 +422,8 @@ object XmlNode extends XmlNodeInstances with XmlNodeSyntax {
     @impure
     private[xml] def safeCopy(
       content: NodeContent = this.mContent
-    ): XmlNode.Group = new Group(
-      unsafeRequireNotNull(content)
-    )
+    ): XmlNode.Group =
+      new Group(unsafeRequireNotNull(content))
 
     // -----------------------------//
     /* ################################################ */
