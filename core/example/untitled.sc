@@ -152,7 +152,7 @@ val result1: Modifier.Result[XmlNode] =
 //
 //
 //val modifyResult = Root
-//  .modifyIfNode(_.withText("HEEEEEY!"))
+//  .modifyNode(_.withText("HEEEEEY!"))
 //  .apply(ORIGINAL)
 
 //

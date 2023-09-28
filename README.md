@@ -167,14 +167,14 @@ val node = xml"""
 //   <foo>
 //    <baz>
 //     <bar>
-//      <value>2</value>
+//      <value>1</value>
 //     </bar>
 //    </baz>
 //   </foo>
 //  </root>
 // </wrapper>
 
-val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyIfNode(_.withText(2)))
+val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyNode(_.withText(2)))
 // result: Modifier.Result[XmlNode] = Right(
 //   value = <wrapper>
 //  <root>

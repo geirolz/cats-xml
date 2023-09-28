@@ -145,5 +145,5 @@ val node = xml"""
          </root>
        </wrapper>"""
 
-val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyIfNode(_.withText(2)))
+val result: Modifier.Result[XmlNode] = node.modify(_.root.foo.baz.bar.value.modifyNode(_.withText(2)))
 ```
