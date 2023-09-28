@@ -3,7 +3,7 @@
 Add XPath support.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-xpath" % "0.0.12"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-xpath" % "0.0.13"
 ```
 
 With this module you can create `NodeCursor`s instances using XPath.

@@ -3,7 +3,7 @@
 At the moment supported only for Scala 2.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-generic" % "0.0.12"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-generic" % "0.0.13"
 ```     
                     
 ## XmlTypeInterpreter
