@@ -16,4 +16,4 @@ val data = xml"""
        </wrapper>"""
 
 val result: Modifier.Result[XmlNode] =
-  data.modify(_.root.foo.bar.baz.value.modifyIfNode(_.withText(2)))
+  data.modify(_.root.foo.bar.baz.value.modifyNode(_.withText(2)))

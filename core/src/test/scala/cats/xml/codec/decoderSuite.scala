@@ -210,7 +210,7 @@ class DecoderSuite extends munit.FunSuite {
 
 class DecoderInstancesSuite extends munit.DisciplineSuite {
 
-  import cats.xml.testing.arbitrary.XmlDataArbitrary.*
+  import cats.xml.testing.arbitrary.XmlArbitrary.*
 
   test("Decoder.decodeUnit") {
     assertEquals(

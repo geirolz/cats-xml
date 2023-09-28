@@ -1,5 +1,6 @@
 package cats.xml
 
+import cats.xml.XmlData.*
 import cats.xml.codec.Decoder
 import cats.{Eq, Order, Show}
 
@@ -23,9 +24,23 @@ sealed trait XmlData extends Xml with Serializable {
     case XmlData.XmlArray(value)  => value.isEmpty
     case _                        => false
   }
+
+  override def duplicate: XmlData =
+    this match {
+      case XmlNull              => XmlNull
+      case value: XmlString     => value.copy()
+      case value: XmlChar       => value.copy()
+      case value: XmlBool       => value.copy()
+      case value: XmlArray[_]   => value.copy()
+      case value: XmlLong       => value.copy()
+      case value: XmlFloat      => value.copy()
+      case value: XmlDouble     => value.copy()
+      case value: XmlBigDecimal => value.copy()
+    }
 }
 case object XmlNull extends Xml with XmlNode.Null with XmlData {
-  override final def isEmpty: Boolean = true
+  override final def isEmpty: Boolean        = true
+  override final def duplicate: XmlNull.type = this
   // To avoid stackoverflow since the XmlPrinter used by the Eq instance uses patter matching.
   override final def equals(obj: Any): Boolean = obj.isInstanceOf[XmlNull.type]
 }

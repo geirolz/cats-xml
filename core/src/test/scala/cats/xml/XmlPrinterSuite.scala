@@ -1,6 +1,6 @@
 package cats.xml
 
-import cats.xml.testing.{DataSize, Ops, XmlNodeGen}
+import cats.xml.testing.{DataSize, Ops, XmlGen}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
 
@@ -233,7 +233,7 @@ class XmlPrinterPerformanceSuite extends munit.ScalaCheckSuite {
   property("XmlPrinter.default.prettyString with XL document") {
 
     implicit val arbXmlNode: Arbitrary[XmlNode] = Arbitrary(
-      XmlNodeGen.genXmlNode(DataSize.L)
+      XmlGen.genXmlNode(DataSize.L)
     )
 
     forAll { (value: XmlNode) =>

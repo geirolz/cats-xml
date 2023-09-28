@@ -42,7 +42,7 @@ class EncoderSuite extends munit.FunSuite {
 class EncoderInstancesSuite extends munit.ScalaCheckSuite {
 
   import cats.xml.testing.arbitrary.CommonArbitrary.*
-  import cats.xml.testing.arbitrary.XmlDataArbitrary.*
+  import cats.xml.testing.arbitrary.XmlArbitrary.*
 
   property(s"Encoder.encodeOption") {
     forAll { (value: Option[Int]) =>
