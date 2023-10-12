@@ -21,7 +21,7 @@ object JavaConverters extends JavaConvertersSyntax {
     @impure
     def rec(ns: JNode): XmlNode = {
       val baseNode: XmlNode.Node = XmlNode(ns.getNodeName)
-        .withAttributes(JavaConverters.attrFromJavaNodeMap(ns.getAttributes))
+        .withAttrs(JavaConverters.attrFromJavaNodeMap(ns.getAttributes))
 
       if (ns.hasChildNodes) {
         val childNodes: NodeList = ns.getChildNodes

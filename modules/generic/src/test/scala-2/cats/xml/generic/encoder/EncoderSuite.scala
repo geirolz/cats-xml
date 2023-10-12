@@ -22,13 +22,13 @@ class EncoderSuite extends munit.FunSuite {
         missingNode    = None
       ).toXml,
       expected = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
         .withChildren(
           XmlNode("Bar")
-            .withAttributes(
+            .withAttrs(
               "field1" := "BHO",
               "field2" := BigDecimal(100)
             )
@@ -60,13 +60,13 @@ class EncoderSuite extends munit.FunSuite {
         missingNode    = None
       ).toXml,
       expected = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
         .withChildren(
           XmlNode("Bar")
-            .withAttributes(
+            .withAttrs(
               "field1" := "BHO",
               "field2" := BigDecimal(100)
             )

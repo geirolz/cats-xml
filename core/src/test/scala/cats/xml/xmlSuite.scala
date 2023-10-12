@@ -20,13 +20,13 @@ class xmlSuite extends munit.ScalaCheckSuite {
 
     val node: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
-        .withAttributes("F" := 'A')
+        .withAttrs("F" := 'A')
         .withChildren(
           XmlNode("Test")
-            .withAttributes("G" := 100L)
+            .withAttrs("G" := 100L)
             .withChildren(
               XmlNode("Node")
-                .withAttributes("A" := 10, "B" := true)
+                .withAttrs("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
             )
         )

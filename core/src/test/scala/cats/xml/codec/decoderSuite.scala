@@ -451,7 +451,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
     assertEquals(
       obtained = decoder.decode(
         XmlNode("Foo")
-          .withAttributes(
+          .withAttrs(
             "intAttr"  := 10,
             "boolAttr" := true
           )
@@ -506,7 +506,7 @@ class DecoderCompanionSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = decoder.decode(
-        XmlNode("Foo").withAttributes(
+        XmlNode("Foo").withAttrs(
           "a" := "INVALID",
           "b" := "INVALID",
           "c" := "INVALID"

@@ -12,13 +12,13 @@ class XmlLoaderSuite extends munit.CatsEffectSuite {
     assertIO(
       Xml.loadResourceFile[IO]("/simple_document_1.xml").use(IO(_)),
       XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "intAttr"  := 1,
           "boolAttr" := true
         )
         .withChildren(
           XmlNode("Bar")
-            .withAttributes(
+            .withAttrs(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )

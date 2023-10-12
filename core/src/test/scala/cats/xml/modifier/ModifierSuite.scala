@@ -9,15 +9,15 @@ class ModifierSuite extends munit.FunSuite {
   test("Modifier works as expected") {
     val node: XmlNode =
       XmlNode("wrapper")
-        .withAttributes("a" := "1", "b" := "2")
+        .withAttrs("a" := "1", "b" := "2")
         .withChildren(
           XmlNode("root")
-            .withAttributes("a" := "1", "b" := "2")
+            .withAttrs("a" := "1", "b" := "2")
             .withChildren(
               XmlNode("foo")
                 .withChildren(
                   XmlNode("baz")
-                    .withAttributes("a" := "1", "b" := "2")
+                    .withAttrs("a" := "1", "b" := "2")
                     .withChildren(
                       XmlNode("bar")
                         .withChildren(

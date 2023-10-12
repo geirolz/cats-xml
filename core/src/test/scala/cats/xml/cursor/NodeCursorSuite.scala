@@ -146,9 +146,9 @@ class NodeCursorSuite extends munit.FunSuite {
     val node: XmlNode =
       XmlNode("root").withChildren(
         XmlNode("foo").withChildren(
-          XmlNode("bar").withAttributes("attr" := 1),
-          XmlNode("bar").withAttributes("attr" := 2),
-          XmlNode("bar").withAttributes("attr" := 3)
+          XmlNode("bar").withAttrs("attr" := 1),
+          XmlNode("bar").withAttrs("attr" := 2),
+          XmlNode("bar").withAttrs("attr" := 3)
         )
       )
 
@@ -156,9 +156,9 @@ class NodeCursorSuite extends munit.FunSuite {
       obtained = (Root \\ "bar").focus(node),
       expected = Right(
         XmlNode.group(
-          XmlNode("bar").withAttributes("attr" := 1),
-          XmlNode("bar").withAttributes("attr" := 2),
-          XmlNode("bar").withAttributes("attr" := 3)
+          XmlNode("bar").withAttrs("attr" := 1),
+          XmlNode("bar").withAttrs("attr" := 2),
+          XmlNode("bar").withAttrs("attr" := 3)
         )
       )
     )
@@ -174,9 +174,9 @@ class NodeCursorSuite extends munit.FunSuite {
     val node: XmlNode =
       XmlNode("root").withChildren(
         XmlNode("foo").withChildren(
-          XmlNode("bar").withAttributes("attr" := 1),
-          XmlNode("bar").withAttributes("attr" := 2),
-          XmlNode("bar").withAttributes("attr" := 3)
+          XmlNode("bar").withAttrs("attr" := 1),
+          XmlNode("bar").withAttrs("attr" := 2),
+          XmlNode("bar").withAttrs("attr" := 3)
         )
       )
 
@@ -184,8 +184,8 @@ class NodeCursorSuite extends munit.FunSuite {
       obtained = (Root \\ "bar").filter(_.existsAttrWithValue[Int]("attr", _ % 2 != 0)).focus(node),
       expected = Right(
         XmlNode.group(
-          XmlNode("bar").withAttributes("attr" := 1),
-          XmlNode("bar").withAttributes("attr" := 3)
+          XmlNode("bar").withAttrs("attr" := 1),
+          XmlNode("bar").withAttrs("attr" := 3)
         )
       )
     )
@@ -264,9 +264,9 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("bar").withAttributes("attr" := 1),
-        XmlNode("bar").withAttributes("attr" := 2),
-        XmlNode("bar").withAttributes("attr" := 3)
+        XmlNode("bar").withAttrs("attr" := 1),
+        XmlNode("bar").withAttrs("attr" := 2),
+        XmlNode("bar").withAttrs("attr" := 3)
       )
 
     assertEquals(
@@ -275,7 +275,7 @@ class NodeCursorSuite extends munit.FunSuite {
         .filter(_.findAttr[Int]("attr").contains(1))
         .focus(node),
       expected = Right(
-        XmlNode("bar").withAttributes("attr" := 1)
+        XmlNode("bar").withAttrs("attr" := 1)
       )
     )
 
@@ -289,9 +289,9 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("bar").withAttributes("attr" := 1),
-        XmlNode("bar").withAttributes("attr" := 2),
-        XmlNode("bar").withAttributes("attr" := 3)
+        XmlNode("bar").withAttrs("attr" := 1),
+        XmlNode("bar").withAttrs("attr" := 2),
+        XmlNode("bar").withAttrs("attr" := 3)
       )
 
     def withAttrEqTo(value: Int): XmlNode => Boolean =
@@ -300,7 +300,7 @@ class NodeCursorSuite extends munit.FunSuite {
     assertEquals(
       obtained = (Root.down("bar") | withAttrEqTo(1)).focus(node),
       expected = Right(
-        XmlNode("bar").withAttributes("attr" := 1)
+        XmlNode("bar").withAttrs("attr" := 1)
       )
     )
 
@@ -315,15 +315,15 @@ class NodeCursorSuite extends munit.FunSuite {
     val node: XmlNode =
       XmlNode("root").withChildren(
         XmlNode("foo").withChildren(
-          XmlNode("bar0").withAttributes("a" := "1"),
-          XmlNode("bar1").withAttributes("a" := "2"),
-          XmlNode("bar2").withAttributes("a" := "3")
+          XmlNode("bar0").withAttrs("a" := "1"),
+          XmlNode("bar1").withAttrs("a" := "2"),
+          XmlNode("bar2").withAttrs("a" := "3")
         )
       )
 
     assertEquals(
       obtained = Root.foo.find(_.findAttrRaw("a").exists(_.value.asString == "3")).focus(node),
-      expected = Right(XmlNode("bar2").withAttributes("a" := "3"))
+      expected = Right(XmlNode("bar2").withAttrs("a" := "3"))
     )
   }
 
@@ -373,7 +373,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("foo").withAttributes("bar" := "TEST")
+        XmlNode("foo").withAttrs("bar" := "TEST")
       )
 
     assertEquals(
@@ -391,7 +391,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("foo").withAttributes("bar" := "TEST")
+        XmlNode("foo").withAttrs("bar" := "TEST")
       )
 
     assertEquals(
@@ -409,7 +409,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("foo").withAttributes(
+        XmlNode("foo").withAttrs(
           "first"  := "TEST_1",
           "second" := "TEST_2"
         )
@@ -425,7 +425,7 @@ class NodeCursorSuite extends munit.FunSuite {
 
     val node: XmlNode =
       XmlNode("root").withChildren(
-        XmlNode("foo").withAttributes(
+        XmlNode("foo").withAttrs(
           "first"  := "TEST_1",
           "second" := "TEST_2"
         )

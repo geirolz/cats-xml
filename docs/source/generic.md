@@ -34,6 +34,7 @@ case class Foo(
 ```
 
 ### Decoder semiauto
+
 ```scala mdoc:nest:to-string
 import cats.xml.XmlNode
 import cats.xml.codec.Decoder
@@ -44,28 +45,28 @@ import cats.xml.generic.decoder.semiauto.*
 
 implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
   XmlTypeInterpreter
-    .default[Foo]
-    .overrideType(
-      _.param(_.valueClass) -> XmlElemType.Attribute
-    )
+          .default[Foo]
+          .overrideType(
+            _.param(_.valueClass) -> XmlElemType.Attribute
+          )
 
 implicit val decoderValueClass: Decoder[ValueClass] = deriveDecoder[ValueClass]
 implicit val decoderBar: Decoder[Bar] = deriveDecoder[Bar]
 implicit val decoderFoo: Decoder[Foo] = deriveDecoder[Foo]
 
 XmlNode("foo")
-   .withAttributes(
-     "primitiveField" := 1d,
-     "valueClass"     := "TEST"
-   )
-   .withChildren(
-     XmlNode("bar")
-       .withAttributes(
-         "field1" := "BHO",
-         "field2" := BigDecimal(100)
-       )
-   )
-   .as[Foo]
+        .withAttrs(
+          "primitiveField" := 1d,
+          "valueClass" := "TEST"
+        )
+        .withChildren(
+          XmlNode("bar")
+                  .withAttrs(
+                    "field1" := "BHO",
+                    "field2" := BigDecimal(100)
+                  )
+        )
+        .as[Foo]
 ```
 
 ### Encoder semiauto

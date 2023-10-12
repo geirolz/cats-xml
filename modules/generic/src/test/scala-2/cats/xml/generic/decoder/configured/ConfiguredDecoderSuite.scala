@@ -23,7 +23,7 @@ class ConfiguredDecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "a" := "TEST"
         )
         .as[Foo],
@@ -40,7 +40,7 @@ class ConfiguredDecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("MyVehicle")
-        .withAttributes(
+        .withAttrs(
           "kind"       := "Bike",
           "wheelCount" := 2
         )
@@ -63,7 +63,7 @@ class ConfiguredDecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "a" := "TEST"
         )
         .as[Foo],
@@ -82,7 +82,7 @@ class ConfiguredDecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("MyVehicle")
-        .withAttributes(
+        .withAttrs(
           "kind"       := "Bike",
           "wheelCount" := 2
         )

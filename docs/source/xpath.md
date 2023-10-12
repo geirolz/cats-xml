@@ -28,6 +28,7 @@ val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 
 
 Full example
+
 ```scala mdoc:reset
 import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor
@@ -40,7 +41,7 @@ import cats.xml.xpath.implicits.*
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 
 val data = XmlNode("wrapper").withChildren(
-  XmlNode("root").withAttributes("id" := 1)
+  XmlNode("root").withAttrs("id" := 1)
 )
 val result: Either[Throwable, XmlNode] =
   cursor
@@ -49,6 +50,7 @@ val result: Either[Throwable, XmlNode] =
 ```
 
 If you want you can use the xpath expression directly on a `XmlNode` focusing using that xpath
+
 ```scala mdoc:reset
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
@@ -57,7 +59,7 @@ import cats.xml.implicits.*
 import cats.xml.xpath.implicits.*
 
 val data = XmlNode("wrapper").withChildren(
-  XmlNode("root").withAttributes("id" := 1)
+  XmlNode("root").withAttrs("id" := 1)
 )
 val result: Cursor.Result[XmlNode] = data.xpath("/root[@id='1']")
 ```

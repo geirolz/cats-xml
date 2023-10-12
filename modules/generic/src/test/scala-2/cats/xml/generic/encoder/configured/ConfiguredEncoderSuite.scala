@@ -20,7 +20,7 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
     assertEquals(
       obtained = Bike(2).toXmlWiden[Vehicle],
       expected = XmlNode("Vehicle")
-        .withAttributes(
+        .withAttrs(
           "kind"       := "Bike",
           "wheelCount" := 2
         )
@@ -41,7 +41,7 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
     assertEquals(
       obtained = Bike(2).toXmlWiden[Vehicle],
       expected = XmlNode("Vehicle")
-        .withAttributes(
+        .withAttrs(
           "kind"       := "Bike",
           "wheelCount" := 2
         )

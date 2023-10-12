@@ -56,7 +56,7 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     val xml: XmlNode =
       XmlNode("Foo")
-        .withAttributes("A" := 10, "B" := true)
+        .withAttrs("A" := 10, "B" := true)
         .withText("Lorem ipsum dolor sit amet, Lorem ipsum dolor sit amet.")
 
     // assert
@@ -72,13 +72,13 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     val xml: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
-        .withAttributes("F" := 'A')
+        .withAttrs("F" := 'A')
         .withChildren(
           XmlNode("Test")
-            .withAttributes("G" := 100L)
+            .withAttrs("G" := 100L)
             .withChildren(
               XmlNode("Node")
-                .withAttributes("A" := 10, "B" := true)
+                .withAttrs("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
             )
         )
@@ -102,7 +102,7 @@ class XmlPrinterSuite extends munit.FunSuite {
     val optNode: Option[XmlNode] = None
     val node: XmlNode =
       XmlNode("Wrapper")
-        .withAttributes(
+        .withAttrs(
           "a" := 1,
           "b" := "test",
           "c" := Some(2),
@@ -141,9 +141,9 @@ class XmlPrinterSuite extends munit.FunSuite {
     val xml: XmlNode =
       XmlNode("Foo").withChildren(
         XmlNode.group(
-          XmlNode("Bar").withAttributes("F" := "A"),
-          XmlNode("Bar").withAttributes("F" := "B"),
-          XmlNode("Bar").withAttributes("F" := "C")
+          XmlNode("Bar").withAttrs("F" := "A"),
+          XmlNode("Bar").withAttrs("F" := "B"),
+          XmlNode("Bar").withAttrs("F" := "C")
         )
       )
 
@@ -162,9 +162,9 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     val xml: XmlNode =
       XmlNode.group(
-        XmlNode("Bar").withAttributes("F" := "A"),
-        XmlNode("Bar").withAttributes("F" := "B"),
-        XmlNode("Bar").withAttributes("F" := "C")
+        XmlNode("Bar").withAttrs("F" := "A"),
+        XmlNode("Bar").withAttrs("F" := "B"),
+        XmlNode("Bar").withAttrs("F" := "C")
       )
 
     // assert
@@ -180,13 +180,13 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     val tree: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
-        .withAttributes("F" := 'A')
+        .withAttrs("F" := 'A')
         .withChildren(
           XmlNode("Test")
-            .withAttributes("G" := 100L)
+            .withAttrs("G" := 100L)
             .withChildren(
               XmlNode("Node")
-                .withAttributes("A" := 10, "B" := true)
+                .withAttrs("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
             )
         )
@@ -204,13 +204,13 @@ class XmlPrinterSuite extends munit.FunSuite {
 
     val xml: XmlNode = XmlNode("Foo").withChildren(
       XmlNode("Bar")
-        .withAttributes("F" := 'A')
+        .withAttrs("F" := 'A')
         .withChildren(
           XmlNode("Test")
-            .withAttributes("G" := 100L)
+            .withAttrs("G" := 100L)
             .withChildren(
               XmlNode("Node")
-                .withAttributes("A" := 10, "B" := true)
+                .withAttrs("A" := 10, "B" := true)
                 .withText("Lorem ipsum dolor sit amet")
             )
         )

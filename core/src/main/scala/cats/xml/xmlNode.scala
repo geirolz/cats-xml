@@ -583,11 +583,33 @@ sealed trait XmlNodeSyntax {
       node.updateLabel(_ => newLabel)
 
     // ------------------ ATTRS ------------------
+    @deprecated(
+      message = "Use withAttrs instead. This method will be removed in the future versions.",
+      since   = "0.0.14"
+    )
     def withAttributes(attrs: Seq[XmlAttribute]): XmlNode.Node =
+      withAttrs(attrs)
+
+    @deprecated(
+      message = "Use withAttrs instead. This method will be removed in the future versions.",
+      since   = "0.0.14"
+    )
+    def withAttributes(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode.Node =
+      withAttrs(attr, attrs*)
+
+    def withAttrs(attrs: Seq[XmlAttribute]): XmlNode.Node =
       node.updateAttrs(_ => attrs.toList)
 
-    def withAttributes(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode.Node =
-      node.updateAttrs(_ => (attr +: attrs).toList)
+    def withAttrs(attr: XmlAttribute, attrs: XmlAttribute*): XmlNode.Node =
+      withAttrs(attr +: attrs)
+
+    @impure
+    def withAttrsMap(attrs: (String, String)*): XmlNode.Node =
+      withAttrsMap(attrs.toMap)
+
+    @impure
+    def withAttrsMap(attrs: Map[String, String]): XmlNode.Node =
+      withAttrs(XmlAttribute.fromMap(attrs))
 
     // append attrs
     def appendAttr(newAttr: XmlAttribute): XmlNode.Node =
