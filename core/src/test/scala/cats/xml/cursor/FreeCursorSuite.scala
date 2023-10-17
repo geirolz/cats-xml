@@ -2,7 +2,7 @@ package cats.xml.cursor
 
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
-import cats.xml.{Xml, XmlNode}
+import cats.xml.XmlNode
 import cats.xml.cursor.NodeCursor.Root
 import cats.xml.validator.Validator
 
@@ -10,7 +10,7 @@ class FreeCursorSuite extends munit.FunSuite {
 
   test("FreeCursor.focus - valid") {
 
-    val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
+    val cursor: FreeCursor[Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
         .withChildren(
@@ -28,8 +28,8 @@ class FreeCursorSuite extends munit.FunSuite {
 
   test("FreeCursor.focus - invalid") {
 
-    val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
-    val incompleteNode: XmlNode      = XmlNode("foo").withChildren(XmlNode("bar"))
+    val cursor: FreeCursor[Int] = Root.bar.test.as[Int]
+    val incompleteNode: XmlNode = XmlNode("foo").withChildren(XmlNode("bar"))
 
     assertEquals(
       obtained = cursor.focus(incompleteNode),
@@ -39,7 +39,7 @@ class FreeCursorSuite extends munit.FunSuite {
 
   test("FreeCursor.map") {
 
-    val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
+    val cursor: FreeCursor[Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
         .withChildren(
@@ -57,7 +57,7 @@ class FreeCursorSuite extends munit.FunSuite {
 
   test("FreeCursor.validate - valid") {
 
-    val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
+    val cursor: FreeCursor[Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
         .withChildren(
@@ -77,7 +77,7 @@ class FreeCursorSuite extends munit.FunSuite {
 
   test("FreeCursor.validate - invalid") {
 
-    val cursor: FreeCursor[Xml, Int] = Root.bar.test.as[Int]
+    val cursor: FreeCursor[Int] = Root.bar.test.as[Int]
     val node: XmlNode =
       XmlNode("foo")
         .withChildren(
@@ -112,11 +112,11 @@ class FreeCursorSuite extends munit.FunSuite {
 //  import cats.laws.discipline.arbitrary.*
 //  import cats.xml.testing.codec.arbitrary.*
 //
-//  implicit def eqFreeCursor[I, O]: Eq[FreeCursor[I, O]] = Eq.allEqual
+//  implicit def eqFreeCursor[O]: Eq[FreeCursor[O]] = Eq.allEqual
 //
 //  checkAll(
 //    "FreeCursor.ApplicativeErrorTests",
-//    ApplicativeErrorTests[FreeCursor[XmlNode, *], NonEmptyList[CursorFailure]]
+//    ApplicativeErrorTests[FreeCursor, NonEmptyList[CursorFailure]]
 //      .applicativeError[Int, Int, String]
 //  )
 //}

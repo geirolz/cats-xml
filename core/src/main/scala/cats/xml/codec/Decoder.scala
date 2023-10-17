@@ -5,7 +5,7 @@ import cats.data.*
 import cats.xml.*
 import cats.xml.cursor.{Cursor, FreeCursor, NodeCursor}
 import cats.xml.cursor.NodeCursor.Root
-import cats.xml.XmlData.{XmlNumber, *}
+import cats.xml.XmlData.*
 
 import scala.collection.Factory
 import scala.reflect.ClassTag
@@ -82,7 +82,7 @@ object Decoder extends DecoderInstances with DecoderSyntax {
       .reduceLeft(_ or _)
 
   def fromCursor[U](
-    f: NodeCursor => FreeCursor[Xml, U]
+    f: NodeCursor => FreeCursor[U]
   ): Decoder[U] = Decoder.of {
     case Left(failure) => DecoderFailure.CursorFailed(failure).invalidNel
     case Right(xml: Xml) =>

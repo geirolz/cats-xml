@@ -107,13 +107,15 @@ val encoder: Encoder[Foo] = Encoder.of(t =>
 ```
 
 ### Navigating
+
 ```scala mdoc:reset
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
 import cats.xml.implicits.*
 
-val node = xml"""
+val node =
+  xml"""
      <wrapper>
          <root>
            <foo>1</foo>

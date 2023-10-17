@@ -1,9 +1,9 @@
 package cats.xml.generic
 
 import cats.data.NonEmptyList
+import cats.xml.XmlNode
 import cats.xml.codec.{Decoder, DecoderFailure}
 import cats.xml.cursor.{CursorFailure, FreeCursor}
-import cats.xml.{Xml, XmlNode}
 import cats.xml.utils.generic.ParamName
 import magnolia1.{CaseClass, Param, SealedTrait, Subtype}
 
@@ -34,7 +34,7 @@ object MagnoliaDecoder {
                   val normalizedLabel: String = paramInfo.labelMapper(param.label)
 
                   // find and decoder element
-                  val result: Option[FreeCursor[Xml, param.PType]] = paramInfo.elemType match {
+                  val result: Option[FreeCursor[param.PType]] = paramInfo.elemType match {
                     case XmlElemType.Attribute => Some(c.attr(normalizedLabel).as[param.PType])
                     case XmlElemType.Child     => Some(c.down(normalizedLabel).as[param.PType])
                     case XmlElemType.Text      => Some(c.text.as[param.PType])
@@ -90,11 +90,11 @@ object MagnoliaDecoder {
   // Internal error: unable to find the outer accessor symbol of class $read
   private def useDefaultParameterIfPresentToRecoverMissing[F[_], T, PT](
     param: Param[F, T]
-  ): PartialFunction[NonEmptyList[CursorFailure], FreeCursor[Xml, PT]] = { failures =>
+  ): PartialFunction[NonEmptyList[CursorFailure], FreeCursor[PT]] = { failures =>
     if (failures.forall(_.isMissing))
       param.default match {
         case Some(value) =>
-          FreeCursor.const[Xml, PT](value.asInstanceOf[PT].validNel[CursorFailure])
+          FreeCursor.const[PT](value.asInstanceOf[PT].validNel[CursorFailure])
         case None => FreeCursor.failure(failures)
       }
     else
