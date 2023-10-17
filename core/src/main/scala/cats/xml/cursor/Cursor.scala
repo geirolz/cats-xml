@@ -34,7 +34,7 @@ sealed trait Cursor[+X <: Xml] extends Serializable {
     * @return
     *   A new `FreeCursor`
     */
-  def as[T: Decoder]: FreeCursor[Xml, T] =
+  def as[T: Decoder]: FreeCursor[T] =
     FreeCursor[T](this)
 
   /** A String representation of the cursor.

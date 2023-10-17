@@ -7,15 +7,12 @@ import cats.xml.{Xml, XmlNode}
 import cats.xml.codec.{Decoder, DecoderFailure}
 import cats.xml.validator.Validator
 
-/** `FreeCursor` represent a cursor with a free `O` type as result of the focusing and a free `I`
-  * type as target of the focusing.
+/** `FreeCursor` represent a cursor with a free `O` type as result of the focusing.
   *
-  * @tparam I
-  *   Input type of the `FreeCursor`
   * @tparam O
   *   Output type of the `FreeCursor`
   */
-sealed trait FreeCursor[I, +O] extends Serializable { $this =>
+sealed trait FreeCursor[+O] extends Serializable { $this =>
 
   /** Apply the current cursor to the specified input of type `I`. This allows to select a precise
     * part of the input `I` tree.
@@ -27,7 +24,7 @@ sealed trait FreeCursor[I, +O] extends Serializable { $this =>
     * @return
     *   `Right` when succeed `Left` when fail
     */
-  def focus(input: I): FreeCursor.Result[O]
+  def focus(input: Xml): FreeCursor.Result[O]
 
   /** Map the result of this cursor when succeed
     * @param f
@@ -38,7 +35,7 @@ sealed trait FreeCursor[I, +O] extends Serializable { $this =>
     *   A new `FreeCursor` which once applied, apply this cursor and then if succeed apply the
     *   function `f` in order to map the result
     */
-  def map[U](f: O => U): FreeCursor[I, U] =
+  def map[U](f: O => U): FreeCursor[U] =
     FreeCursor.of($this.focus(_).map(f))
 
   /** Create a new `FreeCursor` where the output of this cursor is validated with the specified
@@ -50,8 +47,8 @@ sealed trait FreeCursor[I, +O] extends Serializable { $this =>
     * @return
     *   A new validated `FreeCursor`
     */
-  def validate[OO >: O](validator: Validator[OO]): FreeCursor[I, OO] =
-    FreeCursor.of((input: I) =>
+  def validate[OO >: O](validator: Validator[OO]): FreeCursor[OO] =
+    FreeCursor.of((input: Xml) =>
       $this.focus(input).andThen(o =>
         validator(o)
           .leftMap(eNel => NonEmptyList.one(CursorFailure.ValidationsFailed("** UNKNOWN **", eNel)))
@@ -64,27 +61,24 @@ object FreeCursor extends FreeCursorInstances {
 
   type Result[+T] = ValidatedNel[CursorFailure, T]
 
-  def id[T]: FreeCursor[T, T] =
-    FreeCursor.of(_.validNel)
-
-  def pure[I, O](value: O): FreeCursor[I, O] =
+  def pure[O](value: O): FreeCursor[O] =
     const(value.validNel)
 
-  def failure[I, O](value: NonEmptyList[CursorFailure]): FreeCursor[I, O] =
+  def failure[O](value: NonEmptyList[CursorFailure]): FreeCursor[O] =
     const(value.invalid)
 
-  def const[I, O](result: FreeCursor.Result[O]): FreeCursor[I, O] =
+  def const[O](result: FreeCursor.Result[O]): FreeCursor[O] =
     FreeCursor.of(_ => result)
 
-  private[xml] def of[I, O](f: I => FreeCursor.Result[O]): FreeCursor[I, O] =
-    new FreeCursor[I, O] {
-      override def focus(input: I): Result[O] = f(input)
+  private[xml] def of[O](f: Xml => FreeCursor.Result[O]): FreeCursor[O] =
+    new FreeCursor[O] {
+      override def focus(input: Xml): Result[O] = f(input)
     }
 
   def apply[O: Decoder](
     cursor: Cursor[Xml]
-  ): FreeCursor[Xml, O] =
-    new FreeCursor[Xml, O] { $this =>
+  ): FreeCursor[O] =
+    new FreeCursor[O] { $this =>
       override def focus(xml: Xml): FreeCursor.Result[O] = {
 
         val cursorResult: Cursor.Result[Xml] = xml match {
@@ -123,7 +117,7 @@ object FreeCursor extends FreeCursorInstances {
         }
       }
 
-      override def validate[OO >: O](validator: Validator[OO]): FreeCursor[Xml, OO] =
+      override def validate[OO >: O](validator: Validator[OO]): FreeCursor[OO] =
         FreeCursor.of((input: Xml) =>
           $this.focus(input).andThen(o =>
             validator(o)
@@ -135,38 +129,30 @@ object FreeCursor extends FreeCursorInstances {
 
 private[xml] trait FreeCursorInstances {
 
-  implicit def applicativeErrorForFreeCursor[I]
-    : ApplicativeError[FreeCursor[I, *], NonEmptyList[CursorFailure]] =
-    new ApplicativeError[FreeCursor[I, *], NonEmptyList[CursorFailure]] {
+  implicit val applicativeErrorForFreeCursor
+    : ApplicativeError[FreeCursor, NonEmptyList[CursorFailure]] =
+    new ApplicativeError[FreeCursor, NonEmptyList[CursorFailure]] {
 
-      override def map[A, B](fa: FreeCursor[I, A])(f: A => B): FreeCursor[I, B] =
+      override def map[A, B](fa: FreeCursor[A])(f: A => B): FreeCursor[B] =
         fa.map(f)
 
-      def pure[A](a: A): FreeCursor[I, A] =
+      def pure[A](a: A): FreeCursor[A] =
         FreeCursor.pure(a)
 
-      def ap[A, B](ff: FreeCursor[I, A => B])(fa: FreeCursor[I, A]): FreeCursor[I, B] =
-        FreeCursor.of((input: I) => fa.focus(input).ap(ff.focus(input)))
-
-      override def product[A, B](
-        fa: FreeCursor[I, A],
-        fb: FreeCursor[I, B]
-      ): FreeCursor[I, (A, B)] =
-        FreeCursor.of((input: I) => fa.focus(input).product(fb.focus(input)))
-
-      override def unit: FreeCursor[I, Unit] = pure(())
+      def ap[A, B](ff: FreeCursor[A => B])(fa: FreeCursor[A]): FreeCursor[B] =
+        FreeCursor.of((input: Xml) => fa.focus(input).ap(ff.focus(input)))
 
       def handleErrorWith[A](
-        fa: FreeCursor[I, A]
-      )(f: NonEmptyList[CursorFailure] => FreeCursor[I, A]): FreeCursor[I, A] =
-        FreeCursor.of((input: I) =>
+        fa: FreeCursor[A]
+      )(f: NonEmptyList[CursorFailure] => FreeCursor[A]): FreeCursor[A] =
+        FreeCursor.of((input: Xml) =>
           fa.focus(input) match {
             case Validated.Invalid(e)   => f(e).focus(input)
             case v @ Validated.Valid(_) => v
           }
         )
 
-      def raiseError[A](e: NonEmptyList[CursorFailure]): FreeCursor[I, A] =
+      def raiseError[A](e: NonEmptyList[CursorFailure]): FreeCursor[A] =
         FreeCursor.const(Validated.Invalid(e))
     }
 }

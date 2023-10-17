@@ -671,7 +671,7 @@ sealed trait XmlNodeSyntax {
       * @return
       *   Cursor result, Left when fails Right when succeed
       */
-    def focus[T](f: NodeCursor.Root.type => FreeCursor[Xml, T]): FreeCursor.Result[T] =
+    def focus[T](f: NodeCursor.Root.type => FreeCursor[T]): FreeCursor.Result[T] =
       f(Root).focus(node)
 
     def modify(f: NodeCursor.Root.type => Modifier[XmlNode]): Modifier.Result[XmlNode] =
