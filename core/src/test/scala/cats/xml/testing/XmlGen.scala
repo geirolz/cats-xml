@@ -91,7 +91,7 @@ object XmlGen {
         )
       )
     } yield XmlNode(nodeName)
-      .withAttributes(attributes)
+      .withAttrs(attributes)
       .withContent(content)
   }
 

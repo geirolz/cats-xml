@@ -57,7 +57,7 @@ val optNode: Option[XmlNode] = None
 // optNode: Option[XmlNode] = None
 val node: XmlNode = 
   XmlNode("Wrapper")
-    .withAttributes(
+    .withAttrs(
       "a" := 1,
       "b" := "test",
       "c" := Some(2),
@@ -107,7 +107,7 @@ import cats.xml.codec.Encoder
 
 val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
-    .withAttributes(
+    .withAttrs(
       "foo"  := t.foo.getOrElse("ERROR"),
       "bar"  := t.bar
     )

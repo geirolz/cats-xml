@@ -31,13 +31,13 @@ class XmlParserSuite extends munit.FunSuite {
       ),
       expected = Success(
         XmlNode("Foo")
-          .withAttributes(
+          .withAttrs(
             "intAttr"  := 1,
             "boolAttr" := true
           )
           .withChildren(
             XmlNode("Bar")
-              .withAttributes(
+              .withAttrs(
                 "intAttr"   := 2,
                 "emptyAttr" := ""
               )
@@ -69,7 +69,7 @@ class XmlParserSuite extends munit.FunSuite {
                     <A>1</A>
                     <B>2</B>
                     <C>3</C>
-                  </Group>  
+                  </Group>
                   <Group>
                     <A>4</A>
                     <B>5</B>
@@ -78,13 +78,13 @@ class XmlParserSuite extends munit.FunSuite {
               </Bar>
           </Foo>""",
       expected = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "intAttr"  := 1,
           "boolAttr" := true
         )
         .withChildren(
           XmlNode("Bar")
-            .withAttributes(
+            .withAttrs(
               "intAttr"   := 2,
               "emptyAttr" := ""
             )
@@ -111,7 +111,7 @@ class XmlParserSuite extends munit.FunSuite {
     assertEquals(
       obtained = xml,
       expected = XmlNode("Data")
-        .withAttributes(
+        .withAttrs(
           "value" := BigDecimal("5340595900475325933418219074917123456789123456789")
         )
     )

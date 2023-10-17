@@ -34,6 +34,7 @@ case class Foo(
 ```
 
 ### Decoder semiauto
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.codec.Decoder
@@ -44,10 +45,10 @@ import cats.xml.generic.decoder.semiauto.*
 
 implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
   XmlTypeInterpreter
-    .default[Foo]
-    .overrideType(
-      _.param(_.valueClass) -> XmlElemType.Attribute
-    )
+          .default[Foo]
+          .overrideType(
+            _.param(_.valueClass) -> XmlElemType.Attribute
+          )
 // typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@496528c
 
 implicit val decoderValueClass: Decoder[ValueClass] = deriveDecoder[ValueClass]
@@ -58,18 +59,18 @@ implicit val decoderFoo: Decoder[Foo] = deriveDecoder[Foo]
 // decoderFoo: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@2a1f01ae
 
 XmlNode("foo")
-   .withAttributes(
-     "primitiveField" := 1d,
-     "valueClass"     := "TEST"
-   )
-   .withChildren(
-     XmlNode("bar")
-       .withAttributes(
-         "field1" := "BHO",
-         "field2" := BigDecimal(100)
-       )
-   )
-   .as[Foo]
+        .withAttrs(
+          "primitiveField" := 1d,
+          "valueClass" := "TEST"
+        )
+        .withChildren(
+          XmlNode("bar")
+                  .withAttrs(
+                    "field1" := "BHO",
+                    "field2" := BigDecimal(100)
+                  )
+        )
+        .as[Foo]
 // res1: Decoder.Result[Foo] = Valid(Foo(1.0,ValueClass(TEST),Bar(BHO,100),None,None))
 ```
 

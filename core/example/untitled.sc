@@ -96,8 +96,8 @@ val result1: Modifier.Result[XmlNode] =
 ////// ############### DECODER ###############
 //val tree: XmlNode =
 //  XmlNode("Foo")
-//    .withAttributes("name" := "TEST")
-//    .withAttributes("age" := "10")
+//    .withAttrs("name" := "TEST")
+//    .withAttrs("age" := "10")
 //    .withText("1")
 ////
 ////val ressa = tree.findChild("foo")
@@ -132,7 +132,7 @@ val result1: Modifier.Result[XmlNode] =
 ////############### ENCODER ###############
 //val encoder: Encoder[Foo] = Encoder.of(t =>
 //  XmlNode("Foo")
-//    .withAttributes(
+//    .withAttrs(
 //      "name" := t.name.get,
 //      "age"  := t.bar
 //    )

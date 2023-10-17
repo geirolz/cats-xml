@@ -20,7 +20,7 @@ class CodecSuite extends munit.FunSuite {
       ),
       encoder = Encoder.of(foo => {
         XmlNode("Foo")
-          .withAttributes(
+          .withAttrs(
             "bar" := foo.bar,
             "baz" := foo.baz
           )
@@ -48,7 +48,7 @@ class CodecSuite extends munit.FunSuite {
     assertEquals(
       obtained = Decoder[Foo].decode(
         XmlNode("Foo")
-          .withAttributes(
+          .withAttrs(
             "bar" := "test",
             "baz" := 100
           )
@@ -63,7 +63,7 @@ class CodecSuite extends munit.FunSuite {
       decoder = Decoder.failure(DecoderFailure.Custom("Not implemented.")),
       encoder = Encoder.of(foo => {
         XmlNode("Foo")
-          .withAttributes(
+          .withAttrs(
             "bar" := foo.bar,
             "baz" := foo.baz
           )
@@ -75,7 +75,7 @@ class CodecSuite extends munit.FunSuite {
         Foo("test", 100)
       ),
       expected = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "bar" := "test",
           "baz" := 100
         )

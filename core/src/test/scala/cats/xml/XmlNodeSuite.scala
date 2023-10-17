@@ -49,7 +49,7 @@ class XmlNodeSuite extends munit.FunSuite {
   test("XmlNode.apply") {
     assertEquals(
       obtained = XmlNode("Foo", List("A" := 1), NodeContent.text("Text")),
-      expected = XmlNode("Foo").withAttributes("A" := 1).withText("Text")
+      expected = XmlNode("Foo").withAttrs("A" := 1).withText("Text")
     )
     intercept[IllegalArgumentException](
       body = XmlNode("")
@@ -84,11 +84,11 @@ class XmlNodeSuite extends munit.FunSuite {
   test("XmlNode.updateLabel value") {
     assertEquals(
       XmlNode("Foo")
-        .withAttributes("A" := 1)
+        .withAttrs("A" := 1)
         .withText("Text")
         .withLabel("Bar"),
       XmlNode("Bar")
-        .withAttributes("A" := 1)
+        .withAttrs("A" := 1)
         .withText("Text")
     )
 
@@ -100,11 +100,11 @@ class XmlNodeSuite extends munit.FunSuite {
   test("XmlNode.updateLabel function") {
     assertEquals(
       XmlNode("Foo")
-        .withAttributes("A" := 1)
+        .withAttrs("A" := 1)
         .withText("Text")
         .updateLabel(_ ++ "Bar"),
       XmlNode("FooBar")
-        .withAttributes("A" := 1)
+        .withAttrs("A" := 1)
         .withText("Text")
     )
     intercept[IllegalArgumentException](
@@ -116,8 +116,38 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   // ################### ATTRS ###################
+  test("XmlNode.withAttrsMap") {
+
+    val node1 = XmlNode("Foo").withAttrsMap(
+      "A" -> "1",
+      "B" -> "2",
+      "C" -> "3"
+    )
+    val node2 = XmlNode("Foo").withAttrsMap(
+      Map(
+        "A" -> "1",
+        "B" -> "2",
+        "C" -> "3"
+      )
+    )
+    val node3 = XmlNode("Foo").withAttrs(
+      "A" := 1,
+      "B" := 2,
+      "C" := 3
+    )
+
+    assertEquals(
+      obtained = node1,
+      expected = node2
+    )
+    assertEquals(
+      obtained = node2,
+      expected = node3
+    )
+  }
+
   test("XmlNode.findAttrRaw") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -134,7 +164,7 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   test("XmlNode.findAttr") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -151,7 +181,7 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   test("XmlNode.findAttrWhere") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -172,7 +202,7 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   test("XmlNode.existsAttrByKey") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -189,7 +219,7 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   test("XmlNode.existsAttrWithValue") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -210,7 +240,7 @@ class XmlNodeSuite extends munit.FunSuite {
   }
 
   test("XmlNode.existsAttrWithValue") {
-    val node = XmlNode("Foo").withAttributes(
+    val node = XmlNode("Foo").withAttrs(
       "A" := 1,
       "B" := 2,
       "C" := 3
@@ -233,15 +263,15 @@ class XmlNodeSuite extends munit.FunSuite {
   // ----------- appendAttrs -----------
   test("XmlNode.appendAttr preserve normalization") {
     assertEquals(
-      obtained = XmlNode("Foo").withAttributes("A" := 1).appendAttr("A" := 2),
-      expected = XmlNode("Foo").withAttributes("A" := 2)
+      obtained = XmlNode("Foo").withAttrs("A" := 1).appendAttr("A" := 2),
+      expected = XmlNode("Foo").withAttrs("A" := 2)
     )
   }
 
   test("XmlNode.appendAttr") {
     assertEquals(
       obtained = XmlNode("Foo").appendAttr("A" := 1),
-      expected = XmlNode("Foo").withAttributes("A" := 1)
+      expected = XmlNode("Foo").withAttrs("A" := 1)
     )
   }
 
@@ -251,7 +281,7 @@ class XmlNodeSuite extends munit.FunSuite {
         "A" := 1,
         "B" := 2
       ),
-      expected = XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttrs(
         "A" := 1,
         "B" := 2
       )
@@ -266,7 +296,7 @@ class XmlNodeSuite extends munit.FunSuite {
           "B" := 2
         )
       ),
-      expected = XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttrs(
         Seq(
           "A" := 1,
           "B" := 2
@@ -278,29 +308,29 @@ class XmlNodeSuite extends munit.FunSuite {
   // ----------- prependAttrs -----------
   test("XmlNode.prependAttr preserve normalization") {
     assertEquals(
-      obtained = XmlNode("Foo").withAttributes("A" := 2).prependAttrs("A" := 1),
-      expected = XmlNode("Foo").withAttributes("A" := 2)
+      obtained = XmlNode("Foo").withAttrs("A" := 2).prependAttrs("A" := 1),
+      expected = XmlNode("Foo").withAttrs("A" := 2)
     )
   }
 
   test("XmlNode.prependAttr") {
     assertEquals(
       obtained = XmlNode("Foo").prependAttr("A" := 1),
-      expected = XmlNode("Foo").withAttributes("A" := 1)
+      expected = XmlNode("Foo").withAttrs("A" := 1)
     )
   }
 
   test("XmlNode.prependAttrs varargs") {
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "C" := 3
         )
         .prependAttrs(
           "A" := 1,
           "B" := 2
         ),
-      expected = XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttrs(
         "A" := 1,
         "B" := 2,
         "C" := 3
@@ -311,7 +341,7 @@ class XmlNodeSuite extends munit.FunSuite {
   test("XmlNode.prependAttrs") {
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "C" := 3
         )
         .prependAttrs(
@@ -320,7 +350,7 @@ class XmlNodeSuite extends munit.FunSuite {
             "B" := 2
           )
         ),
-      expected = XmlNode("Foo").withAttributes(
+      expected = XmlNode("Foo").withAttrs(
         Seq(
           "A" := 1,
           "B" := 2,
@@ -334,9 +364,9 @@ class XmlNodeSuite extends munit.FunSuite {
   test("XmlNode.removeAttr") {
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes("A" := 1, "B" := 2)
+        .withAttrs("A" := 1, "B" := 2)
         .removeAttr("A"),
-      expected = XmlNode("Foo").withAttributes("B" := 2)
+      expected = XmlNode("Foo").withAttrs("B" := 2)
     )
   }
 

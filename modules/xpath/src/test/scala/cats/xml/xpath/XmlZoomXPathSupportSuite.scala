@@ -52,7 +52,7 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
         .withChildren(
           XmlNode("root").withText("FOO1"),
           XmlNode("root")
-            .withAttributes(
+            .withAttrs(
               "id" := 1
             )
         )
@@ -60,7 +60,7 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
     assertEquals(
       obtained = xpath"/root[@id='1']".toTryValue.get.focus(data),
       expected = Right(
-        XmlNode("root").withAttributes(
+        XmlNode("root").withAttrs(
           "id" := 1
         )
       )
@@ -72,12 +72,12 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
       XmlNode("wrapper")
         .withChildren(
           XmlNode("root")
-            .withAttributes(
+            .withAttrs(
               "id" := 1
             )
             .withText("pew"),
           XmlNode("root")
-            .withAttributes(
+            .withAttrs(
               "id" := 2
             )
             .withText("mew")
@@ -87,7 +87,7 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
       obtained = xpath"/root[text()='mew']".toTryValue.get.focus(data),
       expected = Right(
         XmlNode("root")
-          .withAttributes(
+          .withAttrs(
             "id" := 2
           )
           .withText("mew")
@@ -346,13 +346,13 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
           XmlNode("root")
             .withChildren(
               XmlNode("child")
-                .withAttributes("id" := 1)
+                .withAttrs("id" := 1)
                 .withChildren(XmlNode("value").withText(3)),
               XmlNode("child")
-                .withAttributes("id" := 2)
+                .withAttrs("id" := 2)
                 .withChildren(XmlNode("value").withText(4)),
               XmlNode("child")
-                .withAttributes("id" := 3)
+                .withAttrs("id" := 3)
                 .withChildren(XmlNode("value").withText(5))
             )
         )
@@ -393,13 +393,13 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
           XmlNode("root")
             .withChildren(
               XmlNode("child")
-                .withAttributes("id" := "foo")
+                .withAttrs("id" := "foo")
                 .withChildren(XmlNode("value").withText(3)),
               XmlNode("child")
-                .withAttributes("id" := "bar")
+                .withAttrs("id" := "bar")
                 .withChildren(XmlNode("value").withText(4)),
               XmlNode("child")
-                .withAttributes("id" := "baz")
+                .withAttrs("id" := "baz")
                 .withChildren(XmlNode("value").withText(5))
             )
         )
@@ -422,13 +422,13 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
           XmlNode("root")
             .withChildren(
               XmlNode("child")
-                .withAttributes("id" := "foo")
+                .withAttrs("id" := "foo")
                 .withChildren(XmlNode("value").withText(3)),
               XmlNode("child")
-                .withAttributes("id" := "bar")
+                .withAttrs("id" := "bar")
                 .withChildren(XmlNode("value").withText(4)),
               XmlNode("child")
-                .withAttributes("id" := "baz")
+                .withAttrs("id" := "baz")
                 .withChildren(XmlNode("value").withText(5))
             )
         )
@@ -452,13 +452,13 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
           XmlNode("root")
             .withChildren(
               XmlNode("child")
-                .withAttributes("id" := "foo")
+                .withAttrs("id" := "foo")
                 .withChildren(XmlNode("value").withText(3)),
               XmlNode("child")
-                .withAttributes("id" := "bar")
+                .withAttrs("id" := "bar")
                 .withChildren(XmlNode("value").withText(4)),
               XmlNode("child")
-                .withAttributes("id" := "baz")
+                .withAttrs("id" := "baz")
                 .withChildren(XmlNode("value").withText(5))
             )
         )
@@ -476,13 +476,13 @@ class XmlZoomXPathSupportSuite extends munit.FunSuite {
           XmlNode("root")
             .withChildren(
               XmlNode("child")
-                .withAttributes("id" := "foo")
+                .withAttrs("id" := "foo")
                 .withChildren(XmlNode("value").withText(3)),
               XmlNode("child")
-                .withAttributes("id" := "bar")
+                .withAttrs("id" := "bar")
                 .withChildren(XmlNode("value").withText(4)),
               XmlNode("child")
-                .withAttributes("id" := "baz")
+                .withAttrs("id" := "baz")
                 .withChildren(XmlNode("value").withText(5))
             )
         )

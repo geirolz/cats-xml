@@ -60,7 +60,7 @@ object XmlParser extends XmlParserSyntax {
           ): Unit = {
 
             val newNode: XmlNode.Node = XmlNode(qName)
-              .withAttributes(
+              .withAttrs(
                 (0 until attributes.getLength).map(i =>
                   XmlAttribute(
                     attributes.getLocalName(i),

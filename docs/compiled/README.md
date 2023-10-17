@@ -48,6 +48,7 @@ case class Foo(
 ```
 
 ### Plain creation
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.implicits.*
@@ -55,9 +56,9 @@ import cats.implicits.*
 
 val optNode: Option[XmlNode] = None
 // optNode: Option[XmlNode] = None
-val node: XmlNode = 
+val node: XmlNode =
   XmlNode("Wrapper")
-    .withAttributes(
+    .withAttrs(
       "a" := 1,
       "b" := "test",
       "c" := Some(2),
@@ -101,15 +102,16 @@ val decoder: Decoder[Foo] =
 ```
 
 ### Encoding
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
 
 val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
-    .withAttributes(
-      "foo"  := t.foo.getOrElse("ERROR"),
-      "bar"  := t.bar
+    .withAttrs(
+      "foo" := t.foo.getOrElse("ERROR"),
+      "bar" := t.bar
     )
     .withText(t.text)
 )

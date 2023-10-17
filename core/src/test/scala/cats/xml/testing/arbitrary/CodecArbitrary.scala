@@ -17,7 +17,7 @@ object CodecArbitrary {
     Arbitrary {
       agen.arbitrary.map(a =>
         Encoder.pure(
-          XmlNode(s"Node${a.hashCode()}").withAttributes(
+          XmlNode(s"Node${a.hashCode()}").withAttrs(
             "Id"       := Ops.md5(a.toString),
             "hashcode" := a.hashCode()
           )

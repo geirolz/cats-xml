@@ -74,7 +74,7 @@ object MagnoliaEncoder {
       config.discriminatorAttrKey match {
         case Some(discriminatorAttrKey) =>
           val base = XmlNode(sealedTrait.typeName.short)
-            .withAttributes(
+            .withAttrs(
               discriminatorAttrKey := subtype.typeName.short
             )
 

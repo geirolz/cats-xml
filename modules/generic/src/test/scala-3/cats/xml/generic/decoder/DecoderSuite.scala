@@ -24,13 +24,13 @@
 //
 //    assertEquals(
 //      obtained = XmlNode("foo")
-//        .withAttributes(
+//        .withAttrs(
 //          "primitiveField" := 1d,
 //          "valueClass"     := "TEST"
 //        )
 //        .withChildren(
 //          XmlNode("bar")
-//            .withAttributes(
+//            .withAttrs(
 //              "field1" := "BHO",
 //              "field2" := BigDecimal(100)
 //            )

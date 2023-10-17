@@ -20,13 +20,13 @@ class DecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("foo")
-        .withAttributes(
+        .withAttrs(
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
         .withChildren(
           XmlNode("bar")
-            .withAttributes(
+            .withAttrs(
               "field1" := "BHO",
               "field2" := BigDecimal(100)
             )
@@ -55,7 +55,7 @@ class DecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("Foo")
-        .withAttributes(
+        .withAttrs(
           "a" := "TEST"
         )
         .as[Foo],
@@ -74,7 +74,7 @@ class DecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("Bike")
-        .withAttributes(
+        .withAttrs(
           "wheelCount" := 2
         )
         .as[Vehicle],
@@ -93,13 +93,13 @@ class DecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("foo")
-        .withAttributes(
+        .withAttrs(
           "primitiveField" := 1d,
           "valueClass"     := "TEST"
         )
         .withChildren(
           XmlNode("bar")
-            .withAttributes(
+            .withAttrs(
               "field1" := "BHO",
               "field2" := BigDecimal(100)
             )
@@ -126,7 +126,7 @@ class DecoderSuite extends munit.FunSuite {
 
     assertEquals(
       obtained = XmlNode("Bike")
-        .withAttributes(
+        .withAttrs(
           "wheelCount" := 2
         )
         .as[Vehicle],

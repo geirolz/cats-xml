@@ -32,7 +32,7 @@ val encFoo: Encoder[Foo]          = deriveEncoder[Foo]
 
 val barNode = XmlNode("bar").withText(100)
 val fooNode = XmlNode("Foo")
-  .withAttributes("test" := "TEST")
+  .withAttrs("test" := "TEST")
   .withChild(barNode)
 
 val decoderResult: Decoder.Result[Foo] = decFoo.decode(fooNode)
