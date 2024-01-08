@@ -1,12 +1,12 @@
-package cats.xml.std
+package cats.xml.scalaxml
 
 import cats.xml.{Xml, XmlNode}
-import cats.xml.std.testing.NodeSeqAssertions
+import cats.xml.scalaxml.testing.NodeSeqAssertions
 
 class NodeSeqConverterSuite extends munit.FunSuite with NodeSeqAssertions {
 
   import cats.xml.implicits.*
-  import cats.xml.std.implicits.*
+  import cats.xml.scalaxml.implicits.*
 
   test("NodeSeqConverter.fromNodeSeq") {
     assertEquals(

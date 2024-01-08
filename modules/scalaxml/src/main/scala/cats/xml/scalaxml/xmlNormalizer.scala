@@ -1,4 +1,4 @@
-package cats.xml.std
+package cats.xml.scalaxml
 
 import scala.xml.{Elem, Node, NodeSeq, Text}
 
@@ -39,7 +39,7 @@ object XmlNormalizer extends XmlNormalizerSyntax {
     }
   }
 }
-private[std] trait XmlNormalizerSyntax {
+private[scalaxml] trait XmlNormalizerSyntax {
 
   implicit class NodeSeqNormalizationAndEqualityOps[N <: NodeSeq](ns: N) {
     def normalized: NodeSeq =

@@ -34,7 +34,7 @@ Please, drop a ⭐️ if you are interested in this project and you want to supp
 ## Modules
 - [Effect](docs/compiled/effect.md)
 - [Generic (scala 2 only so far)](docs/compiled/generic.md)
-- [Standard](docs/compiled/standard.md)
+- [ScalaXml](docs/compiled/scalaxml.md)
 - [XPath](docs/compiled/xpath.md)
 
 ## Example

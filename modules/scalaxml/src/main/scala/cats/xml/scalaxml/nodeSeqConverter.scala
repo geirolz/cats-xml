@@ -1,4 +1,4 @@
-package cats.xml.std
+package cats.xml.scalaxml
 
 import cats.xml.*
 import cats.Eq
@@ -6,9 +6,11 @@ import cats.Eq
 import scala.annotation.{tailrec, unused}
 import scala.xml.*
 
-private[std] object NodeSeqConverter extends NodeSeqConverterInstances with NodeSeqConverterSyntax {
+private[scalaxml] object NodeSeqConverter
+    extends NodeSeqConverterInstances
+    with NodeSeqConverterSyntax {
 
-  import cats.xml.std.implicits.*
+  import cats.xml.scalaxml.implicits.*
 
   def fromNodeSeq(ns: NodeSeq): XmlNode =
     ns match {
@@ -80,12 +82,12 @@ private[std] object NodeSeqConverter extends NodeSeqConverterInstances with Node
   }
 }
 
-private[std] trait NodeSeqConverterInstances {
+private[scalaxml] trait NodeSeqConverterInstances {
   implicit val eqNodeSeq: Eq[NodeSeq] = (x: NodeSeq, y: NodeSeq) =>
     XmlNormalizer.normalize(x) == XmlNormalizer.normalize(y)
 }
 
-private[std] trait NodeSeqConverterSyntax {
+private[scalaxml] trait NodeSeqConverterSyntax {
 
   implicit def nodeSeqToXmlNode(ns: NodeSeq): XmlNode =
     Xml.fromNodeSeq(ns)

@@ -1,6 +1,6 @@
-package cats.xml.std
+package cats.xml.scalaxml
 
-import cats.xml.std.testing.NodeSeqAssertions
+import cats.xml.scalaxml.testing.NodeSeqAssertions
 
 class XmlNormalizerSuite extends munit.FunSuite with NodeSeqAssertions {
 
@@ -37,7 +37,7 @@ class XmlNormalizerSuite extends munit.FunSuite with NodeSeqAssertions {
 
   test("NodeSeq.normalize") {
 
-    import cats.xml.std.syntax.*
+    import cats.xml.scalaxml.syntax.*
 
     assertEqualsNodeSeq(
       obtained = <Cars>

@@ -1,4 +1,4 @@
-package cats.xml.std.testing
+package cats.xml.scalaxml.testing
 
 import munit.{Assertions, Location}
 
@@ -6,7 +6,7 @@ import scala.xml.NodeSeq
 
 trait NodeSeqAssertions { $this: munit.Suite =>
 
-  import cats.xml.std.implicits.*
+  import cats.xml.scalaxml.implicits.*
 
   def assertEqualsNodeSeq(
     obtained: NodeSeq,

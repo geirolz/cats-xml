@@ -1,6 +1,6 @@
-package cats.xml.std
+package cats.xml.scalaxml
 
-import cats.xml.std.codec.NodeSeqEncoderSyntax
+import cats.xml.scalaxml.codec.NodeSeqEncoderSyntax
 
 object implicits extends AllInstances with AllSyntax
 
