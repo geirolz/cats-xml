@@ -143,6 +143,7 @@ def module(modName: String)(
     case None => noPublishSettings
   }
   val mimaSettings = Seq(
+    mimaFailOnNoPrevious := false,
     mimaPreviousArtifacts := mimaCompatibleWith.map { version =>
       organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % version
     }
