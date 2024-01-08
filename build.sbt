@@ -10,7 +10,7 @@ lazy val supportedScalaVersions = List(scala213, scala33)
 
 //## global project to no publish ##
 val copyReadMe = taskKey[Unit]("Copy generated README to main folder.")
-lazy val `cats-xml`: Project = project
+lazy val root: Project = project
   .in(file("."))
   .settings(
     inThisBuild(
@@ -60,37 +60,34 @@ lazy val docs: Project =
     )
 
 lazy val internalUtils: Project =
-  buildModule(
-    prjModuleName = "internal-utils",
-    toPublish     = true,
-    folder        = "."
+  module("internal-utils")(
+    folder    = "./internal-utils",
+    publishAs = Some(subProjectName("internal-utils"))
   ).settings(
     libraryDependencies ++= ProjectDependencies.Utils.dedicated
   )
 
 lazy val core: Project =
-  buildModule(
-    prjModuleName = "core",
-    toPublish     = true,
-    folder        = "."
+  module("core")(
+    folder    = "./core",
+    publishAs = Some(prjName)
   ).dependsOn(internalUtils)
 
 lazy val metrics: Project =
-  buildModule(
-    prjModuleName = "metrics",
-    toPublish     = false,
-    folder        = "."
+  module("metrics")(
+    folder    = "./metrics",
+    publishAs = None
   ).dependsOn(core, internalUtils, effect, scalaxml, generic)
     .settings(
       libraryDependencies ++= ProjectDependencies.Metrics.dedicated
     )
 
 // modules
+lazy val modulesFolder = "modules"
 lazy val generic: Project =
-  buildModule(
-    prjModuleName = "generic",
-    toPublish     = true,
-    folder        = "modules"
+  module("generic")(
+    folder    = s"$modulesFolder/generic",
+    publishAs = Some(subProjectName("generic"))
   ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= {
@@ -103,58 +100,72 @@ lazy val generic: Project =
     )
 
 lazy val effect: Project =
-  buildModule(
-    prjModuleName = "effect",
-    toPublish     = true,
-    folder        = "modules"
+  module("effect")(
+    folder    = s"$modulesFolder/effect",
+    publishAs = Some(subProjectName("effect"))
   ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Effect.dedicated
     )
 
 lazy val scalaxml: Project =
-  buildModule(
-    prjModuleName = "standard",
-    toPublish     = true,
-    folder        = "modules"
+  module("scalaxml")(
+    folder    = s"$modulesFolder/scalaxml",
+    publishAs = Some(subProjectName("scalaxml"))
   ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Standard.dedicated
     )
 
 lazy val xpath: Project =
-  buildModule(
-    prjModuleName = "xpath",
-    toPublish     = true,
-    folder        = "modules"
+  module("xpath")(
+    folder    = s"$modulesFolder/xpath",
+    publishAs = Some(subProjectName("xpath"))
   ).dependsOn(core, internalUtils)
     .settings(
       libraryDependencies ++= ProjectDependencies.Xpath.dedicated
     )
 
 //=============================== MODULES UTILS ===============================
-def buildModule(prjModuleName: String, toPublish: Boolean, folder: String): Project = {
-  val keys       = prjModuleName.split("-")
-  val docName    = keys.mkString(" ")
-  val prjFile    = file(s"$folder/$prjModuleName")
-  val docNameStr = s"$prjName $docName"
+def module(modName: String)(
+  folder: String,
+  publishAs: Option[String]       = None,
+  mimaCompatibleWith: Set[String] = Set.empty
+): Project = {
+  val keys       = modName.split("-")
+  val modDocName = keys.mkString(" ")
+  val publishSettings = publishAs match {
+    case Some(pubName) =>
+      Seq(
+        moduleName     := pubName,
+        publish / skip := false
+      )
+    case None => noPublishSettings
+  }
+  val mimaSettings = Seq(
+    mimaPreviousArtifacts := mimaCompatibleWith.map { version =>
+      organization.value % s"${moduleName.value}_${scalaBinaryVersion.value}" % version
+    }
+  )
 
-  Project(prjModuleName, prjFile)
+  Project(modName, file(folder))
     .settings(
-      description    := moduleName.value,
-      moduleName     := s"$prjName-$prjModuleName",
-      name           := s"$prjName $docName",
-      publish / skip := !toPublish,
+      name := s"$prjName $modDocName",
+      mimaSettings,
+      publishSettings,
       baseSettings
     )
 }
 
+def subProjectName(modPublishName: String): String = s"$prjName-$modPublishName"
+
 //=============================== SETTINGS ===============================
 lazy val noPublishSettings: Seq[Def.Setting[_]] = Seq(
-  publish         := {},
-  publishLocal    := {},
-  publishArtifact := false,
-  publish / skip  := true
+  publish              := {},
+  publishLocal         := {},
+  publishArtifact      := false,
+  publish / skip       := true,
+  mimaFailOnNoPrevious := false
 )
 
 lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
