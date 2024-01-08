@@ -3,7 +3,7 @@
 At the moment supported only for Scala 2.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-generic" % "0.0.13"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-generic" % "0.0.15"
 ```     
                     
 ## XmlTypeInterpreter
@@ -49,14 +49,14 @@ implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
           .overrideType(
             _.param(_.valueClass) -> XmlElemType.Attribute
           )
-// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@496528c
+// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@3adc38c7
 
 implicit val decoderValueClass: Decoder[ValueClass] = deriveDecoder[ValueClass]
-// decoderValueClass: Decoder[ValueClass] = cats.xml.codec.Decoder$$anonfun$of$2@51623483
+// decoderValueClass: Decoder[ValueClass] = cats.xml.codec.Decoder$$anonfun$of$2@78a62633
 implicit val decoderBar: Decoder[Bar] = deriveDecoder[Bar]
-// decoderBar: Decoder[Bar] = cats.xml.codec.Decoder$$anonfun$of$2@3bd7ec01
+// decoderBar: Decoder[Bar] = cats.xml.codec.Decoder$$anonfun$of$2@2d8b4916
 implicit val decoderFoo: Decoder[Foo] = deriveDecoder[Foo]
-// decoderFoo: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@2a1f01ae
+// decoderFoo: Decoder[Foo] = cats.xml.codec.Decoder$$anonfun$of$2@253a6def
 
 XmlNode("foo")
         .withAttrs(
@@ -88,14 +88,14 @@ implicit val typeInterpreterFoo: XmlTypeInterpreter[Foo] =
     .overrideType(
       _.param(_.valueClass) -> XmlElemType.Attribute
     )
-// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@5c2dcd69
+// typeInterpreterFoo: XmlTypeInterpreter[Foo] = cats.xml.generic.XmlTypeInterpreter$$anon$1@372555cd
 
 implicit val encoderValueClass: Encoder[ValueClass] = deriveEncoder[ValueClass]
-// encoderValueClass: Encoder[ValueClass] = cats.xml.codec.DataEncoder$$anonfun$of$4@581e8509
+// encoderValueClass: Encoder[ValueClass] = cats.xml.codec.DataEncoder$$anonfun$of$4@409179c6
 implicit val encoderBar: Encoder[Bar]               = deriveEncoder[Bar]
-// encoderBar: Encoder[Bar] = cats.xml.codec.Encoder$$anonfun$of$2@adeedd5
+// encoderBar: Encoder[Bar] = cats.xml.codec.Encoder$$anonfun$of$2@3632212e
 implicit val encoderFoo: Encoder[Foo]               = deriveEncoder[Foo]
-// encoderFoo: Encoder[Foo] = cats.xml.codec.Encoder$$anonfun$of$2@4f125971
+// encoderFoo: Encoder[Foo] = cats.xml.codec.Encoder$$anonfun$of$2@1370cb6c
 
 Foo(
   primitiveField = 1d,

@@ -34,7 +34,7 @@ Please, drop a ⭐️ if you are interested in this project and you want to supp
 ## Modules
 - [Effect](docs/compiled/effect.md)
 - [Generic (scala 2 only so far)](docs/compiled/generic.md)
-- [Standard](docs/compiled/standard.md)
+- [ScalaXml](docs/compiled/scalaxml.md)
 - [XPath](docs/compiled/xpath.md)
 
 ## Example
@@ -48,6 +48,7 @@ case class Foo(
 ```
 
 ### Plain creation
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.implicits.*
@@ -55,7 +56,7 @@ import cats.implicits.*
 
 val optNode: Option[XmlNode] = None
 // optNode: Option[XmlNode] = None
-val node: XmlNode = 
+val node: XmlNode =
   XmlNode("Wrapper")
     .withAttrs(
       "a" := 1,
@@ -101,6 +102,7 @@ val decoder: Decoder[Foo] =
 ```
 
 ### Encoding
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
@@ -108,21 +110,23 @@ import cats.xml.codec.Encoder
 val encoder: Encoder[Foo] = Encoder.of(t =>
   XmlNode("Foo")
     .withAttrs(
-      "foo"  := t.foo.getOrElse("ERROR"),
-      "bar"  := t.bar
+      "foo" := t.foo.getOrElse("ERROR"),
+      "bar" := t.bar
     )
     .withText(t.text)
 )
 ```
 
 ### Navigating
+
 ```scala
 import cats.xml.XmlNode
 import cats.xml.cursor.Cursor
 import cats.xml.cursor.FreeCursor
 import cats.xml.implicits.*
 
-val node = xml"""
+val node =
+  xml"""
      <wrapper>
          <root>
            <foo>1</foo>

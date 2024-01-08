@@ -3,7 +3,7 @@
 Add XPath support.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-xpath" % "0.0.13"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-xpath" % "0.0.15"
 ```
 
 With this module you can create `NodeCursor`s instances using XPath.
@@ -16,7 +16,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = NodeCursor.fromXPath("/root[@id='1']")
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32224/0x00000008044833f8@707c43ce]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$11249/0x0000000802d53028@7b3fbbaf]
 // )
 ```
 
@@ -28,7 +28,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32224/0x00000008044833f8@24f5dcc2]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$11249/0x0000000802d53028@72be9ffd]
 // )
 ```
 
@@ -46,7 +46,7 @@ import cats.xml.xpath.implicits.*
 
 val cursor: Either[XPathError, NodeCursor] = xpath"/root[@id='1']"
 // cursor: Either[XPathError, NodeCursor] = Right(
-//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$32224/0x00000008044833f8@5e4e72da]
+//   value = /root[filter cats.xml.xpath.CursorBuilder$PredicateBuilder$$$Lambda$11249/0x0000000802d53028@dac049]
 // )
 
 val data = XmlNode("wrapper").withChildren(
@@ -56,9 +56,9 @@ val data = XmlNode("wrapper").withChildren(
 //  <root id="1"/>
 // </wrapper>
 val result: Either[Throwable, XmlNode] =
-cursor
-  .leftMapThrowable
-  .flatMap(_.focus(data).leftMap(_.asException))
+  cursor
+    .leftMapThrowable
+    .flatMap(_.focus(data).leftMap(_.asException))
 // result: Either[Throwable, XmlNode] = Right(value = <root id="1"/>)
 ```
 
