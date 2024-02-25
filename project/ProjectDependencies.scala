@@ -64,7 +64,7 @@ object ProjectDependencies {
 
   object Plugins {
     lazy val compilerPluginsFor2_13: Seq[ModuleID] = Seq(
-      compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full)
+      compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full)
     )
     lazy val compilerPluginsFor3: Seq[ModuleID] = Nil
   }
