@@ -52,7 +52,7 @@ object ProjectDependencies {
 
   object Standard {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.scala-lang.modules" %% "scala-xml" % "2.2.0"
+      "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
     )
   }
 
