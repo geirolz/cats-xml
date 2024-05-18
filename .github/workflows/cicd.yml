@@ -65,8 +65,8 @@ jobs:
         run: sbt ++${{ matrix.scala }} mimaReportBinaryIssues
 
       #----------- COVERAGE -----------
-      - name: Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+      - name: Upload Coverage to Codacy
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
 
   deploy:
     runs-on: ubuntu-latest
