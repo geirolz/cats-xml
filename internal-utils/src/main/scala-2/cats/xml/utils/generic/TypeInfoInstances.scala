@@ -91,13 +91,11 @@ object TypeInfoInstances {
 
       def isOptionOfAnyPrimitiveOrString(tpe: c.universe.Type): Boolean = {
         val typeArgs = tpe.typeArgs
-        tpe <:< typeOf[Option[?]]
-        && typeArgs.nonEmpty
-        && (
-          typeArgs.exists(isPrimitive) ||
-            typeArgs.exists(isPrimitiveWrapper) ||
-            typeArgs.exists(isString)
-        )
+        tpe <:< typeOf[Option[?]] &&
+        typeArgs.nonEmpty &&
+        (typeArgs.exists(isPrimitive) ||
+          typeArgs.exists(isPrimitiveWrapper) ||
+          typeArgs.exists(isString))
       }
 
       // value class

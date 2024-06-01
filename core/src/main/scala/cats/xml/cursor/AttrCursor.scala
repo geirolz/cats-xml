@@ -120,8 +120,8 @@ final class AttrCursor(protected val vCursor: NodeCursor, op: AttrCursor.Op)
 
   // eq
   override def equals(obj: Any): Boolean =
-    obj.isInstanceOf[AttrCursor]
-      && Eq[AttrCursor].eqv(this, obj.asInstanceOf[AttrCursor])
+    obj.isInstanceOf[AttrCursor] &&
+      Eq[AttrCursor].eqv(this, obj.asInstanceOf[AttrCursor])
 }
 object AttrCursor {
 

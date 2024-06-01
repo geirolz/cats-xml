@@ -126,8 +126,8 @@ sealed trait NodeCursor
 
   // eq
   override final def equals(obj: Any): Boolean =
-    obj.isInstanceOf[NodeCursor]
-      && Eq[NodeCursor].eqv(this, obj.asInstanceOf[NodeCursor])
+    obj.isInstanceOf[NodeCursor] &&
+      Eq[NodeCursor].eqv(this, obj.asInstanceOf[NodeCursor])
 }
 
 object NodeCursor {

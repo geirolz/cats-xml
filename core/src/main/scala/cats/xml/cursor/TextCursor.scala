@@ -43,8 +43,8 @@ final class TextCursor(protected[xml] val lastCursor: NodeCursor)
 
   // eq
   override def equals(obj: Any): Boolean =
-    obj.isInstanceOf[TextCursor]
-      && Eq[TextCursor].eqv(this, obj.asInstanceOf[TextCursor])
+    obj.isInstanceOf[TextCursor] &&
+      Eq[TextCursor].eqv(this, obj.asInstanceOf[TextCursor])
 }
 object TextCursor {
 
