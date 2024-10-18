@@ -3,7 +3,7 @@
 Add standard scala XML interop support.
 
 ```sbt
-libraryDependencies += "com.github.geirolz" %% "cats-xml-scalaxml" % "0.0.15"
+libraryDependencies += "com.github.geirolz" %% "cats-xml-scalaxml" % "0.0.18"
 ```
 
 Use
