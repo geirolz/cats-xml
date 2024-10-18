@@ -128,7 +128,7 @@ sealed trait XmlNode extends Xml {
     children.exists(n => (n.label == label) && predicate(n))
 
   // must be 'def' due it's mutable
-  def children: Seq[XmlNode] =
+  def children: List[XmlNode] =
     content.children
 
   /** Create a new immutable instance with the same values of the current one
