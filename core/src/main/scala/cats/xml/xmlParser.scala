@@ -1,6 +1,6 @@
 package cats.xml
 
-import cats.MonadThrow
+import cats.ApplicativeThrow
 import cats.xml.utils.impure
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
@@ -40,7 +40,7 @@ object XmlParser extends XmlParserSyntax {
 
   def apply[F[_]](implicit parser: XmlParser[F]): XmlParser[F] = parser
 
-  def fromSAXParser[F[_]: MonadThrow](
+  def fromSAXParser[F[_]: ApplicativeThrow](
     saxParser: SAXParser
   ): XmlParser[F] =
     (inputStream: InputStream) =>
@@ -97,7 +97,7 @@ object XmlParser extends XmlParserSyntax {
         }
       }.liftTo[F]
 
-  implicit def defaultXmlSAXParser[F[_]: MonadThrow]: XmlParser[F] =
+  implicit def defaultXmlSAXParser[F[_]: ApplicativeThrow]: XmlParser[F] =
     fromSAXParser[F](defaultSaxParser)
 }
 private[xml] trait XmlParserSyntax {
