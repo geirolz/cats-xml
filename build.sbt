@@ -5,7 +5,7 @@ lazy val prjPackageName         = prjName.replaceAll("[^\\p{Alpha}\\d]+", ".")
 lazy val prjDescription         = "A purely functional XML library"
 lazy val prjOrg                 = "com.github.geirolz"
 lazy val scala213               = "2.13.14"
-lazy val scala33                = "3.3.3"
+lazy val scala33                = "3.3.4"
 lazy val supportedScalaVersions = List(scala213, scala33)
 
 //## global project to no publish ##
