@@ -15,7 +15,7 @@ object ProjectDependencies {
     "org.scalameta"  %% "munit-scalacheck" % "1.0.0"  % Test,
     "org.typelevel"  %% "cats-laws"        % "2.12.0" % Test,
     "org.typelevel"  %% "discipline-munit" % "2.0.0"  % Test,
-    "org.scalacheck" %% "scalacheck"       % "1.18.0" % Test
+    "org.scalacheck" %% "scalacheck"       % "1.18.1" % Test
   )
 
   object Docs {
