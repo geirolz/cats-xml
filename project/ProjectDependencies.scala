@@ -24,7 +24,7 @@ object ProjectDependencies {
 
   object Utils {
     val dedicated: Seq[ModuleID] = List(
-      "org.scala-lang" % "scala-reflect" % "2.13.14"
+      "org.scala-lang" % "scala-reflect" % "2.13.15"
     )
   }
 
@@ -35,7 +35,7 @@ object ProjectDependencies {
   object Generic {
     val scala2: Seq[ModuleID] = Seq(
       "com.softwaremill.magnolia1_2" %% "magnolia"      % "1.1.10",
-      "org.scala-lang"                % "scala-reflect" % "2.13.14",
+      "org.scala-lang"                % "scala-reflect" % "2.13.15",
       "com.chuusai"                  %% "shapeless"     % "2.3.12"
     )
     val scala3: Seq[ModuleID] = Seq(
