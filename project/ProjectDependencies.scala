@@ -45,7 +45,7 @@ object ProjectDependencies {
 
   object Effect {
     val dedicated: Seq[ModuleID] = Seq(
-      "org.typelevel" %% "cats-effect"       % "3.5.4",
+      "org.typelevel" %% "cats-effect"       % "3.5.5",
       "org.typelevel" %% "munit-cats-effect" % "2.0.0" % Test
     )
   }
