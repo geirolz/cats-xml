@@ -12,7 +12,7 @@ object ProjectDependencies {
     "org.typelevel" %% "cats-core" % "2.12.0",
     // TEST
     "org.scalameta"  %% "munit"            % "1.0.3"  % Test,
-    "org.scalameta"  %% "munit-scalacheck" % "1.0.0"  % Test,
+    "org.scalameta"  %% "munit-scalacheck" % "1.1.0"  % Test,
     "org.typelevel"  %% "cats-laws"        % "2.12.0" % Test,
     "org.typelevel"  %% "discipline-munit" % "2.0.0"  % Test,
     "org.scalacheck" %% "scalacheck"       % "1.18.1" % Test
