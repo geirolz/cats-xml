@@ -5,7 +5,8 @@ import cats.Show
 final case class Configuration(
   useDefaults: Boolean,
   unwrapValueClasses: Boolean,
-  discriminatorAttrKey: Option[String]
+  discriminatorAttrKey: Option[String],
+  useLabelsForNodes: Boolean
 ) {
 
   def withDefaults: Configuration =
@@ -18,6 +19,9 @@ final case class Configuration(
     require(discriminator != null && discriminator.nonEmpty)
     copy(discriminatorAttrKey = Some(discriminator))
   }
+  def withUseLabelsForNodes(useLabelsForNodes: Boolean): Configuration = {
+    copy(useLabelsForNodes = useLabelsForNodes)
+  }
 
   override def toString: String = Show[Configuration].show(this)
 }
@@ -26,13 +30,15 @@ object Configuration {
   val default: Configuration = Configuration(
     useDefaults          = false,
     unwrapValueClasses   = true,
-    discriminatorAttrKey = None
+    discriminatorAttrKey = None,
+    useLabelsForNodes    = false
   )
 
   implicit val showConfig: Show[Configuration] = Show.show(c => s"""
       |Configuration(
-      | useDefaults        = ${c.useDefaults},
-      | unwrapValueClasses = ${c.unwrapValueClasses},
-      | discriminatorAttrKey  = ${c.discriminatorAttrKey}
+      | useDefaults          = ${c.useDefaults},
+      | unwrapValueClasses   = ${c.unwrapValueClasses},
+      | discriminatorAttrKey = ${c.discriminatorAttrKey},
+      | useLabelsForNodes    = ${c.useLabelsForNodes}
       |)""".stripMargin)
 }

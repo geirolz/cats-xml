@@ -42,6 +42,11 @@ object MagnoliaEncoder {
               )
             case data: XmlData if paramInfo.elemType == XmlElemType.Text =>
               nodeBuild.unsafeMuteNode(_.withText(data))
+            case node: XmlNode.Node
+                if paramInfo.elemType == XmlElemType.Child && config.useLabelsForNodes =>
+              nodeBuild.unsafeMuteNode(
+                _.appendChildren(node.withLabel(paramInfo.labelMapper(param.label)))
+              )
             case node: XmlNode if paramInfo.elemType == XmlElemType.Child =>
               nodeBuild.unsafeMuteNode(_.appendChildren(node))
             case node: XmlData if paramInfo.elemType == XmlElemType.Child =>
