@@ -44,6 +44,12 @@ object MagnoliaEncoder {
               nodeBuild.unsafeMuteNode(_.withText(data))
             case node: XmlNode if paramInfo.elemType == XmlElemType.Child =>
               nodeBuild.unsafeMuteNode(_.appendChildren(node))
+            case node: XmlData if paramInfo.elemType == XmlElemType.Child =>
+              nodeBuild.unsafeMuteNode(
+                _.appendChildren(
+                  XmlNode(paramInfo.labelMapper(param.label), content = NodeContent.text(node))
+                )
+              )
             case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
           }
 
