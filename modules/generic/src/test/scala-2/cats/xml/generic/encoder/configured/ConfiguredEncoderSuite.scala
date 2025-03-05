@@ -54,9 +54,9 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
 
     implicit val config: Configuration = Configuration.default
       .withUseLabelsForNodes(true)
-    implicit def FooXmlTypeInterpreter: XmlTypeInterpreter[Bar] =
+    implicit val fooXmlTypeInterpreter: XmlTypeInterpreter[Bar] =
       XmlTypeInterpreter.auto[Bar]((_, _) => false, (_, _) => false)
-    implicit lazy val BarXmlTypeInterpreter: XmlTypeInterpreter[Foo] =
+    implicit val barXmlTypeInterpreter: XmlTypeInterpreter[Foo] =
       XmlTypeInterpreter.auto[Foo]((_, _) => false, (_, _) => false)
 
     implicit val encoderBar: Encoder[Bar]               = deriveConfiguredEncoder[Bar]
