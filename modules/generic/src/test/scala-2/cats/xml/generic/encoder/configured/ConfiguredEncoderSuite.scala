@@ -2,7 +2,7 @@ package cats.xml.generic.encoder.configured
 
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
-import cats.xml.generic.Configuration
+import cats.xml.generic.{Configuration, XmlTypeInterpreter}
 
 class ConfiguredEncoderSuite extends munit.FunSuite {
 
@@ -44,6 +44,42 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
         .withAttrs(
           "kind"       := "Bike",
           "wheelCount" := 2
+        )
+    )
+  }
+
+  test("semiauto configured with useLabelsForNodes") {
+
+    import cats.xml.generic.encoder.configured.semiauto.*
+
+    implicit val config: Configuration = Configuration.default
+      .withUseLabelsForNodes(true)
+    implicit val fooXmlTypeInterpreter: XmlTypeInterpreter[Bar] =
+      XmlTypeInterpreter.auto[Bar]((_, _) => false, (_, _) => false)
+    implicit val barXmlTypeInterpreter: XmlTypeInterpreter[Foo] =
+      XmlTypeInterpreter.auto[Foo]((_, _) => false, (_, _) => false)
+
+    implicit val encoderBar: Encoder[Bar]               = deriveConfiguredEncoder[Bar]
+    implicit val encoderValueClass: Encoder[ValueClass] = deriveConfiguredEncoder[ValueClass]
+    implicit val encoderFoo: Encoder[Foo]               = deriveConfiguredEncoder[Foo]
+
+    assertEquals(
+      obtained = Foo(
+        primitiveField = 666d,
+        valueClass     = ValueClass("hi"),
+        bar            = Bar("f1", BigDecimal(12.34)),
+        missingField   = None,
+        missingNode    = None
+      ).toXmlWiden[Foo],
+      expected = XmlNode("Foo")
+        .withChildren(
+          XmlNode("primitiveField").withText(666d),
+          XmlNode("valueClass").withText("hi"),
+          XmlNode("bar")
+            .withChildren(
+              XmlNode("field1").withText("f1"),
+              XmlNode("field2").withText(BigDecimal(12.34))
+            )
         )
     )
   }
