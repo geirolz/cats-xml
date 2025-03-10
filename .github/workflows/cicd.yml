@@ -19,10 +19,10 @@ jobs:
       matrix:
         # supported scala versions
         include:
-          - scala: 2.13.14
+          - scala: 2.13.16
             name: Scala2_13
             test-tasks: coverage test coverageReport gen-doc
-          - scala: 3.3.3
+          - scala: 3.3.5
             name: Scala3_3
             test-tasks: coverage test coverageReport
 
@@ -36,9 +36,12 @@ jobs:
           distribution: "liberica"
           java-version: 17
 
-      #----------- CACHE -----------
+      #----------- SBT -----------
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
+
       - name: Cache SBT
-        uses: actions/cache@v4.2.2
+        uses: actions/cache@v4
         with:
           # A list of files, directories, and wildcard patterns to cache and restore
           path: |

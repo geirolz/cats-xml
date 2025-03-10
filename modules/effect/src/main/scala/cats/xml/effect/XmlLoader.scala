@@ -27,10 +27,7 @@ object XmlLoader extends XmlLoaderInstances {
     new XmlLoader[F] {
       override def loadInputStreamResource(inputStream: => InputStream): Resource[F, XmlNode] =
         Resource
-          <<<<<<< HEAD
-            .fromAutoCloseable(F.blocking(inputStream))
-      =======.fromAutoCloseable(F.delay(inputStream))
-        >>>>>>> a1cb2bb(WIP)
+          .fromAutoCloseable(F.blocking(inputStream))
           .evalMap(parser.parseInputStream(_))
     }
   }
