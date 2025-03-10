@@ -177,7 +177,8 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
 //  idePackagePrefix := Some(prjPackageName),
   // scala
   crossScalaVersions := supportedScalaVersions,
-  scalaVersion       := supportedScalaVersions.head,
+  scalaVersion       := scala33,
+//  scalaVersion       := supportedScalaVersions.head,
   scalacOptions ++= scalacSettings(scalaVersion.value),
   versionScheme := Some("early-semver"),
   // dependencies

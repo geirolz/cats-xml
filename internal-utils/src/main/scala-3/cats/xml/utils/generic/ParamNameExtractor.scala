@@ -54,8 +54,10 @@ object ParamNameExtractor {
         /** Single inlined path */
         case Inlined(_, _, Block(List(DefDef(_, _, _, Some(p))), _)) =>
           toPath(p, List.empty)
+//        case Expr(_, _, Block(List(DefDef(_, _, _, Some(p))), _)) =>
+//          toPath(p, List.empty)
         case _ =>
-          report.errorAndAbort(s"Unsupported path [$path]")
+          report.errorAndAbort(s"Unsupported path [${path.show}]")
       }
 
       Expr(
