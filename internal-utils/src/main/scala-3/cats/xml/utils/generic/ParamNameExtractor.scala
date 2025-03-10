@@ -36,6 +36,7 @@ object ParamNameExtractor {
       @tailrec
       def toPath(tree: Tree, acc: List[PathElement]): Seq[PathElement] = {
         tree match {
+
           /** Field access */
           case Select(deep, ident) =>
             toPath(deep, PathElement.TermPathElement(ident) :: acc)
@@ -49,6 +50,7 @@ object ParamNameExtractor {
       }
 
       val pathElements: Seq[PathElement] = path.asTerm match {
+
         /** Single inlined path */
         case Inlined(_, _, Block(List(DefDef(_, _, _, Some(p))), _)) =>
           toPath(p, List.empty)
