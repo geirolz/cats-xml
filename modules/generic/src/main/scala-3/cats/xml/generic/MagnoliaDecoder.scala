@@ -3,24 +3,34 @@ package cats.xml.generic
 import cats.data.NonEmptyList
 import cats.xml.*
 import cats.xml.codec.{Decoder, DecoderFailure}
-import cats.xml.cursor.{CursorFailure, FreeCursor}
-import cats.xml.generic.{Configuration, XmlElemType, XmlTypeInterpreter}
+import cats.xml.cursor.{Cursor, CursorFailure, FreeCursor}
 import cats.xml.utils.generic.ParamName
 import magnolia1.*
 import magnolia1.CaseClass.Param
 
+import scala.compiletime.{erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 
-object MagnoliaDecoder extends AutoDerivation[Decoder]:
+class DerivedDecoder[T](delegate: Decoder[T]) extends Decoder[T] {
+  def decodeCursorResult(cursorResult: Cursor.Result[Xml]): Decoder.Result[T] =
+    delegate.decodeCursorResult(cursorResult)
+}
+
+object DerivedDecoder {
+  inline def derived[T](using m: Mirror.Of[T]): DerivedDecoder[T] = new DerivedDecoder(
+    MagnoliaDecoder.derived[T]
+  )
+  inline def derived[T <: AnyVal: XmlTypeInterpreter]: DerivedDecoder[T] =
+    new DerivedDecoder(MagnoliaDecoder.derived[T])
+}
+
+object MagnoliaDecoder extends AutoDerivationHack[Decoder, XmlTypeInterpreter]:
 
   import cats.syntax.all.given
 
   val config: Configuration = Configuration.default
-  implicit class CantRememberHowToDoThisInScala3(o: Decoder.type) {
-    inline def derived[A](using Mirror.Of[A]): Decoder[A] = MagnoliaDecoder.derived[A]
-  }
 
-  override def join[T](ctx: CaseClass[Typeclass, T]): Typeclass[T] =
+  override def join[T: XmlTypeInterpreter](ctx: CaseClass[Typeclass, T]): Typeclass[T] =
     if (ctx.isValueClass && config.unwrapValueClasses) {
       ctx.params.head.typeclass.map(v => ctx.rawConstruct(Seq(v)))
     } else {
@@ -51,7 +61,11 @@ object MagnoliaDecoder extends AutoDerivation[Decoder]:
                   if (config.useDefaults)
                     result.map(
                       _.recoverWith(
-                        useDefaultParameterIfPresentToRecoverMissing[Decoder, T, param.PType](param)
+                        useDefaultParameterIfPresentToRecoverMissing[
+                          Decoder,
+                          T,
+                          param.PType
+                        ](param)
                       )
                     )
                   else
@@ -64,14 +78,8 @@ object MagnoliaDecoder extends AutoDerivation[Decoder]:
         })
     }
 
-  override def split[T](ctx: SealedTrait[Typeclass, T]): Typeclass[T] =
+  override def split[T: XmlTypeInterpreter](ctx: SealedTrait[Typeclass, T]): Typeclass[T] =
     Decoder.instance(xml => {
-//      val subtypeTypeClass: Option[SealedTrait.Subtype[Typeclass, T, _]] = xml match
-//        case node: XmlNode =>
-//          ctx.subtypes.toList.find(_.typeInfo.short == node.label)
-//        case _ =>
-//          ctx.subtypes.headOption
-
       val subtypeTypeClass: Option[SealedTrait.Subtype[Typeclass, T, _]] = xml match {
         case node: XmlNode =>
           val target: String = (config.discriminatorAttrKey match {
@@ -107,3 +115,21 @@ object MagnoliaDecoder extends AutoDerivation[Decoder]:
     else
       FreeCursor.failure(failures)
   }
+
+  inline def handleAnyVal[A <: AnyVal: XmlTypeInterpreter]: Decoder[A] = summonFrom {
+    case f: WrapAnyVal[A, ?] =>
+      summonFrom { case t: Decoder[f.From] =>
+        handleAnyValImpl[A, f.From]
+      }
+  }
+
+  def handleAnyValImpl[A <: AnyVal: XmlTypeInterpreter, B: Decoder](implicit
+    f: WrapAnyVal[A, B]
+  ): Decoder[A] = {
+    Decoder[B].map(f.fn)
+  }
+
+case class WrapAnyVal[S <: AnyVal, T](fn: T => S) {
+  type From = T
+  type To   = S
+}

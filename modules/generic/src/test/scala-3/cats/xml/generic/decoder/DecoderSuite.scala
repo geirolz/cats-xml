@@ -15,9 +15,9 @@ class DecoderSuite extends munit.FunSuite {
     given XmlTypeInterpreter[Foo] =
       XmlTypeInterpreter
         .default[Foo]
-//        .overrideType(
-//          _.param(_.valueClass) -> XmlElemType.Attribute
-//        )
+        .overrideType(
+          _.param(_.valueClass) -> XmlElemType.Attribute
+        )
 //
 //    given Decoder[Bar] = deriveDecoder[Bar]
 //    given Decoder[Foo] = deriveDecoder[Foo]

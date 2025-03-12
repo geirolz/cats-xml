@@ -6,7 +6,7 @@ import cats.xml.utils.generic.ParamName
 import scala.quoted.*
 
 class ParamNameExtractor[T] private () {
-  inline def param[U](path: T => U): ParamName[T] =
+  inline def param[U](inline path: T => U): ParamName[T] =
     ${ ParamNameExtractor.Scala3Macros.extractParamName[T, U]('path) }
 }
 object ParamNameExtractor {
@@ -54,13 +54,11 @@ object ParamNameExtractor {
         /** Single inlined path */
         case Inlined(_, _, Block(List(DefDef(_, _, _, Some(p))), _)) =>
           toPath(p, List.empty)
-//        case Expr(_, _, Block(List(DefDef(_, _, _, Some(p))), _)) =>
-//          toPath(p, List.empty)
         case _ =>
           report.errorAndAbort(s"Unsupported path [${path.show}]")
       }
 
-      Expr(
+      val res = Expr(
         ParamName[T](
           pathElements
             .map {
@@ -70,6 +68,11 @@ object ParamNameExtractor {
             .mkString(".")
         )
       )
+      report.info(
+        s"Currently at ${res.show}\nfor path ${path.show}\non term ${path.asTerm}"
+      )
+      res
     }
+
   }
 }

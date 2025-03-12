@@ -7,8 +7,10 @@ object Samples {
   import cats.xml.generic.MagnoliaDecoder.given
   import cats.xml.generic.MagnoliaDecoder.*
 
-  case class ValueClass(value: String) /*extends AnyVal*/ derives Decoder
-  case class Bar(field1: String, field2: BigDecimal) derives Decoder
+  // TODO: Derive this somehow
+  private implicit def wrapValueClass: WrapAnyVal[ValueClass, String] = WrapAnyVal(ValueClass.apply)
+  case class ValueClass(value: String) extends AnyVal derives DerivedDecoder
+  case class Bar(field1: String, field2: BigDecimal) derives DerivedDecoder
 
   case class Foo(
     primitiveField: Double = 666d,
@@ -16,5 +18,5 @@ object Samples {
     bar: Bar,
     missingField: Option[String],
     missingNode: Option[Bar]
-  ) derives Decoder
+  ) derives DerivedDecoder
 }

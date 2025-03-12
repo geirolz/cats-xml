@@ -5,73 +5,73 @@ import cats.xml.codec.Encoder
 import cats.xml.utils.generic.ParamName
 import cats.xml.utils.impure
 import magnolia1.*
+
 import scala.compiletime.summonFrom
 
-class MagnoliaEncoder(config: Configuration) extends AutoDerivation[Encoder] {
+class MagnoliaEncoder(config: Configuration)
+    extends AutoDerivationHack[Encoder, XmlTypeInterpreter] {
 
   import cats.xml.syntax.*
-  private inline def summonInterpreter[T] = summonFrom {
-    case interpreter: XmlTypeInterpreter[T] => interpreter
-    case _ => throw new IllegalStateException("No interpreter for type")
-  }
 
-  def join[T](
-    ctx: CaseClass[Encoder, T]
-  ): Encoder[T] = {
-    if (ctx.isValueClass && config.unwrapValueClasses) {
-      val valueParam: CaseClass.Param[Encoder, T] = ctx.parameters.head
-      valueParam.typeclass.contramap[T](valueParam.deref(_))
-    } else {
-      val interpreter: XmlTypeInterpreter[T] = summonInterpreter[T]
+  def join[T: Ps](
+    ctx: CaseClass[Typeclass, T]
+  ): Typeclass[T] = Encoder.of(t => {
 
-      Encoder.of(t => {
+    val nodeBuild: XmlNode.Node = XmlNode(ctx.typeInfo.short)
 
-        val nodeBuild: XmlNode.Node = XmlNode(ctx.typeInfo.short)
-
-        def evaluateAndAppend(
-          xml: Xml,
-          param: CaseClass.Param[Encoder, T],
-          paramInfo: XmlElemTypeParamInfo
-        ): Unit =
-          xml match {
-            case XmlNull => ()
-            case data: XmlData if paramInfo.elemType == XmlElemType.Attribute =>
-              nodeBuild.unsafeMuteNode(
-                _.appendAttr(
-                  XmlAttribute(
-                    key   = paramInfo.labelMapper(param.label),
-                    value = data
-                  )
-                )
+    def evaluateAndAppend(
+      xml: Xml,
+      param: CaseClass.Param[Encoder, T],
+      paramInfo: XmlElemTypeParamInfo
+    ): Unit =
+      xml match {
+        case XmlNull => ()
+        case data: XmlData if paramInfo.elemType == XmlElemType.Attribute =>
+          nodeBuild.unsafeMuteNode(
+            _.appendAttr(
+              XmlAttribute(
+                key   = paramInfo.labelMapper(param.label),
+                value = data
               )
-            case data: XmlData if paramInfo.elemType == XmlElemType.Text =>
-              nodeBuild.unsafeMuteNode(_.withText(data))
-            case node: XmlNode if paramInfo.elemType == XmlElemType.Child =>
-              nodeBuild.unsafeMuteNode(_.appendChildren(node))
-            case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
-          }
+            )
+          )
+        case data: XmlData if paramInfo.elemType == XmlElemType.Text =>
+          nodeBuild.unsafeMuteNode(_.withText(data))
+        case node: XmlNode.Node
+            if paramInfo.elemType == XmlElemType.Child && config.useLabelsForNodes =>
+          nodeBuild.unsafeMuteNode(
+            _.appendChildren(node.withLabel(paramInfo.labelMapper(param.label)))
+          )
+        case node: XmlNode if paramInfo.elemType == XmlElemType.Child =>
+          nodeBuild.unsafeMuteNode(_.appendChildren(node))
+        case node: XmlData if paramInfo.elemType == XmlElemType.Child =>
+          nodeBuild.unsafeMuteNode(
+            _.appendChildren(
+              XmlNode(paramInfo.labelMapper(param.label), content = NodeContent.text(node))
+            )
+          )
+        case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
+      }
 
-        ctx.parameters.foreach(param =>
-          interpreter
-            .evalParam(ParamName(param.label))
-            .foreach((paramInfo: XmlElemTypeParamInfo) => {
-              evaluateAndAppend(
-                xml       = param.typeclass.encode(param.deref(t)),
-                param     = param,
-                paramInfo = paramInfo
-              )
-            })
-        )
-
-        nodeBuild
-      })
+    ctx.parameters.foreach { param =>
+      XmlTypeInterpreter[T]
+        .evalParam(ParamName(param.label))
+        .foreach((paramInfo: XmlElemTypeParamInfo) => {
+          evaluateAndAppend(
+            xml       = param.typeclass.encode(param.deref(t)),
+            param     = param,
+            paramInfo = paramInfo
+          )
+        })
     }
-  }
+
+    nodeBuild
+  })
 
   @impure
-  def split[T](
+  def split[T: XmlTypeInterpreter](
     sealedTrait: SealedTrait[Encoder, T]
-  ): Encoder[T] = { (a: T) =>
+  ): Encoder[T] = Encoder { (a: T) =>
     sealedTrait.choose(a) { subtype =>
       val subTypeXml = subtype.typeclass.encode(subtype.cast(a))
       config.discriminatorAttrKey match {
@@ -122,4 +122,23 @@ class MagnoliaEncoder(config: Configuration) extends AutoDerivation[Encoder] {
        |Field type: ${p.typeclass}
        |Treated as: ${paramInfo.elemType}
        |""".stripMargin
+
+  inline def handleAnyVal[A <: AnyVal: XmlTypeInterpreter]: Encoder[A] = summonFrom {
+    case f: UnwrapAnyVal[A, ?] =>
+      summonFrom { case t: Encoder[f.To] =>
+        handleAnyValImpl[A, f.To]
+      }
+  }
+
+  inline def handleAnyValImpl[A <: AnyVal: XmlTypeInterpreter, B: Encoder](implicit
+    f: UnwrapAnyVal[A, B]
+  ): Encoder[A] = {
+    val x = XmlTypeInterpreter[A]
+    Encoder[B].contramap(f.fn)
+  }
+}
+
+case class UnwrapAnyVal[S <: AnyVal, T](fn: S => T) {
+  type From = S
+  type To   = T
 }
