@@ -27,12 +27,11 @@ class MagnoliaEncoder(config: Configuration)
 
   import cats.xml.syntax.*
 
-  def join[T: Ps](
-    ctx: CaseClass[Typeclass, T]
-  ): Typeclass[T] = Encoder.of(t => {
+  def join[T: XmlTypeInterpreter](
+    ctx: CaseClass[Encoder, T]
+  ): Encoder[T] = Encoder.of(t => {
 
     val nodeBuild: XmlNode.Node = XmlNode(ctx.typeInfo.short)
-
     def evaluateAndAppend(
       xml: Xml,
       param: CaseClass.Param[Encoder, T],

@@ -8,7 +8,7 @@ import scala.deriving.Mirror
 object semiauto {
   private final val defaultEncoder = new MagnoliaEncoder(Configuration.default)
 
-  inline def deriveEncoder[T: XmlTypeInterpreter](using Mirror.Of[T]): Encoder[T] =
+  inline def deriveEncoder[T: Mirror.Of: XmlTypeInterpreter]: Encoder[T] =
     defaultEncoder.derived[T]
   inline def deriveEncoder[T <: AnyVal & Product: XmlTypeInterpreter]: Encoder[T] =
     defaultEncoder.derived[T]

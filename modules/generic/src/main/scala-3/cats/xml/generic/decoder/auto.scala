@@ -8,7 +8,8 @@ import scala.deriving.Mirror
 object auto {
   private final val defaultDecoder = new MagnoliaDecoder(Configuration.default)
 
-  inline given deriveDecoder[T](using Mirror.Of[T]): Decoder[T] = defaultDecoder.autoDerived[T]
+  inline given deriveDecoder[T: Mirror.Of: XmlTypeInterpreter]: Decoder[T] =
+    defaultDecoder.autoDerived[T]
   inline given deriveEncoder[T <: AnyVal & Product: XmlTypeInterpreter]: Decoder[T] =
     defaultDecoder.autoDerived[T]
 

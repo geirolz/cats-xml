@@ -30,7 +30,7 @@ class MagnoliaDecoder(config: Configuration)
 
   import cats.syntax.all.given
 
-  override def join[T: XmlTypeInterpreter](ctx: CaseClass[Typeclass, T]): Typeclass[T] =
+  override def join[T: XmlTypeInterpreter](ctx: CaseClass[Decoder, T]): Decoder[T] =
     if (ctx.isValueClass && config.unwrapValueClasses) {
       ctx.params.head.typeclass.map(v => ctx.rawConstruct(Seq(v)))
     } else {
@@ -78,9 +78,9 @@ class MagnoliaDecoder(config: Configuration)
         })
     }
 
-  override def split[T: XmlTypeInterpreter](ctx: SealedTrait[Typeclass, T]): Typeclass[T] =
+  override def split[T: XmlTypeInterpreter](ctx: SealedTrait[Decoder, T]): Decoder[T] =
     Decoder.instance(xml => {
-      val subtypeTypeClass: Option[SealedTrait.Subtype[Typeclass, T, _]] = xml match {
+      val subtypeTypeClass: Option[SealedTrait.Subtype[Decoder, T, _]] = xml match {
         case node: XmlNode =>
           val target: String = (config.discriminatorAttrKey match {
             case Some(discriminatorAttrKey) => node.findAttr[String](discriminatorAttrKey)

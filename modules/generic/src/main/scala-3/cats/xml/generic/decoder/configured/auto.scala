@@ -7,11 +7,11 @@ import scala.deriving.Mirror
 
 object auto {
 
-  inline given deriveConfiguredDecoder[T](using m: Mirror.Of[T], c: Configuration): Decoder[T] =
-    new MagnoliaDecoder(c).autoDerived[T]
-  inline given deriveEncoder[T <: AnyVal & Product: XmlTypeInterpreter](using
+  inline given deriveConfiguredDecoder[T: Mirror.Of: XmlTypeInterpreter](using
     c: Configuration
-  ): Decoder[T] =
-    new MagnoliaDecoder(c).autoDerived[T]
+  ): Decoder[T] = new MagnoliaDecoder(c).autoDerived[T]
+  inline given deriveConfiguredDecoder[T <: AnyVal & Product: XmlTypeInterpreter](using
+    c: Configuration
+  ): Decoder[T] = new MagnoliaDecoder(c).autoDerived[T]
 
 }
