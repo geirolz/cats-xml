@@ -63,9 +63,6 @@ class MagnoliaEncoder(config: Configuration)
               XmlNode(paramInfo.labelMapper(param.label), content = NodeContent.text(node))
             )
           )
-        case node: XmlNode
-            if paramInfo.elemType == XmlElemType.Attribute || paramInfo.elemType == XmlElemType.Text =>
-          ???
         case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
       }
 
