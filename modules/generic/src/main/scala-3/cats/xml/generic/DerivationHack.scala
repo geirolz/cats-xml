@@ -128,11 +128,16 @@ trait DerivationHack[TypeClass[_], Params[_]] {
 
   def default[A]: Params[A] = throw new IllegalStateException("No default implemented")
 
-  inline def derived[T <: AnyVal: Params]: TypeClass[T] = handleAnyVal[T]
+  inline def derived[T <: AnyVal & Product: Params]: TypeClass[T] = handleAnyVal[T]
 
-  inline def handleAnyVal[A <: AnyVal: Params]: TypeClass[A]
+  inline def handleAnyVal[A <: AnyVal & Product: Params]: TypeClass[A]
+  inline def handlePrimitive[A]: TypeClass[A]
+
+  // alias because I can't write macros well enough to avoid it r/n
+  inline def mirrorDerived[A](using mirror: Mirror.Of[A]): Typeclass[A] = derived[A]
+  inline def noMirrorDerived[A]: Typeclass[A]                           = handlePrimitive[A]
 }
 
 trait AutoDerivationHack[TypeClass[_], Params[_]] extends DerivationHack[TypeClass, Params]:
   inline given autoDerived[A](using Mirror.Of[A], Params[A]): TypeClass[A] = derivedMirror[A]
-  inline given autoDerived[A <: AnyVal: Params]: TypeClass[A]              = derived[A]
+  inline given autoDerived[A <: AnyVal & Product: Params]: TypeClass[A]    = derived[A]

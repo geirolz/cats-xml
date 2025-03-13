@@ -6,7 +6,7 @@ import cats.xml.utils.generic.ParamName
 import cats.xml.utils.impure
 import magnolia1.*
 
-import scala.compiletime.summonFrom
+import scala.compiletime.{summonFrom, summonInline}
 
 class MagnoliaEncoder(config: Configuration)
     extends AutoDerivationHack[Encoder, XmlTypeInterpreter] {
@@ -123,19 +123,20 @@ class MagnoliaEncoder(config: Configuration)
        |Treated as: ${paramInfo.elemType}
        |""".stripMargin
 
-  inline def handleAnyVal[A <: AnyVal: XmlTypeInterpreter]: Encoder[A] = summonFrom {
+  inline def handleAnyVal[A <: AnyVal & Product: XmlTypeInterpreter]: Encoder[A] = summonFrom {
     case f: UnwrapAnyVal[A, ?] =>
       summonFrom { case t: Encoder[f.To] =>
         handleAnyValImpl[A, f.To]
       }
   }
 
-  inline def handleAnyValImpl[A <: AnyVal: XmlTypeInterpreter, B: Encoder](implicit
+  inline def handleAnyValImpl[A <: AnyVal & Product: XmlTypeInterpreter, B: Encoder](implicit
     f: UnwrapAnyVal[A, B]
   ): Encoder[A] = {
     val x = XmlTypeInterpreter[A]
     Encoder[B].contramap(f.fn)
   }
+  inline def handlePrimitive[A]: Encoder[A] = summonInline[Encoder[A]]
 }
 
 case class UnwrapAnyVal[S <: AnyVal, T](fn: S => T) {

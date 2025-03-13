@@ -20,7 +20,7 @@ object DerivedDecoder {
   inline def derived[T](using m: Mirror.Of[T]): DerivedDecoder[T] = new DerivedDecoder(
     MagnoliaDecoder.derived[T]
   )
-  inline def derived[T <: AnyVal: XmlTypeInterpreter]: DerivedDecoder[T] =
+  inline def derived[T <: AnyVal & Product: XmlTypeInterpreter]: DerivedDecoder[T] =
     new DerivedDecoder(MagnoliaDecoder.derived[T])
 }
 
@@ -116,20 +116,75 @@ object MagnoliaDecoder extends AutoDerivationHack[Decoder, XmlTypeInterpreter]:
       FreeCursor.failure(failures)
   }
 
-  inline def handleAnyVal[A <: AnyVal: XmlTypeInterpreter]: Decoder[A] = summonFrom {
-    case f: WrapAnyVal[A, ?] =>
-      summonFrom { case t: Decoder[f.From] =>
-        handleAnyValImpl[A, f.From]
-      }
+  inline def handleAnyVal[A <: AnyVal & Product: XmlTypeInterpreter]: Decoder[A] = summonFrom {
+    case f: FullSupp[A] => f.decoder
+    case _              => deriveAnyValSupport[A].decoder
   }
 
-  def handleAnyValImpl[A <: AnyVal: XmlTypeInterpreter, B: Decoder](implicit
-    f: WrapAnyVal[A, B]
-  ): Decoder[A] = {
-    Decoder[B].map(f.fn)
-  }
+  inline implicit def deriveAnyValSupport[A <: AnyVal & Product: XmlTypeInterpreter]: FullSupp[A] =
+    ${
+      DecoderMacros.deriveAnyValSupportImpl[A]('this)
+    }
+  inline def handlePrimitive[A]: Decoder[A] = summonInline[Decoder[A]]
 
-case class WrapAnyVal[S <: AnyVal, T](fn: T => S) {
-  type From = T
-  type To   = S
+object DecoderMacros {
+  import scala.quoted.*
+
+  def deriveAnyValSupportImpl[A <: AnyVal](
+    self: Expr[MagnoliaDecoder.type]
+  )(using quotes: Quotes, tpe: Type[A]): Expr[FullSupp[A]] = {
+    import quotes.*, quotes.reflect.*
+    val wrapperSym  = TypeRepr.of[A].typeSymbol
+    val constructor = wrapperSym.primaryConstructor
+    val theType = constructor.paramSymss.head.head.tree match {
+      case ValDef(_, tt: TypeTree, _) => tt
+      case _ =>
+        quotes.reflect.report.errorAndAbort(
+          "expecting AnyVal with Product to have a single constructor arg"
+        )
+    }
+    theType.tpe.asType match {
+      case '[t] =>
+        val decoder =
+          if (theType.symbol.isClassDef)
+            TypeApply(
+              Select.unique(self.asTerm, "mirrorDerived"),
+              List(theType)
+            )
+          else
+            TypeApply(
+              Select.unique(self.asTerm, "noMirrorDerived"),
+              List(theType)
+            )
+
+        val mtpe = MethodType(List("v"))(_ => List(TypeRepr.of[t]), _ => TypeRepr.of[A])
+        def doApply = Lambda(
+          Symbol.noSymbol,
+          mtpe,
+          {
+            case (_, List(arg)) =>
+              Apply(
+                Select(New(TypeIdent(wrapperSym)), constructor),
+                List(Ref(arg.symbol))
+              )
+            case _ =>
+              quotes.reflect.report.errorAndAbort(
+                "expecting AnyVal constructor to be called with a single arg"
+              )
+          }
+        ).asExprOf[t => A]
+
+        '{
+          FullSupp[A](
+            WrapAndSerde[A, t](${ doApply })(using ${ decoder.asExprOf[Decoder[t]] })
+          )
+        }.asExprOf[FullSupp[A]]
+    }
+  }
+}
+case class FullSupp[S <: AnyVal](wrapAndSerde: WrapAndSerde[S, ?]) {
+  def decoder = wrapAndSerde.impl
+}
+case class WrapAndSerde[S <: AnyVal, T: Decoder](fn: T => S) {
+  def impl = Decoder[T].map(fn)
 }
