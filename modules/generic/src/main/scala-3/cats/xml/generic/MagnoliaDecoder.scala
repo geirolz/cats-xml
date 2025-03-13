@@ -121,6 +121,8 @@ class MagnoliaDecoder(config: Configuration)
     case _              => deriveAnyValSupport[A].decoder
   }
 
+  // Since there's no 'Mirror.Of' for user-defined AnyVals, we attempt to summon the Decoder for the wrapped type
+  // from within a macro, and map it to a decoder for the wrapper with the wrapper's constructor
   inline implicit def deriveAnyValSupport[A <: AnyVal & Product: XmlTypeInterpreter]: FullSupp[A] =
     ${
       DecoderMacros.deriveAnyValSupportImpl[A]('this)

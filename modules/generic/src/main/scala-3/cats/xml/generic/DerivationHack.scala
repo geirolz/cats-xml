@@ -13,7 +13,10 @@ private trait SerializableFunction0[+R] extends Function0[R] with Serializable:
 private trait SerializableFunction1[-T1, +R] extends Function1[T1, R] with Serializable:
   def apply(v1: T1): R
 
+// Modified version of magnolia1.Derivation (and relevant parents) which permits configuration of the produced
+// `TypeClass[T]` by summoning an implicit `Params[T]` (which represents our internal `XmlTypeInterpreter`)
 trait DerivationHack[TypeClass[_], Params[_]] {
+  final type Ps[S] = Params[S]
   protected inline def sealedTraitFromMirror[A](
     m: Mirror.SumOf[A]
   ): SealedTrait[Typeclass, A] =
@@ -28,7 +31,6 @@ trait DerivationHack[TypeClass[_], Params[_]] {
 
   @nowarn protected transparent inline def subtypesFromMirror[A, SubtypeTuple <: Tuple](
     m: Mirror.SumOf[A],
-    idx: Int                                           = 0, // no longer used, kept for bincompat
     result: List[SealedTrait.Subtype[Typeclass, A, _]] = Nil
   ): List[SealedTrait.Subtype[Typeclass, A, _]] =
     inline erasedValue[SubtypeTuple] match
@@ -39,7 +41,6 @@ trait DerivationHack[TypeClass[_], Params[_]] {
           case mm: Mirror.SumOf[`s`] =>
             subtypesFromMirror[A, mm.MirroredElemTypes](
               mm.asInstanceOf[m.type],
-              0,
               Nil
             )
           case _ => {
@@ -59,7 +60,7 @@ trait DerivationHack[TypeClass[_], Params[_]] {
                 IArray.from(inheritedAnns[s]),
                 IArray.from(paramTypeAnns[A]),
                 isObject[s],
-                idx,
+                0, // unused
                 CallByNeed.createLazy(tc),
                 isType,
                 asType
@@ -67,7 +68,7 @@ trait DerivationHack[TypeClass[_], Params[_]] {
             )
           }
         }
-        subtypesFromMirror[A, tail](m, idx + 1, sub ::: result)
+        subtypesFromMirror[A, tail](m, sub ::: result)
   // From CommonDerivation
   type Typeclass[T] = TypeClass[T]
 
@@ -85,7 +86,6 @@ trait DerivationHack[TypeClass[_], Params[_]] {
     defaults
   )
 
-  // From Bar
   def join[T: Params](caseClass: CaseClass[Typeclass, T]): Typeclass[T]
 
   inline def derivedMirrorProduct[A: Params](
@@ -93,33 +93,28 @@ trait DerivationHack[TypeClass[_], Params[_]] {
   ): Typeclass[A] = join(CaseClassDerivation.fromMirror(product))
 
   // From Derivation
-  final type Ps[S] = Params[S]
 
   def split[T: Params](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T]
 
   transparent inline def subtypes[T, SubtypeTuple <: Tuple](
-    m: Mirror.SumOf[T],
-    idx: Int = 0 // no longer used, kept for bincompat
+    m: Mirror.SumOf[T]
   ): List[SealedTrait.Subtype[Typeclass, T, _]] =
-    subtypesFromMirror[T, SubtypeTuple](m, idx)
+    subtypesFromMirror[T, SubtypeTuple](m)
 
   inline def derivedMirrorSum[A: Params](sum: Mirror.SumOf[A]): Typeclass[A] =
     split(sealedTraitFromMirror(sum))
 
-  // From Foo and Derivation
   inline def derivedMirror[A](using mirror: Mirror.Of[A], i: Params[A]): Typeclass[A] =
     inline mirror match
       case sum: Mirror.SumOf[A]         => derivedMirrorSum[A](sum)
       case product: Mirror.ProductOf[A] => derivedMirrorProduct[A](product)
-
-//  inline def derived[A](using Mirror.Of[A], Params[A]): Typeclass[A] = derivedMirror[A]
 
   protected inline def deriveSubtype[s](
     m: Mirror.Of[s],
     i: Params[s]
   ): Typeclass[s] = derivedMirror[s](using m, i)
 
-  // for foo
+  // for `derives` syntax, seems like we can't take the Params config in the defn signature
   inline def derived[A](using mirror: Mirror.Of[A]): Typeclass[A] =
     summonFrom {
       case p: Params[A] => derivedMirror[A](using mirror, p)
