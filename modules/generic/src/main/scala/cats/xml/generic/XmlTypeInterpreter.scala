@@ -32,6 +32,7 @@ object XmlTypeInterpreter {
     f: (ParamName[T], TypeInfo[?]) => (XmlElemType, Endo[String])
   ): XmlTypeInterpreter[T] =
     new XmlTypeInterpreter[T] {
+      override def toString: String = s"XmlTypeInterpreter[\n$classFieldsInfo\n$classInfoExtractor]"
 
       val classFieldsInfo: Map[ParamName[T], TypeInfo[?]] = TypeInfo[T].accessorsInfo
       val classInfoExtractor: ParamNameExtractor[T]       = ParamNameExtractor.of[T]
@@ -103,7 +104,7 @@ object XmlTypeInterpreter {
         tpeInfo.isString
           || tpeInfo.isPrimitive
           || tpeInfo.isPrimitiveWrapper
-          || tpeInfo.isValueClass
+          || (tpeInfo.isValueClass && !tpeInfo.isNonPrimitiveValueClass)
           || tpeInfo.isOptionOfAnyPrimitiveOrString
   ): XmlTypeInterpreter[T] =
     XmlTypeInterpreter.of[T] { case (paramName, tpeInfo) =>
