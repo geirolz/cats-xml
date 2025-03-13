@@ -7,6 +7,20 @@ import cats.xml.utils.impure
 import magnolia1.*
 
 import scala.compiletime.{summonFrom, summonInline}
+import scala.deriving.Mirror
+
+class DerivedEncoder[T](delegate: Encoder[T]) extends Encoder[T] {
+  def encode(t: T): Xml = delegate.encode(t)
+}
+
+object DerivedEncoder {
+  inline def derived[T](using m: Mirror.Of[T]): DerivedEncoder[T] = new DerivedEncoder(
+    MagnoliaEncoder(Configuration.default).derived[T]
+  )
+
+  inline def derived[T <: AnyVal & Product: XmlTypeInterpreter]: DerivedEncoder[T] =
+    new DerivedEncoder(MagnoliaEncoder(Configuration.default).derived[T])
+}
 
 class MagnoliaEncoder(config: Configuration)
     extends AutoDerivationHack[Encoder, XmlTypeInterpreter] {
@@ -71,30 +85,33 @@ class MagnoliaEncoder(config: Configuration)
   @impure
   def split[T: XmlTypeInterpreter](
     sealedTrait: SealedTrait[Encoder, T]
-  ): Encoder[T] = Encoder { (a: T) =>
-    sealedTrait.choose(a) { subtype =>
-      val subTypeXml = subtype.typeclass.encode(subtype.cast(a))
-      config.discriminatorAttrKey match {
-        case Some(discriminatorAttrKey) =>
-          val base = XmlNode(sealedTrait.typeInfo.short)
-            .withAttrs(
-              discriminatorAttrKey := subtype.typeInfo.short
-            )
+  ): Encoder[T] = Encoder {
+    // special-case 'None' to avoid empty elements
+    case None => Xml.Null
+    case (a: T) =>
+      sealedTrait.choose(a) { subtype =>
+        val subTypeXml = subtype.typeclass.encode(subtype.cast(a))
+        config.discriminatorAttrKey match {
+          case Some(discriminatorAttrKey) =>
+            val base = XmlNode(sealedTrait.typeInfo.short)
+              .withAttrs(
+                discriminatorAttrKey := subtype.typeInfo.short
+              )
 
-          subTypeXml match {
-            case group: XmlNode.Group => base.withContent(group.content)
-            case node: XmlNode.Node =>
-              base
-                .appendAttrs(node.attributes)
-                .withContent(node.content)
-            case attr: XmlAttribute => base.appendAttr(attr)
-            case data: XmlData      => base.withText(data)
-            case _                  => base
-          }
+            subTypeXml match {
+              case group: XmlNode.Group => base.withContent(group.content)
+              case node: XmlNode.Node =>
+                base
+                  .appendAttrs(node.attributes)
+                  .withContent(node.content)
+              case attr: XmlAttribute => base.appendAttr(attr)
+              case data: XmlData      => base.withText(data)
+              case _                  => base
+            }
 
-        case None => subTypeXml
+          case None => subTypeXml
+        }
       }
-    }
   }
 
   private def debugMsg[TC[_], T](

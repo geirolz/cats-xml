@@ -18,9 +18,6 @@ class DecoderSuite extends munit.FunSuite {
         .overrideType(
           _.param(_.valueClass) -> XmlElemType.Attribute
         )
-//
-//    given Decoder[Bar] = deriveDecoder[Bar]
-//    given Decoder[Foo] = deriveDecoder[Foo]
 
     assertEquals(
       obtained = XmlNode("foo")

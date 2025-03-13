@@ -6,9 +6,11 @@ import cats.xml.generic.{Configuration, MagnoliaEncoder, XmlTypeInterpreter}
 import scala.deriving.Mirror
 
 object auto {
-  private final val foo = new MagnoliaEncoder(Configuration.default)
+  private final val defaultEncoder = new MagnoliaEncoder(Configuration.default)
 
   inline given deriveEncoder[T: XmlTypeInterpreter](using Mirror.Of[T]): Encoder[T] =
-    foo.autoDerived[T]
+    defaultEncoder.autoDerived[T]
+  inline given deriveEncoder[T <: AnyVal & Product: XmlTypeInterpreter]: Encoder[T] =
+    defaultEncoder.autoDerived[T]
 
 }

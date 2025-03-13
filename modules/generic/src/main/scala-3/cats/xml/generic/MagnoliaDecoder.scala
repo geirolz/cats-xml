@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import cats.xml.*
 import cats.xml.codec.{Decoder, DecoderFailure}
 import cats.xml.cursor.{Cursor, CursorFailure, FreeCursor}
+import cats.xml.generic.decoder.semiauto
 import cats.xml.utils.generic.ParamName
 import magnolia1.*
 import magnolia1.CaseClass.Param
@@ -18,17 +19,16 @@ class DerivedDecoder[T](delegate: Decoder[T]) extends Decoder[T] {
 
 object DerivedDecoder {
   inline def derived[T](using m: Mirror.Of[T]): DerivedDecoder[T] = new DerivedDecoder(
-    MagnoliaDecoder.derived[T]
+    semiauto.deriveDecoder[T]
   )
   inline def derived[T <: AnyVal & Product: XmlTypeInterpreter]: DerivedDecoder[T] =
-    new DerivedDecoder(MagnoliaDecoder.derived[T])
+    new DerivedDecoder(semiauto.deriveDecoder[T])
 }
 
-object MagnoliaDecoder extends AutoDerivationHack[Decoder, XmlTypeInterpreter]:
+class MagnoliaDecoder(config: Configuration)
+    extends AutoDerivationHack[Decoder, XmlTypeInterpreter]:
 
   import cats.syntax.all.given
-
-  val config: Configuration = Configuration.default
 
   override def join[T: XmlTypeInterpreter](ctx: CaseClass[Typeclass, T]): Typeclass[T] =
     if (ctx.isValueClass && config.unwrapValueClasses) {
@@ -131,7 +131,7 @@ object DecoderMacros {
   import scala.quoted.*
 
   def deriveAnyValSupportImpl[A <: AnyVal](
-    self: Expr[MagnoliaDecoder.type]
+    self: Expr[MagnoliaDecoder]
   )(using quotes: Quotes, tpe: Type[A]): Expr[FullSupp[A]] = {
     import quotes.*, quotes.reflect.*
     val wrapperSym  = TypeRepr.of[A].typeSymbol

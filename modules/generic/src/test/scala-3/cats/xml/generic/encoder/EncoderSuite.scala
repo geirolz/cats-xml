@@ -10,38 +10,38 @@ class EncoderSuite extends munit.FunSuite {
   import cats.xml.syntax.*
   import cats.xml.generic.Samples.*
 
-//  test("auto") {
-//
-//    import cats.xml.generic.encoder.auto.*
-//
-//    assertEquals(
-//      obtained = Foo(
-//        primitiveField = 1d,
-//        valueClass     = ValueClass("TEST"),
-//        bar            = Bar("BHO", BigDecimal(100)),
-//        missingField   = None,
-//        missingNode    = None
-//      ).toXml,
-//      expected = XmlNode("Foo")
-//        .withAttrs(
-//          "primitiveField" := 1d,
-//          "valueClass"     := "TEST"
-//        )
-//        .withChildren(
-//          XmlNode("Bar")
-//            .withAttrs(
-//              "field1" := "BHO",
-//              "field2" := BigDecimal(100)
-//            )
-//        )
-//    )
-//  }
+  test("auto") {
+
+    import cats.xml.generic.encoder.auto.*
+    import cats.xml.generic.encoder.auto.given
+
+    assertEquals(
+      obtained = Foo(
+        primitiveField = 1d,
+        valueClass     = ValueClass("TEST"),
+        bar            = Bar("BHO", BigDecimal(100)),
+        missingField   = None,
+        missingNode    = None
+      ).toXml,
+      expected = XmlNode("Foo")
+        .withAttrs(
+          "primitiveField" := 1d,
+          "valueClass"     := "TEST"
+        )
+        .withChildren(
+          XmlNode("Bar")
+            .withAttrs(
+              "field1" := "BHO",
+              "field2" := BigDecimal(100)
+            )
+        )
+    )
+  }
 
   test("semiauto") {
 
     import cats.xml.generic.encoder.semiauto.*
 
-//    println(s"The type info is ${TypeInfo[Foo]}")
     implicit val typeInterpreterValueClass: XmlTypeInterpreter[ValueClass] =
       XmlTypeInterpreter.default[ValueClass]
     implicit val typeInterpreterBar: XmlTypeInterpreter[Bar] = XmlTypeInterpreter.default[Bar]

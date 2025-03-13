@@ -5,11 +5,11 @@ import cats.xml.generic.{Configuration, MagnoliaDecoder, XmlTypeInterpreter}
 
 import scala.deriving.Mirror
 
-object auto {
+object semiauto {
   private final val defaultDecoder = new MagnoliaDecoder(Configuration.default)
 
-  inline given deriveDecoder[T](using Mirror.Of[T]): Decoder[T] = defaultDecoder.autoDerived[T]
-  inline given deriveEncoder[T <: AnyVal & Product: XmlTypeInterpreter]: Decoder[T] =
-    defaultDecoder.autoDerived[T]
+  inline def deriveDecoder[T](using Mirror.Of[T]): Decoder[T] = defaultDecoder.derived[T]
+  inline def deriveDecoder[T <: AnyVal & Product: XmlTypeInterpreter]: Decoder[T] =
+    defaultDecoder.derived[T]
 
 }
