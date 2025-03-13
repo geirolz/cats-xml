@@ -149,10 +149,16 @@ object DecoderMacros {
       case '[t] =>
         val decoder =
           if (theType.symbol.isClassDef)
-            TypeApply(
-              Select.unique(self.asTerm, "mirrorDerived"),
-              List(theType)
-            )
+            Implicits.search(TypeRepr.of[scala.deriving.Mirror.Of[t]]) match {
+              case mirror: ImplicitSearchSuccess =>
+                Apply(
+                  TypeApply(
+                    Select.unique(self.asTerm, "mirrorDerived"),
+                    List(theType)
+                  ),
+                  List(mirror.tree)
+                )
+            }
           else
             TypeApply(
               Select.unique(self.asTerm, "noMirrorDerived"),

@@ -57,17 +57,23 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
       .withUseLabelsForNodes(true)
     implicit val fooXmlTypeInterpreter: XmlTypeInterpreter[Bar] =
       XmlTypeInterpreter.auto[Bar]((_, _) => false, (_, _) => false)
+    implicit val insideValueClassXmlTypeInterpreter: XmlTypeInterpreter[InsideValueClass] =
+      XmlTypeInterpreter.auto[InsideValueClass]((_, _) => false, (_, _) => false)
     implicit val barXmlTypeInterpreter: XmlTypeInterpreter[Foo] =
       XmlTypeInterpreter.auto[Foo]((_, _) => false, (_, _) => false)
 
     implicit val encoderValueClass: Encoder[ValueClass] = deriveConfiguredEncoder[ValueClass]
-    implicit val encoderBar: Encoder[Bar]               = deriveConfiguredEncoder[Bar]
-    implicit val encoderFoo: Encoder[Foo]               = deriveConfiguredEncoder[Foo]
+    implicit val encoderInsideValueClass: Encoder[InsideValueClass] =
+      deriveConfiguredEncoder[InsideValueClass]
+    implicit val encoderValueClass2: Encoder[ValueClass2] = deriveConfiguredEncoder[ValueClass2]
+    implicit val encoderBar: Encoder[Bar]                 = deriveConfiguredEncoder[Bar]
+    implicit val encoderFoo: Encoder[Foo]                 = deriveConfiguredEncoder[Foo]
 
     assertEquals(
       obtained = Foo(
         primitiveField = 666d,
         valueClass     = ValueClass("hi"),
+        valueClass2    = ValueClass2(InsideValueClass("OK!")),
         bar            = Bar("f1", BigDecimal(12.34)),
         missingField   = None,
         missingNode    = None
@@ -76,6 +82,8 @@ class ConfiguredEncoderSuite extends munit.FunSuite {
         .withChildren(
           XmlNode("primitiveField").withText(666d),
           XmlNode("valueClass").withText("hi"),
+          XmlNode("valueClass2")
+            .withChildren(XmlNode("v").withText("OK!")),
           XmlNode("bar")
             .withChildren(
               XmlNode("field1").withText("f1"),

@@ -63,6 +63,9 @@ class MagnoliaEncoder(config: Configuration)
               XmlNode(paramInfo.labelMapper(param.label), content = NodeContent.text(node))
             )
           )
+        case node: XmlNode
+            if paramInfo.elemType == XmlElemType.Attribute || paramInfo.elemType == XmlElemType.Text =>
+          ???
         case xml => throw new RuntimeException(debugMsg(xml, param, paramInfo))
       }
 
@@ -178,16 +181,21 @@ object EncoderMacros {
       case '[t] =>
         val encoder =
           if (theType.symbol.isClassDef)
-            TypeApply(
-              Select.unique(self.asTerm, "mirrorDerived"),
-              List(theType)
-            )
+            Implicits.search(TypeRepr.of[scala.deriving.Mirror.Of[t]]) match {
+              case mirror: ImplicitSearchSuccess =>
+                Apply(
+                  TypeApply(
+                    Select.unique(self.asTerm, "mirrorDerived"),
+                    List(theType)
+                  ),
+                  List(mirror.tree)
+                )
+            }
           else
             TypeApply(
               Select.unique(self.asTerm, "noMirrorDerived"),
               List(theType)
             )
-
         val mtpe = MethodType(List("v"))(_ => List(TypeRepr.of[A]), _ => TypeRepr.of[t])
 
         def doUnapply = Lambda(
