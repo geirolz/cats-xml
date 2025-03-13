@@ -2,7 +2,7 @@ package cats.xml.generic.encoder
 
 import cats.xml.XmlNode
 import cats.xml.codec.Encoder
-import cats.xml.generic.{UnwrapAnyVal, XmlElemType, XmlTypeInterpreter}
+import cats.xml.generic.{XmlElemType, XmlTypeInterpreter}
 import cats.xml.utils.generic.TypeInfo
 
 class EncoderSuite extends munit.FunSuite {
@@ -52,17 +52,9 @@ class EncoderSuite extends munit.FunSuite {
           _.param(_.valueClass) -> XmlElemType.Attribute
         )
 
-      // TODO: Derive this somehow
-//      val x = cats.xml.generic.FullSupp.apply[cats.xml.generic.Samples.ValueClass](
-//        cats.xml.generic.WrapAndSerde.apply[cats.xml.generic.Samples.ValueClass, java.lang.String](
-//          ValueClass.this
-//        )(this.noMirrorDerived[scala.Predef.String])
-//      )
-//    val x = ValueClass.this("asd")
-    implicit val anyValSupport: UnwrapAnyVal[ValueClass, String] = UnwrapAnyVal(_.value)
-    implicit val encoderValueClass: Encoder[ValueClass]          = deriveEncoder[ValueClass]
-    implicit val encoderBar: Encoder[Bar]                        = deriveEncoder[Bar]
-    implicit val encoderFoo: Encoder[Foo]                        = deriveEncoder[Foo]
+    implicit val encoderValueClass: Encoder[ValueClass] = deriveEncoder[ValueClass]
+    implicit val encoderBar: Encoder[Bar]               = deriveEncoder[Bar]
+    implicit val encoderFoo: Encoder[Foo]               = deriveEncoder[Foo]
     val xml = Foo(
       primitiveField = 1d,
       valueClass     = ValueClass("TEST"),

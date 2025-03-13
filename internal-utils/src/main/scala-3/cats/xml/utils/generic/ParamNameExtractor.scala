@@ -58,7 +58,7 @@ object ParamNameExtractor {
           report.errorAndAbort(s"Unsupported path [${path.show}]")
       }
 
-      val res = Expr(
+      Expr(
         ParamName[T](
           pathElements
             .map {
@@ -68,10 +68,6 @@ object ParamNameExtractor {
             .mkString(".")
         )
       )
-      report.info(
-        s"Currently at ${res.show}\nfor path ${path.show}\non term ${path.asTerm}"
-      )
-      res
     }
 
   }

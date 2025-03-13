@@ -124,22 +124,80 @@ class MagnoliaEncoder(config: Configuration)
        |""".stripMargin
 
   inline def handleAnyVal[A <: AnyVal & Product: XmlTypeInterpreter]: Encoder[A] = summonFrom {
-    case f: UnwrapAnyVal[A, ?] =>
-      summonFrom { case t: Encoder[f.To] =>
-        handleAnyValImpl[A, f.To]
-      }
+    case f: FullEncSupp[A] => f.encoder
+    case _                 => deriveAnyValSupport[A].encoder
   }
 
-  inline def handleAnyValImpl[A <: AnyVal & Product: XmlTypeInterpreter, B: Encoder](implicit
-    f: UnwrapAnyVal[A, B]
-  ): Encoder[A] = {
-    val x = XmlTypeInterpreter[A]
-    Encoder[B].contramap(f.fn)
-  }
+  inline implicit def deriveAnyValSupport[A <: AnyVal & Product: XmlTypeInterpreter]
+    : FullEncSupp[A] =
+    ${
+      EncoderMacros.deriveAnyValSupportImpl[A]('this)
+    }
+
   inline def handlePrimitive[A]: Encoder[A] = summonInline[Encoder[A]]
 }
 
-case class UnwrapAnyVal[S <: AnyVal, T](fn: S => T) {
-  type From = S
-  type To   = T
+object EncoderMacros {
+
+  import scala.quoted.*
+
+  def deriveAnyValSupportImpl[A <: AnyVal](
+    self: Expr[MagnoliaEncoder]
+  )(using quotes: Quotes, tpe: Type[A]): Expr[FullEncSupp[A]] = {
+    import quotes.*, quotes.reflect.*
+    val wrapperSym  = TypeRepr.of[A].typeSymbol
+    val constructor = wrapperSym.primaryConstructor
+    val arg         = constructor.paramSymss.head.head
+    val argName     = arg.name
+    val theType = arg.tree match {
+      case ValDef(_, tt: TypeTree, _) => tt
+      case _ =>
+        quotes.reflect.report.errorAndAbort(
+          "expecting AnyVal with Product to have a single constructor arg"
+        )
+    }
+    theType.tpe.asType match {
+      case '[t] =>
+        val encoder =
+          if (theType.symbol.isClassDef)
+            TypeApply(
+              Select.unique(self.asTerm, "mirrorDerived"),
+              List(theType)
+            )
+          else
+            TypeApply(
+              Select.unique(self.asTerm, "noMirrorDerived"),
+              List(theType)
+            )
+
+        val mtpe = MethodType(List("v"))(_ => List(TypeRepr.of[A]), _ => TypeRepr.of[t])
+
+        def doUnapply = Lambda(
+          Symbol.noSymbol,
+          mtpe,
+          {
+            case (_, List(arg)) =>
+              Select(Ref(arg.symbol), wrapperSym.fieldMember(argName))
+            case _ =>
+              quotes.reflect.report.errorAndAbort(
+                "expecting AnyVal constructor to be called with a single arg"
+              )
+          }
+        ).asExprOf[A => t]
+
+        '{
+          FullEncSupp[A](
+            UnwrapAndSerde[A, t](${ doUnapply })(using ${ encoder.asExprOf[Encoder[t]] })
+          )
+        }.asExprOf[FullEncSupp[A]]
+    }
+  }
+}
+
+case class FullEncSupp[S <: AnyVal](unwrapAndSerde: UnwrapAndSerde[S, ?]) {
+  def encoder = unwrapAndSerde.impl
+}
+
+case class UnwrapAndSerde[S <: AnyVal, T: Encoder](fn: S => T) {
+  def impl = Encoder[T].contramap(fn)
 }
