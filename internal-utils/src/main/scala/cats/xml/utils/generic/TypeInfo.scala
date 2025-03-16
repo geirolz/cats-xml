@@ -8,7 +8,8 @@ case class TypeInfo[T](
   isPrimitive: Boolean,
   isValueClass: Boolean,
   isOptionOfAnyPrimitiveOrString: Boolean,
-  accessorsInfo: Map[ParamName[T], TypeInfo[?]]
+  accessorsInfo: Map[ParamName[T], TypeInfo[?]],
+  isNonPrimitiveValueClass: Boolean
 ) {
   override def toString: String = Show[TypeInfo[T]].show(this)
 }
@@ -22,14 +23,16 @@ object TypeInfo extends TypeInfoInstances {
     isPrimitive: Boolean,
     isValueClass: Boolean,
     isOptionOfAnyPrimitiveOrString: Boolean,
-    accessorsInfo: Map[ParamName[T], TypeInfo[?]]
+    accessorsInfo: Map[ParamName[T], TypeInfo[?]],
+    isNonPrimitiveValueClass: Boolean
   ): TypeInfo[T] = new TypeInfo[T](
     isString,
     isPrimitiveWrapper,
     isPrimitive,
     isValueClass,
     isOptionOfAnyPrimitiveOrString,
-    accessorsInfo
+    accessorsInfo,
+    isNonPrimitiveValueClass
   )
 
   def of[T](
@@ -38,22 +41,26 @@ object TypeInfo extends TypeInfoInstances {
     isPrimitive: Boolean,
     isValueClass: Boolean,
     isOptionOfAnyPrimitiveOrString: Boolean,
-    accessorsInfo: Map[ParamName[T], TypeInfo[?]]
+    accessorsInfo: Map[ParamName[T], TypeInfo[?]],
+    isNonPrimitiveValueClass: Boolean
   ): TypeInfo[T] = TypeInfo[T](
     isString,
     isPrimitiveWrapper,
     isPrimitive,
     isValueClass,
     isOptionOfAnyPrimitiveOrString,
-    accessorsInfo
+    accessorsInfo,
+    isNonPrimitiveValueClass
   )
 
   implicit def showTypeInfo[T]: Show[TypeInfo[T]] =
-    (t: TypeInfo[T]) => s"""
+    (t: TypeInfo[T]) =>
+      s"""
        |isString:  ${t.isString}
        |isPrimitiveWrapper: ${t.isPrimitive}
        |isPrimitive: ${t.isPrimitive}
        |isValueClass: ${t.isValueClass}
        |isOptionOfAnyPrimitiveOrString: ${t.isValueClass}
-       |accessorsInfo: ${t.accessorsInfo}""".stripMargin
+       |accessorsInfo: ${t.accessorsInfo}
+       |isNonPrimitiveValueClass: ${t.isNonPrimitiveValueClass}""".stripMargin
 }
