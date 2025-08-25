@@ -34,6 +34,7 @@ object TypeInfoInstances {
         val isPrimitiveWrapper: Expr[Boolean]                   = Expr(utils.isPrimitiveWrapper[T])
         val isPrimitive: Expr[Boolean]                          = Expr(utils.isPrimitive[T])
         val isValueClass: Expr[Boolean]                         = Expr(utils.isValueClass[T])
+        val isNonPrimitiveValueClass: Expr[Boolean] = Expr(utils.isNonPrimitiveValueClass[T])
         val isOptionOfAnyPrimitiveOrString: Expr[Boolean] = Expr(
           utils.isOptionOfAnyPrimitiveOrString[T]
         )
@@ -45,7 +46,8 @@ object TypeInfoInstances {
             isPrimitive                    = ${ isPrimitive },
             isValueClass                   = ${ isValueClass },
             isOptionOfAnyPrimitiveOrString = ${ isOptionOfAnyPrimitiveOrString },
-            accessorsInfo                  = ${ accessorsInfo }
+            accessorsInfo                  = ${ accessorsInfo },
+            isNonPrimitiveValueClass       = ${ isNonPrimitiveValueClass }
           )
         }
       }
@@ -134,6 +136,14 @@ object TypeInfoInstances {
         (tpe <:< anyValTypeRepr)
         && tpe.classSymbol.exists(cs => cs.flags.is(Flags.Case) && cs.isClassDef)
         && getAccessors[T].size == 1
+      }
+
+      def isNonPrimitiveValueClass[T: Type]: Boolean = {
+        val tpe = TypeRepr.of[T]
+        (tpe <:< anyValTypeRepr)
+        && tpe.classSymbol.exists(cs => cs.flags.is(Flags.Case) && cs.isClassDef)
+        && getAccessors[T].size == 1
+        && getAccessors[T].head.tree.symbol.fieldMembers.size > 0
       }
 
       // utils

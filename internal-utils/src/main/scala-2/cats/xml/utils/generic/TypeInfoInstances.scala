@@ -23,6 +23,7 @@ object TypeInfoInstances {
       val isPrimitiveWrapper: Boolean             = utils.isPrimitiveWrapper(wtpe)
       val isPrimitive: Boolean                    = utils.isPrimitive(wtpe)
       val isValueClass: Boolean                   = utils.isValueClass(wtpe)
+      val isNonPrimitiveValueClass: Boolean       = utils.isNonPrimitiveValueClass(wtpe)
       val isOptionOfAnyPrimitiveOrString: Boolean = utils.isOptionOfAnyPrimitiveOrString(wtpe)
       val accessorsInfo: c.Expr[Map[ParamName[T], TypeInfo[?]]] = deriveFieldsTypeInfoImpl[T](c)
 
@@ -38,7 +39,8 @@ object TypeInfoInstances {
             isPrimitive                      = $isPrimitive,
             isValueClass                     = $isValueClass,
             isOptionOfAnyPrimitiveOrString   = $isOptionOfAnyPrimitiveOrString,
-            accessorsInfo                    = $accessorsInfo
+            accessorsInfo                    = $accessorsInfo,
+            isNonPrimitiveValueClass         = $isNonPrimitiveValueClass
           )
          """
       )
@@ -104,6 +106,14 @@ object TypeInfoInstances {
           tpe.typeSymbol.isClass &&
           tpe.typeSymbol.asClass.isCaseClass &&
           getAccessors(tpe).size == 1
+
+      def isNonPrimitiveValueClass(tpe: c.universe.Type): Boolean = {
+        tpe <:< typeOf[AnyVal] &&
+        tpe.typeSymbol.isClass &&
+        tpe.typeSymbol.asClass.isCaseClass &&
+        getAccessors(tpe).size == 1 &&
+        getAccessors(getAccessors(tpe).head.returnType).nonEmpty
+      }
 
       // utils
       def getAccessors(tpe: c.universe.Type): Iterable[c.universe.MethodSymbol] =
